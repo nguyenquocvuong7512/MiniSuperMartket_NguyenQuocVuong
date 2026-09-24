@@ -159,6 +159,7 @@
             grpInfo.TabIndex = 2;
             grpInfo.TabStop = false;
             grpInfo.Text = "Thông tin Nhóm hàng";
+            grpInfo.Enter += grpInfo_Enter;
             // 
             // btnDelete
             // 
@@ -265,7 +266,7 @@
             // 
             lblApiUrl.Name = "lblApiUrl";
             lblApiUrl.Size = new Size(202, 17);
-            lblApiUrl.Text = "https://localhost:7123/api/categories";
+            lblApiUrl.Text = "https://localhost:7292/api/categories";
             // 
             // FormCategoryManagement
             // 

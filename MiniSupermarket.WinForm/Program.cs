@@ -1,4 +1,4 @@
-using MiniSupermarket.WinForms;
+﻿using MiniSupermarket.WinForms;
 
 namespace MiniSupermarket.WinForm
 {
@@ -13,8 +13,9 @@ namespace MiniSupermarket.WinForm
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new FormCategoryManagement());
+            //Application.Run(new FormCategoryManagement());
             //Application.Run(new FormRoleManagement());
+            Application.Run(new FormLogin());
         }
     }
 }
