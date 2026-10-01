@@ -49,5 +49,15 @@
 
             btnLogin.Enabled = true;
         }
+
+        private void lblMessage_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void FormLogin_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

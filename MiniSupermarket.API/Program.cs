@@ -2,12 +2,19 @@
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using Microsoft.EntityFrameworkCore;
+using MiniSupermarket.API.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// === BẮT ĐẦU: Phần 4.2 — Đăng ký DbContext ===
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<SupermarketDbContext>(options =>
+    options.UseSqlServer(connectionString));
+// === KẾT THÚC: Phần 4.2 ===
+
 var jwtSecret = builder.Configuration["JwtSettings:Secret"]
                 ?? "SupermarketSecretKeyDoAnMonHoc2026SecureString!!";
-
 builder.Services.AddAuthentication(options => {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -44,11 +51,14 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddControllers();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment()) { app.UseSwagger(); app.UseSwaggerUI(); }
+
 app.UseHttpsRedirection();
 app.UseAuthentication(); // ⚠️ Đúng thứ tự
 app.UseAuthorization();
 app.MapControllers();
+
 app.Run();
