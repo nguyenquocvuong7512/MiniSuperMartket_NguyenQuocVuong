@@ -7,6 +7,9 @@ namespace MiniSupermarket.WinForms
     public static class SessionManager
     {
         public static string JwtToken { get; set; } = string.Empty;
+
+        public static string CurrentUsername { get; set; } = string.Empty;
+
         public static string CurrentRole { get; set; } = string.Empty;
     }
 
@@ -27,9 +30,17 @@ namespace MiniSupermarket.WinForms
             if (response.IsSuccessStatusCode)
             {
                 var jsonString = await response.Content.ReadAsStringAsync();
+
                 using var doc = JsonDocument.Parse(jsonString);
-                SessionManager.JwtToken = doc.RootElement.GetProperty("token").GetString() ?? string.Empty;
-                SessionManager.CurrentRole = doc.RootElement.GetProperty("role").GetString() ?? string.Empty;
+
+                SessionManager.JwtToken =
+                    doc.RootElement.GetProperty("token").GetString() ?? string.Empty;
+
+                SessionManager.CurrentRole =
+                    doc.RootElement.GetProperty("role").GetString() ?? string.Empty;
+
+                SessionManager.CurrentUsername = username;
+
                 return true;
             }
             return false;

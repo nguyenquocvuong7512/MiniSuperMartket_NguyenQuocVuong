@@ -40,19 +40,32 @@ namespace MiniSupermarket.API.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<IActionResult> Search([FromQuery] string? keyword, [FromQuery] int? categoryId)
+        public async Task<IActionResult> Search(
+            [FromQuery] string? keyword,
+            [FromQuery] int? categoryId)
         {
             var query = _context.Products.AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                keyword = keyword.Trim();
+
                 query = query.Where(p =>
-                    p.ProductName.Contains(keyword, StringComparison.OrdinalIgnoreCase) ||
-                    p.Barcode.Contains(keyword));
+                    EF.Functions.Like(p.ProductName, $"%{keyword}%") ||
+                    EF.Functions.Like(p.Barcode, $"%{keyword}%"));
+            }
 
             if (categoryId.HasValue)
-                query = query.Where(p => p.CategoryId == categoryId.Value);
+            {
+                query = query.Where(
+                    p => p.CategoryId == categoryId.Value);
+            }
 
-            var list = await query.Include(p => p.Category).ToListAsync();
+            var list = await query
+                .Include(p => p.Category)
+                .OrderByDescending(p => p.ProductId)
+                .ToListAsync();
+
             return Ok(list);
         }
 
@@ -95,6 +108,7 @@ namespace MiniSupermarket.API.Controllers
             prod.ProductName = updateProduct.ProductName;
             prod.Price = updateProduct.Price;
             prod.StockQuantity = updateProduct.StockQuantity;
+            prod.Unit = updateProduct.Unit;
             prod.CategoryId = updateProduct.CategoryId;
 
             await _context.SaveChangesAsync();

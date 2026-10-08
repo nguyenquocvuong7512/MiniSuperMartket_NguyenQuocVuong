@@ -11,8 +11,8 @@ using MiniSupermarket.API.Data;
 namespace MiniSupermarket.API.Migrations
 {
     [DbContext(typeof(SupermarketDbContext))]
-    [Migration("20261001132643_InitialCompleteDatabase")]
-    partial class InitialCompleteDatabase
+    [Migration("20261008130028_AddUsersAndRoles")]
+    partial class AddUsersAndRoles
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -223,6 +223,96 @@ namespace MiniSupermarket.API.Migrations
                             MembershipRank = "Mới",
                             PhoneNumber = "0977889900",
                             RewardPoints = 20
+                        },
+                        new
+                        {
+                            CustomerId = 6,
+                            Address = "89 Nguyễn Huệ, Phường Bến Nghé, Quận 1, Hồ Chí Minh",
+                            CustomerName = "Võ Thị Hoa",
+                            MembershipRank = "Vàng",
+                            PhoneNumber = "0901234567",
+                            RewardPoints = 720
+                        },
+                        new
+                        {
+                            CustomerId = 7,
+                            Address = "34 Trần Phú, Quận Hải Châu, Đà Nẵng",
+                            CustomerName = "Đặng Văn Hùng",
+                            MembershipRank = "Bạc",
+                            PhoneNumber = "0912345678",
+                            RewardPoints = 315
+                        },
+                        new
+                        {
+                            CustomerId = 8,
+                            Address = "67 Hai Bà Trưng, Quận Hoàn Kiếm, Hà Nội",
+                            CustomerName = "Bùi Thị Lan",
+                            MembershipRank = "Thân Thiết",
+                            PhoneNumber = "0987654321",
+                            RewardPoints = 150
+                        },
+                        new
+                        {
+                            CustomerId = 9,
+                            Address = "25 Lê Duẩn, Thành phố Huế, Thừa Thiên Huế",
+                            CustomerName = "Đỗ Minh Quân",
+                            MembershipRank = "Mới",
+                            PhoneNumber = "0931234567",
+                            RewardPoints = 45
+                        },
+                        new
+                        {
+                            CustomerId = 10,
+                            Address = "112 Phan Chu Trinh, Thành phố Hội An, Quảng Nam",
+                            CustomerName = "Ngô Thị Mai",
+                            MembershipRank = "Bạc",
+                            PhoneNumber = "0971234568",
+                            RewardPoints = 280
+                        },
+                        new
+                        {
+                            CustomerId = 11,
+                            Address = "43 Điện Biên Phủ, Quận Thanh Khê, Đà Nẵng",
+                            CustomerName = "Phan Văn Nam",
+                            MembershipRank = "Vàng",
+                            PhoneNumber = "0908765432",
+                            RewardPoints = 590
+                        },
+                        new
+                        {
+                            CustomerId = 12,
+                            Address = "78 Lạc Long Quân, Quận Tây Hồ, Hà Nội",
+                            CustomerName = "Lý Thị Ngọc",
+                            MembershipRank = "Thân Thiết",
+                            PhoneNumber = "0913456789",
+                            RewardPoints = 110
+                        },
+                        new
+                        {
+                            CustomerId = 13,
+                            Address = "156 Võ Văn Tần, Quận 3, Hồ Chí Minh",
+                            CustomerName = "Trương Minh Phúc",
+                            MembershipRank = "Kim Cương",
+                            PhoneNumber = "0984567890",
+                            RewardPoints = 1480
+                        },
+                        new
+                        {
+                            CustomerId = 14,
+                            Address = "29 Nguyễn Trãi, Quận 5, Hồ Chí Minh",
+                            CustomerName = "Mai Thị Thảo",
+                            MembershipRank = "Bạc",
+                            PhoneNumber = "0936789012",
+                            RewardPoints = 360
+                        },
+                        new
+                        {
+                            CustomerId = 15,
+                            Address = "91 Trần Hưng Đạo, Thành phố Vũng Tàu, Bà Rịa - Vũng Tàu",
+                            CustomerName = "Đinh Văn Tùng",
+                            MembershipRank = "Vàng",
+                            PhoneNumber = "0978901234",
+                            RewardPoints = 830
                         });
                 });
 
@@ -416,6 +506,201 @@ namespace MiniSupermarket.API.Migrations
                         });
                 });
 
+            modelBuilder.Entity("MiniSupermarket.API.Models.Role", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RoleName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Toàn quyền toàn bộ hệ thống",
+                            RoleName = "Admin"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Màn hình POS, Khách hàng thành viên",
+                            RoleName = "Cashier"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Sản phẩm, Nhóm hàng, Nhập xuất kho",
+                            RoleName = "Warehouse"
+                        });
+                });
+
+            modelBuilder.Entity("MiniSupermarket.API.Models.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            FullName = "Nguyễn Quản Trị",
+                            Password = "123456",
+                            RoleId = 1,
+                            Username = "admin01"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            FullName = "Trần Giám Đốc",
+                            Password = "123456",
+                            RoleId = 1,
+                            Username = "admin02"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            FullName = "Lê Thu Ngân",
+                            Password = "123456",
+                            RoleId = 2,
+                            Username = "cashier01"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            FullName = "Phạm Bán Hàng",
+                            Password = "123456",
+                            RoleId = 2,
+                            Username = "cashier02"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            FullName = "Hoàng Thu Ngân",
+                            Password = "123456",
+                            RoleId = 2,
+                            Username = "cashier03"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            FullName = "Vũ Thị Quầy",
+                            Password = "123456",
+                            RoleId = 2,
+                            Username = "cashier04"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            FullName = "Đỗ Bán Lẻ",
+                            Password = "123456",
+                            RoleId = 2,
+                            Username = "cashier05"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            FullName = "Ngô Quản Kho",
+                            Password = "123456",
+                            RoleId = 3,
+                            Username = "ware01"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            FullName = "Bùi Kiểm Kê",
+                            Password = "123456",
+                            RoleId = 3,
+                            Username = "ware02"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            FullName = "Dương Thủ Kho",
+                            Password = "123456",
+                            RoleId = 3,
+                            Username = "ware03"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            FullName = "Lý Nhập Hàng",
+                            Password = "123456",
+                            RoleId = 3,
+                            Username = "ware04"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            FullName = "Đặng Hỗ Trợ",
+                            Password = "123456",
+                            RoleId = 1,
+                            Username = "admin_backup"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            FullName = "Hồ Ca Chiều",
+                            Password = "123456",
+                            RoleId = 2,
+                            Username = "cashier06"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            FullName = "Trương Vận Chuyển",
+                            Password = "123456",
+                            RoleId = 3,
+                            Username = "ware05"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            FullName = "Mai Giám Sát",
+                            Password = "123456",
+                            RoleId = 1,
+                            Username = "supervisor"
+                        });
+                });
+
             modelBuilder.Entity("MiniSupermarket.API.Models.Product", b =>
                 {
                     b.HasOne("MiniSupermarket.API.Models.Category", "Category")
@@ -427,9 +712,25 @@ namespace MiniSupermarket.API.Migrations
                     b.Navigation("Category");
                 });
 
+            modelBuilder.Entity("MiniSupermarket.API.Models.User", b =>
+                {
+                    b.HasOne("MiniSupermarket.API.Models.Role", "Role")
+                        .WithMany("Users")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+                });
+
             modelBuilder.Entity("MiniSupermarket.API.Models.Category", b =>
                 {
                     b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("MiniSupermarket.API.Models.Role", b =>
+                {
+                    b.Navigation("Users");
                 });
 #pragma warning restore 612, 618
         }

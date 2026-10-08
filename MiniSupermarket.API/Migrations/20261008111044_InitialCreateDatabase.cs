@@ -7,7 +7,7 @@
 namespace MiniSupermarket.API.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCompleteDatabase : Migration
+    public partial class InitialCreateDatabase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -98,7 +98,17 @@ namespace MiniSupermarket.API.Migrations
                     { 2, "45 Nguyễn Chí Thanh, Quận Đống Đa, Hà Nội", "Trần Thị Bình", "Vàng", "0918877665", 680 },
                     { 3, "78 Hùng Vương, Quận Hải Châu, Đà Nẵng", "Lê Văn Cường", "Bạc", "0983344556", 240 },
                     { 4, "12 Nguyễn Văn Cừ, Quận Ninh Kiều, Cần Thơ", "Phạm Thị Dung", "Thân Thiết", "0935566778", 85 },
-                    { 5, "56 Trần Hưng Đạo, Thành phố Nha Trang, Khánh Hòa", "Hoàng Minh Đức", "Mới", "0977889900", 20 }
+                    { 5, "56 Trần Hưng Đạo, Thành phố Nha Trang, Khánh Hòa", "Hoàng Minh Đức", "Mới", "0977889900", 20 },
+                    { 6, "89 Nguyễn Huệ, Phường Bến Nghé, Quận 1, Hồ Chí Minh", "Võ Thị Hoa", "Vàng", "0901234567", 720 },
+                    { 7, "34 Trần Phú, Quận Hải Châu, Đà Nẵng", "Đặng Văn Hùng", "Bạc", "0912345678", 315 },
+                    { 8, "67 Hai Bà Trưng, Quận Hoàn Kiếm, Hà Nội", "Bùi Thị Lan", "Thân Thiết", "0987654321", 150 },
+                    { 9, "25 Lê Duẩn, Thành phố Huế, Thừa Thiên Huế", "Đỗ Minh Quân", "Mới", "0931234567", 45 },
+                    { 10, "112 Phan Chu Trinh, Thành phố Hội An, Quảng Nam", "Ngô Thị Mai", "Bạc", "0971234568", 280 },
+                    { 11, "43 Điện Biên Phủ, Quận Thanh Khê, Đà Nẵng", "Phan Văn Nam", "Vàng", "0908765432", 590 },
+                    { 12, "78 Lạc Long Quân, Quận Tây Hồ, Hà Nội", "Lý Thị Ngọc", "Thân Thiết", "0913456789", 110 },
+                    { 13, "156 Võ Văn Tần, Quận 3, Hồ Chí Minh", "Trương Minh Phúc", "Kim Cương", "0984567890", 1480 },
+                    { 14, "29 Nguyễn Trãi, Quận 5, Hồ Chí Minh", "Mai Thị Thảo", "Bạc", "0936789012", 360 },
+                    { 15, "91 Trần Hưng Đạo, Thành phố Vũng Tàu, Bà Rịa - Vũng Tàu", "Đinh Văn Tùng", "Vàng", "0978901234", 830 }
                 });
 
             migrationBuilder.InsertData(

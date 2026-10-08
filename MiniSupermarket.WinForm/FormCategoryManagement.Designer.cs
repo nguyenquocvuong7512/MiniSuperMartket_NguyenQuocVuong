@@ -116,6 +116,7 @@
             dgvCategories.Size = new Size(469, 323);
             dgvCategories.TabIndex = 0;
             dgvCategories.CellClick += dgvCategories_CellClick;
+            dgvCategories.CellContentClick += dgvCategories_CellContentClick;
             // 
             // CategoryId
             // 

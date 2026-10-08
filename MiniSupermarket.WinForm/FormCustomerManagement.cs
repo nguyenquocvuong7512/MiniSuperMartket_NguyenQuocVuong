@@ -1,276 +1,302 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace MiniSupermarket.WinForms
 {
     public partial class FormCustomerManagement : Form
     {
-        // === Cấu hình ===
-        private static readonly HttpClient _httpClient = new HttpClient();
-        private const string ApiBase = "https://localhost:7123/api/customers";
-        private string _jwtToken = string.Empty;
-
-        // === Lớp DTO nhận dữ liệu ===
-        public class CustomerDto
+        public FormCustomerManagement()
         {
-            public int CustomerId { get; set; }
-            public string CustomerName { get; set; } = string.Empty;
-            public string PhoneNumber { get; set; } = string.Empty;
-            public string? Address { get; set; }
-            public int RewardPoints { get; set; }
-            public string MembershipRank { get; set; } = "Chuẩn";
+            InitializeComponent();
         }
 
-        // === Constructor ===
-        public FormCustomerManagement(string jwtToken)
+        private HttpClient GetAuthenticatedClient()
         {
-            _jwtToken = jwtToken;
-            InitializeComponent(); // Gọi hàm thiết kế từ file khác
-            SetupHttpClient();
-            BindEvents();
+            var client = new HttpClient
+            {
+                BaseAddress = new Uri("https://localhost:7292/api/")
+            };
+
+            if (!string.IsNullOrEmpty(SessionManager.JwtToken))
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", SessionManager.JwtToken);
+            }
+            return client;
         }
 
-        // === Cấu hình HttpClient ===
-        private void SetupHttpClient()
+        private async void FormCustomerManagement_Load(object sender, EventArgs e)
         {
-            _httpClient.DefaultRequestHeaders.Clear();
-            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_jwtToken}");
+            if (cbMembershipRank.Items.Count > 0 && cbMembershipRank.SelectedIndex == -1)
+            {
+                cbMembershipRank.SelectedIndex = 0;
+            }
+
+            if (!string.IsNullOrEmpty(SessionManager.CurrentRole))
+            {
+                lblReady.Text = $"Sẵn sàng | Quyền: {SessionManager.CurrentRole} | Phân hệ Khách hàng (EF Core)";
+            }
+
+            await LoadDataAsync();
         }
 
-        // === Gắn sự kiện cho các nút bấm ===
-        private void BindEvents()
-        {
-            btnLoad.Click += BtnLoad_Click;
-            btnAdd.Click += BtnAdd_Click;
-            btnUpdate.Click += BtnUpdate_Click;
-            btnDelete.Click += BtnDelete_Click;
-            btnSearch.Click += BtnSearch_Click;
-            dgvCustomers.CellClick += DgvCustomers_CellClick;
-        }
-
-        // === 1. Tải danh sách ===
-        private async void BtnLoad_Click(object sender, EventArgs e)
+        private async Task LoadDataAsync()
         {
             try
             {
-                var list = await _httpClient.GetFromJsonAsync<List<CustomerDto>>(ApiBase);
-                dgvCustomers.DataSource = null;
-                dgvCustomers.DataSource = list;
-                FormatDataGridView();
-                ClearInputFields();
+                using var client = GetAuthenticatedClient();
+                var response = await client.GetAsync("customers");
+                if (response.IsSuccessStatusCode)
+                {
+                    var customers = await response.Content.ReadFromJsonAsync<List<CustomerDto>>();
+                    dgvCustomers.DataSource = customers;
+                }
+                else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    MessageBox.Show("Phiên làm việc hết hạn hoặc chưa đăng nhập!", "Lỗi xác thực", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                else
+                {
+                    MessageBox.Show("Không thể tải danh sách khách hàng từ máy chủ!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi tải dữ liệu: {ex.Message}", "❌ Lỗi",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Lỗi kết nối API: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        // === 2. Chọn dòng trên lưới → Điền vào ô nhập ===
-        private void DgvCustomers_CellClick(object sender, DataGridViewCellEventArgs e)
+        private void dgvCustomers_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex < 0) return;
+            if (e.RowIndex >= 0 && dgvCustomers.Rows[e.RowIndex].DataBoundItem is CustomerDto customer)
+            {
+                txtCustomerId.Text = customer.CustomerId.ToString();
+                txtCustomerName.Text = customer.CustomerName;
+                txtPhoneNumber.Text = customer.PhoneNumber;
+                txtAddress.Text = customer.Address ?? string.Empty;
+                txtRewardPoints.Text = customer.RewardPoints.ToString();
 
-            var row = dgvCustomers.Rows[e.RowIndex];
-            txtCustomerId.Text = row.Cells["CustomerId"].Value.ToString();
-            txtCustomerName.Text = row.Cells["CustomerName"].Value?.ToString() ?? "";
-            txtPhoneNumber.Text = row.Cells["PhoneNumber"].Value?.ToString() ?? "";
-            txtAddress.Text = row.Cells["Address"].Value?.ToString() ?? "";
-            txtRewardPoints.Text = row.Cells["RewardPoints"].Value?.ToString() ?? "0";
-            txtMembershipRank.Text = row.Cells["MembershipRank"].Value?.ToString() ?? "Chuẩn";
+                int rankIndex = cbMembershipRank.FindStringExact(customer.MembershipRank ?? "Chuẩn");
+                cbMembershipRank.SelectedIndex = rankIndex >= 0 ? rankIndex : 0;
+            }
         }
 
-        // === 3. Thêm khách hàng mới ===
-        private async void BtnAdd_Click(object sender, EventArgs e)
+        private async void btnAdd_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtCustomerName.Text) ||
-                string.IsNullOrWhiteSpace(txtPhoneNumber.Text))
+            string name = txtCustomerName.Text.Trim();
+            string phone = txtPhoneNumber.Text.Trim();
+
+            if (string.IsNullOrEmpty(name))
             {
-                MessageBox.Show("Tên và Số điện thoại không được bỏ trống!",
-                    "⚠️ Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Vui lòng nhập tên khách hàng!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtCustomerName.Focus();
                 return;
             }
 
-            var newCustomer = new
+            if (string.IsNullOrEmpty(phone))
             {
-                CustomerName = txtCustomerName.Text.Trim(),
-                PhoneNumber = txtPhoneNumber.Text.Trim(),
+                MessageBox.Show("Vui lòng nhập số điện thoại!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtPhoneNumber.Focus();
+                return;
+            }
+
+            int points = 0;
+            int.TryParse(txtRewardPoints.Text.Trim(), out points);
+
+            var newCustomer = new CustomerDto
+            {
+                CustomerName = name,
+                PhoneNumber = phone,
                 Address = txtAddress.Text.Trim(),
-                RewardPoints = int.TryParse(txtRewardPoints.Text, out var p) ? p : 0,
-                MembershipRank = string.IsNullOrWhiteSpace(txtMembershipRank.Text)
-                                    ? "Chuẩn"
-                                    : txtMembershipRank.Text.Trim()
+                RewardPoints = points,
+                MembershipRank = cbMembershipRank.SelectedItem?.ToString() ?? "Chuẩn"
             };
 
             try
             {
-                var response = await _httpClient.PostAsJsonAsync(ApiBase, newCustomer);
-
+                using var client = GetAuthenticatedClient();
+                var response = await client.PostAsJsonAsync("customers", newCustomer);
                 if (response.IsSuccessStatusCode)
                 {
-                    MessageBox.Show("✅ Thêm khách hàng thành công!", "Thông báo",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    BtnLoad_Click(sender, e);
+                    MessageBox.Show("Thêm mới khách hàng thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    await LoadDataAsync();
+                    ClearInputs();
                 }
                 else
                 {
-                    var errorMsg = await response.Content.ReadAsStringAsync();
-                    MessageBox.Show($"❌ Lỗi: {errorMsg}", "Thông báo",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    var err = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show($"Thêm khách hàng thất bại: {err}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"❌ Lỗi kết nối: {ex.Message}", "Lỗi",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Lỗi kết nối: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        // === 4. Cập nhật thông tin ===
-        private async void BtnUpdate_Click(object sender, EventArgs e)
+        private async void btnUpdate_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtCustomerId.Text))
+            if (string.IsNullOrEmpty(txtCustomerId.Text))
             {
-                MessageBox.Show("Vui lòng chọn khách hàng cần sửa!",
-                    "⚠️ Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(txtCustomerName.Text) ||
-                string.IsNullOrWhiteSpace(txtPhoneNumber.Text))
-            {
-                MessageBox.Show("Tên và Số điện thoại không được bỏ trống!",
-                    "⚠️ Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Vui lòng chọn khách hàng từ danh sách để cập nhật!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             int id = int.Parse(txtCustomerId.Text);
-            var updateCustomer = new
+            string name = txtCustomerName.Text.Trim();
+            string phone = txtPhoneNumber.Text.Trim();
+
+            if (string.IsNullOrEmpty(name))
+            {
+                MessageBox.Show("Tên khách hàng không được để trống!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (string.IsNullOrEmpty(phone))
+            {
+                MessageBox.Show("Số điện thoại không được để trống!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            int points = 0;
+            int.TryParse(txtRewardPoints.Text.Trim(), out points);
+
+            var updatedCustomer = new CustomerDto
             {
                 CustomerId = id,
-                CustomerName = txtCustomerName.Text.Trim(),
-                PhoneNumber = txtPhoneNumber.Text.Trim(),
+                CustomerName = name,
+                PhoneNumber = phone,
                 Address = txtAddress.Text.Trim(),
-                RewardPoints = int.TryParse(txtRewardPoints.Text, out var p) ? p : 0,
-                MembershipRank = string.IsNullOrWhiteSpace(txtMembershipRank.Text)
-                                    ? "Chuẩn"
-                                    : txtMembershipRank.Text.Trim()
+                RewardPoints = points,
+                MembershipRank = cbMembershipRank.SelectedItem?.ToString() ?? "Chuẩn"
             };
 
             try
             {
-                var response = await _httpClient.PutAsJsonAsync($"{ApiBase}/{id}", updateCustomer);
-
+                using var client = GetAuthenticatedClient();
+                var response = await client.PutAsJsonAsync($"customers/{id}", updatedCustomer);
                 if (response.IsSuccessStatusCode)
                 {
-                    MessageBox.Show("✅ Cập nhật thành công!", "Thông báo",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    BtnLoad_Click(sender, e);
+                    MessageBox.Show("Cập nhật thông tin khách hàng thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    await LoadDataAsync();
+                    ClearInputs();
                 }
                 else
                 {
-                    var errorMsg = await response.Content.ReadAsStringAsync();
-                    MessageBox.Show($"❌ Lỗi: {errorMsg}", "Thông báo",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Cập nhật thất bại!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"❌ Lỗi kết nối: {ex.Message}", "Lỗi",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Lỗi kết nối: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        // === 5. Xóa khách hàng ===
-        private async void BtnDelete_Click(object sender, EventArgs e)
+        private async void btnDelete_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtCustomerId.Text))
+            if (string.IsNullOrEmpty(txtCustomerId.Text))
             {
-                MessageBox.Show("Vui lòng chọn khách hàng cần xóa!",
-                    "⚠️ Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Vui lòng chọn khách hàng cần xóa!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-
-            if (MessageBox.Show("Bạn có chắc chắn xóa?", "❓ Xác nhận",
-                MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
-                return;
 
             int id = int.Parse(txtCustomerId.Text);
-
-            try
+            var confirm = MessageBox.Show($"Bạn có chắc chắn muốn xóa khách hàng ID = {id}?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (confirm == DialogResult.Yes)
             {
-                var response = await _httpClient.DeleteAsync($"{ApiBase}/{id}");
-
-                if (response.IsSuccessStatusCode)
+                try
                 {
-                    MessageBox.Show("✅ Xóa thành công!", "Thông báo",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    BtnLoad_Click(sender, e);
+                    using var client = GetAuthenticatedClient();
+                    var response = await client.DeleteAsync($"customers/{id}");
+                    if (response.IsSuccessStatusCode)
+                    {
+                        MessageBox.Show("Xóa khách hàng thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        await LoadDataAsync();
+                        ClearInputs();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Xóa thất bại!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    var errorMsg = await response.Content.ReadAsStringAsync();
-                    MessageBox.Show($"❌ Lỗi: {errorMsg}", "Thông báo",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Lỗi kết nối: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"❌ Lỗi kết nối: {ex.Message}", "Lỗi",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        // === 6. Tìm kiếm ===
-        private async void BtnSearch_Click(object sender, EventArgs e)
+        private async void btnSearch_Click(object sender, EventArgs e)
         {
-            string keyword = txtSearch.Text.Trim();
-
-            if (string.IsNullOrWhiteSpace(keyword))
+            string keyword = txtKeyword.Text.Trim();
+            if (string.IsNullOrEmpty(keyword))
             {
-                BtnLoad_Click(sender, e);
+                await LoadDataAsync();
                 return;
             }
 
             try
             {
-                var list = await _httpClient.GetFromJsonAsync<List<CustomerDto>>($"{ApiBase}/search?keyword={keyword}");
-
-                dgvCustomers.DataSource = null;
-                dgvCustomers.DataSource = list;
-                FormatDataGridView();
+                using var client = GetAuthenticatedClient();
+                var response = await client.GetAsync($"customers/search?keyword={Uri.EscapeDataString(keyword)}");
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadFromJsonAsync<List<CustomerDto>>();
+                    dgvCustomers.DataSource = result;
+                }
+                else
+                {
+                    MessageBox.Show("Không tìm thấy khách hàng phù hợp!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi tìm kiếm: {ex.Message}", "❌ Lỗi",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Lỗi kết nối: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        // === Công cụ: Xóa trắng ô nhập ===
-        private void ClearInputFields()
+        private async void btnLoad_Click(object sender, EventArgs e)
+        {
+            txtKeyword.Clear();
+            await LoadDataAsync();
+            ClearInputs();
+        }
+
+        private void ClearInputs()
         {
             txtCustomerId.Clear();
             txtCustomerName.Clear();
             txtPhoneNumber.Clear();
             txtAddress.Clear();
             txtRewardPoints.Text = "0";
-            txtMembershipRank.Text = "Chuẩn";
+            if (cbMembershipRank.Items.Count > 0)
+            {
+                cbMembershipRank.SelectedIndex = 0;
+            }
         }
 
-        // === Công cụ: Định dạng cột lưới ===
-        private void FormatDataGridView()
+        private void dgvCustomers_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            dgvCustomers.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvCustomers.Columns["CustomerId"].HeaderText = "Mã KH";
-            dgvCustomers.Columns["CustomerName"].HeaderText = "Tên Khách Hàng";
-            dgvCustomers.Columns["PhoneNumber"].HeaderText = "Số Điện Thoại";
-            dgvCustomers.Columns["Address"].HeaderText = "Địa Chỉ";
-            dgvCustomers.Columns["RewardPoints"].HeaderText = "Điểm Tích Lũy";
-            dgvCustomers.Columns["MembershipRank"].HeaderText = "Hạng Thẻ";
+
         }
+
+        private void grpInfo_Enter(object sender, EventArgs e)
+        {
+
+        }
+    }
+
+    public class CustomerDto
+    {
+        public int CustomerId { get; set; }
+        public string CustomerName { get; set; } = string.Empty;
+        public string PhoneNumber { get; set; } = string.Empty;
+        public string? Address { get; set; }
+        public int RewardPoints { get; set; }
+        public string MembershipRank { get; set; } = "Chuẩn";
     }
 }

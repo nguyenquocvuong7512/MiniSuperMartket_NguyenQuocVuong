@@ -139,6 +139,11 @@ namespace MiniSupermarket.WinForms
         private void ClearInputs() { txtId.Text = ""; txtCategoryName.Text = ""; txtDescription.Text = ""; }
         private void statusStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e) { }
         private void grpInfo_Enter(object sender, EventArgs e) { }
+
+        private void dgvCategories_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
     }
 
     public class CategoryDto

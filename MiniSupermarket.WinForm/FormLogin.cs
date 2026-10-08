@@ -30,9 +30,12 @@
                     MessageBox.Show($"Đăng nhập thành công!\nQuyền: {SessionManager.CurrentRole}",
                                     "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                    FormCategoryManagement mainForm = new FormCategoryManagement();
+                    FormMainShell mainForm = new FormMainShell();
+
                     this.Hide();
+
                     mainForm.ShowDialog();
+
                     this.Close();
                 }
                 else

@@ -16,6 +16,7 @@ namespace MiniSupermarket.WinForm
             //Application.Run(new FormCategoryManagement());
             //Application.Run(new FormRoleManagement());
             Application.Run(new FormLogin());
+            //Application.Run(new FormCustomerManagement());
         }
     }
 }
