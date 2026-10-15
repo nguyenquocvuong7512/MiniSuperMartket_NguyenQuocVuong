@@ -1,4 +1,4 @@
-﻿using MiniSupermarket.WinForms.Forms;
+using MiniSupermarket.WinForms.Forms;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -30,7 +30,7 @@ namespace MiniSupermarket.WinForms
         {
             string role = SessionManager.CurrentRole;
 
-            lblUserInfo.Text = $"Nhân viên: {SessionManager.CurrentUsername} | Vai trò: {role}";
+            lblUserInfo.Text = $"Nhân viên: {SessionManager.CurrentUsername} | Vai trò: [{role}]";
             UpdateUserInfoPosition();
 
             ApplyRolePermissions(role);
@@ -86,7 +86,7 @@ namespace MiniSupermarket.WinForms
 
                 default:
                     MessageBox.Show(
-                        "Tài khoản chưa được cấp quyền hợp lệ!",
+                        "Tài khoản chưa được cấp quyền hạn hợp lệ!",
                         "Cảnh báo",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Warning
@@ -107,24 +107,24 @@ namespace MiniSupermarket.WinForms
                 case "ADMIN":
                     OpenChildForm(
                         new FormCategoryManagement(),
-                        "QUẢN LÝ DANH MỤC",
+                        "QUẢN LÝ DANH MỤC NHÓM HÀNG",
                         btnCategory
                     );
                     break;
 
                 case "CASHIER":
                     OpenChildForm(
-                        new FormCustomerManagement(),
-                        "QUẢN LÝ KHÁCH HÀNG",
-                        btnCustomer
+                        new FormPOS(),
+                        "HỆ THỐNG QUẦY BÁN HÀNG & THU NGÂN (POS)",
+                        btnPOS
                     );
                     break;
 
                 case "WAREHOUSE":
                     OpenChildForm(
-                        new FormCategoryManagement(),
-                        "QUẢN LÝ DANH MỤC",
-                        btnCategory
+                        new FormProductManagement(),
+                        "QUẢN LÝ THÔNG TIN SẢN PHẨM & KHO HÀNG",
+                        btnProduct
                     );
                     break;
             }
@@ -190,7 +190,7 @@ namespace MiniSupermarket.WinForms
 
             OpenChildForm(
                 new FormCategoryManagement(),
-                "QUẢN LÝ DANH MỤC",
+                "QUẢN LÝ DANH MỤC NHÓM HÀNG",
                 btnCategory
             );
         }
@@ -202,7 +202,7 @@ namespace MiniSupermarket.WinForms
 
             OpenChildForm(
                 new FormCustomerManagement(),
-                "QUẢN LÝ KHÁCH HÀNG",
+                "QUẢN LÝ KHÁCH HÀNG & TÍCH ĐIỂM",
                 btnCustomer
             );
         }
@@ -214,46 +214,60 @@ namespace MiniSupermarket.WinForms
 
             OpenChildForm(
                 new FormPOS(),
-                "MÀN HÌNH POS",
+                "HỆ THỐNG QUẦY BÁN HÀNG & THU NGÂN (POS)",
                 btnPOS
             );
         }
 
-        private void btnProduct_Click(object sender, EventArgs e)
+        private void btnProduct_Click(object? sender, EventArgs e)
         {
             if (!IsAllowed("ADMIN", "WAREHOUSE"))
                 return;
 
             OpenChildForm(
                 new FormProductManagement(),
-                "QUẢN LÝ SẢN PHẨM & KHO HÀNG",
+                "QUẢN LÝ THÔNG TIN SẢN PHẨM & KHO HÀNG",
                 btnProduct
             );
         }
 
         private void btnReports_Click(object? sender, EventArgs e)
         {
-            if (!IsAllowed("ADMIN"))
+            if (SessionManager.CurrentRole.Trim().ToUpper() != "ADMIN")
+            {
+                MessageBox.Show(
+                    "Bạn không có quyền xem dữ liệu tài chính của siêu thị!",
+                    "Từ chối",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Stop
+                );
                 return;
+            }
 
-            MessageBox.Show(
-                "Màn hình báo cáo sẽ triển khai tiếp.",
-                "Báo cáo",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information
+            OpenChildForm(
+                new FormQuickReport(),
+                "BÁO CÁO DOANH THU & HIỆU SUẤT CA BÁN",
+                btnReports
             );
         }
 
         private void btnUserManage_Click(object? sender, EventArgs e)
         {
-            if (!IsAllowed("ADMIN"))
+            if (SessionManager.CurrentRole.Trim().ToUpper() != "ADMIN")
+            {
+                MessageBox.Show(
+                    "Bạn không có quyền quản trị tài khoản!",
+                    "Từ chối",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Stop
+                );
                 return;
+            }
 
-            MessageBox.Show(
-                "Màn hình quản lý tài khoản sẽ triển khai tiếp.",
-                "Tài khoản",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information
+            OpenChildForm(
+                new FormUserManagement(),
+                "QUẢN TRỊ TÀI KHOẢN VÀ PHÂN QUYỀN HỆ THỐNG",
+                btnUserManage
             );
         }
 

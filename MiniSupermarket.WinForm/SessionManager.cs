@@ -1,4 +1,4 @@
-﻿using System.Net.Http.Headers;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 
@@ -20,6 +20,23 @@ namespace MiniSupermarket.WinForms
         {
             BaseAddress = new Uri("https://localhost:7292/api/")
         };
+
+        public static HttpClient Client
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(SessionManager.JwtToken))
+                {
+                    _client.DefaultRequestHeaders.Authorization =
+                        new AuthenticationHeaderValue("Bearer", SessionManager.JwtToken);
+                }
+                else
+                {
+                    _client.DefaultRequestHeaders.Authorization = null;
+                }
+                return _client;
+            }
+        }
 
         // Hàm gọi API đăng nhập lấy Token
         public static async Task<bool> LoginAsync(string username, string password)
