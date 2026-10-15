@@ -12,7 +12,7 @@ using MiniSupermarket.API.Data;
 namespace MiniSupermarket.API.Migrations
 {
     [DbContext(typeof(SupermarketDbContext))]
-    [Migration("20261015113135_InitialCreateDatabase")]
+    [Migration("20261015122203_InitialCreateDatabase")]
     partial class InitialCreateDatabase
     {
         /// <inheritdoc />
@@ -353,6 +353,173 @@ namespace MiniSupermarket.API.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Orders");
+
+                    b.HasData(
+                        new
+                        {
+                            OrderId = 1,
+                            AmountReceived = 250000m,
+                            ChangeAmount = 46000m,
+                            OrderDate = new DateTime(2026, 10, 1, 8, 30, 0, 0, DateTimeKind.Unspecified),
+                            PaymentMethod = "Cash",
+                            Status = "Completed",
+                            TotalAmount = 204000m,
+                            UserId = 3
+                        },
+                        new
+                        {
+                            OrderId = 2,
+                            AmountReceived = 360000m,
+                            ChangeAmount = 0m,
+                            OrderDate = new DateTime(2026, 10, 1, 9, 15, 0, 0, DateTimeKind.Unspecified),
+                            PaymentMethod = "Transfer",
+                            Status = "Completed",
+                            TotalAmount = 360000m,
+                            UserId = 4
+                        },
+                        new
+                        {
+                            OrderId = 3,
+                            AmountReceived = 600000m,
+                            ChangeAmount = 20000m,
+                            OrderDate = new DateTime(2026, 10, 2, 10, 20, 0, 0, DateTimeKind.Unspecified),
+                            PaymentMethod = "Cash",
+                            Status = "Completed",
+                            TotalAmount = 580000m,
+                            UserId = 5
+                        },
+                        new
+                        {
+                            OrderId = 4,
+                            AmountReceived = 200000m,
+                            ChangeAmount = 40000m,
+                            OrderDate = new DateTime(2026, 10, 2, 11, 45, 0, 0, DateTimeKind.Unspecified),
+                            PaymentMethod = "Cash",
+                            Status = "Completed",
+                            TotalAmount = 160000m,
+                            UserId = 6
+                        },
+                        new
+                        {
+                            OrderId = 5,
+                            AmountReceived = 425000m,
+                            ChangeAmount = 0m,
+                            OrderDate = new DateTime(2026, 10, 3, 13, 10, 0, 0, DateTimeKind.Unspecified),
+                            PaymentMethod = "Transfer",
+                            Status = "Completed",
+                            TotalAmount = 425000m,
+                            UserId = 7
+                        },
+                        new
+                        {
+                            OrderId = 6,
+                            AmountReceived = 100000m,
+                            ChangeAmount = 10000m,
+                            OrderDate = new DateTime(2026, 10, 3, 14, 25, 0, 0, DateTimeKind.Unspecified),
+                            PaymentMethod = "Cash",
+                            Status = "Completed",
+                            TotalAmount = 90000m,
+                            UserId = 3
+                        },
+                        new
+                        {
+                            OrderId = 7,
+                            AmountReceived = 630000m,
+                            ChangeAmount = 0m,
+                            OrderDate = new DateTime(2026, 10, 4, 8, 40, 0, 0, DateTimeKind.Unspecified),
+                            PaymentMethod = "Transfer",
+                            Status = "Completed",
+                            TotalAmount = 630000m,
+                            UserId = 4
+                        },
+                        new
+                        {
+                            OrderId = 8,
+                            AmountReceived = 300000m,
+                            ChangeAmount = 55000m,
+                            OrderDate = new DateTime(2026, 10, 4, 15, 30, 0, 0, DateTimeKind.Unspecified),
+                            PaymentMethod = "Cash",
+                            Status = "Completed",
+                            TotalAmount = 245000m,
+                            UserId = 5
+                        },
+                        new
+                        {
+                            OrderId = 9,
+                            AmountReceived = 320000m,
+                            ChangeAmount = 0m,
+                            OrderDate = new DateTime(2026, 10, 5, 9, 5, 0, 0, DateTimeKind.Unspecified),
+                            PaymentMethod = "Transfer",
+                            Status = "Completed",
+                            TotalAmount = 320000m,
+                            UserId = 6
+                        },
+                        new
+                        {
+                            OrderId = 10,
+                            AmountReceived = 150000m,
+                            ChangeAmount = 12000m,
+                            OrderDate = new DateTime(2026, 10, 5, 10, 50, 0, 0, DateTimeKind.Unspecified),
+                            PaymentMethod = "Cash",
+                            Status = "Completed",
+                            TotalAmount = 138000m,
+                            UserId = 7
+                        },
+                        new
+                        {
+                            OrderId = 11,
+                            AmountReceived = 870000m,
+                            ChangeAmount = 0m,
+                            OrderDate = new DateTime(2026, 10, 6, 12, 15, 0, 0, DateTimeKind.Unspecified),
+                            PaymentMethod = "Transfer",
+                            Status = "Completed",
+                            TotalAmount = 870000m,
+                            UserId = 3
+                        },
+                        new
+                        {
+                            OrderId = 12,
+                            AmountReceived = 300000m,
+                            ChangeAmount = 50000m,
+                            OrderDate = new DateTime(2026, 10, 7, 16, 20, 0, 0, DateTimeKind.Unspecified),
+                            PaymentMethod = "Cash",
+                            Status = "Completed",
+                            TotalAmount = 250000m,
+                            UserId = 4
+                        },
+                        new
+                        {
+                            OrderId = 13,
+                            AmountReceived = 465000m,
+                            ChangeAmount = 0m,
+                            OrderDate = new DateTime(2026, 10, 8, 9, 35, 0, 0, DateTimeKind.Unspecified),
+                            PaymentMethod = "Transfer",
+                            Status = "Completed",
+                            TotalAmount = 465000m,
+                            UserId = 5
+                        },
+                        new
+                        {
+                            OrderId = 14,
+                            AmountReceived = 150000m,
+                            ChangeAmount = 37000m,
+                            OrderDate = new DateTime(2026, 10, 9, 14, 45, 0, 0, DateTimeKind.Unspecified),
+                            PaymentMethod = "Cash",
+                            Status = "Completed",
+                            TotalAmount = 113000m,
+                            UserId = 6
+                        },
+                        new
+                        {
+                            OrderId = 15,
+                            AmountReceived = 0m,
+                            ChangeAmount = 0m,
+                            OrderDate = new DateTime(2026, 10, 10, 17, 10, 0, 0, DateTimeKind.Unspecified),
+                            PaymentMethod = "Cash",
+                            Status = "Cancelled",
+                            TotalAmount = 500000m,
+                            UserId = 7
+                        });
                 });
 
             modelBuilder.Entity("MiniSupermarket.API.Models.OrderDetail", b =>
@@ -385,6 +552,278 @@ namespace MiniSupermarket.API.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("OrderDetails");
+
+                    b.HasData(
+                        new
+                        {
+                            OrderDetailId = 1,
+                            OrderId = 1,
+                            ProductId = 104,
+                            Quantity = 2,
+                            SubTotal = 84000m,
+                            UnitPrice = 42000m
+                        },
+                        new
+                        {
+                            OrderDetailId = 2,
+                            OrderId = 1,
+                            ProductId = 603,
+                            Quantity = 1,
+                            SubTotal = 45000m,
+                            UnitPrice = 45000m
+                        },
+                        new
+                        {
+                            OrderDetailId = 3,
+                            OrderId = 2,
+                            ProductId = 204,
+                            Quantity = 2,
+                            SubTotal = 240000m,
+                            UnitPrice = 120000m
+                        },
+                        new
+                        {
+                            OrderDetailId = 4,
+                            OrderId = 2,
+                            ProductId = 901,
+                            Quantity = 2,
+                            SubTotal = 130000m,
+                            UnitPrice = 65000m
+                        },
+                        new
+                        {
+                            OrderDetailId = 5,
+                            OrderId = 3,
+                            ProductId = 304,
+                            Quantity = 1,
+                            SubTotal = 290000m,
+                            UnitPrice = 290000m
+                        },
+                        new
+                        {
+                            OrderDetailId = 6,
+                            OrderId = 3,
+                            ProductId = 503,
+                            Quantity = 2,
+                            SubTotal = 170000m,
+                            UnitPrice = 85000m
+                        },
+                        new
+                        {
+                            OrderDetailId = 7,
+                            OrderId = 4,
+                            ProductId = 403,
+                            Quantity = 1,
+                            SubTotal = 160000m,
+                            UnitPrice = 160000m
+                        },
+                        new
+                        {
+                            OrderDetailId = 8,
+                            OrderId = 4,
+                            ProductId = 603,
+                            Quantity = 0,
+                            SubTotal = 0m,
+                            UnitPrice = 45000m
+                        },
+                        new
+                        {
+                            OrderDetailId = 9,
+                            OrderId = 5,
+                            ProductId = 701,
+                            Quantity = 2,
+                            SubTotal = 420000m,
+                            UnitPrice = 210000m
+                        },
+                        new
+                        {
+                            OrderDetailId = 10,
+                            OrderId = 5,
+                            ProductId = 1301,
+                            Quantity = 1,
+                            SubTotal = 38000m,
+                            UnitPrice = 38000m
+                        },
+                        new
+                        {
+                            OrderDetailId = 11,
+                            OrderId = 6,
+                            ProductId = 1201,
+                            Quantity = 2,
+                            SubTotal = 90000m,
+                            UnitPrice = 45000m
+                        },
+                        new
+                        {
+                            OrderDetailId = 12,
+                            OrderId = 6,
+                            ProductId = 1501,
+                            Quantity = 0,
+                            SubTotal = 0m,
+                            UnitPrice = 25000m
+                        },
+                        new
+                        {
+                            OrderDetailId = 13,
+                            OrderId = 7,
+                            ProductId = 304,
+                            Quantity = 2,
+                            SubTotal = 580000m,
+                            UnitPrice = 290000m
+                        },
+                        new
+                        {
+                            OrderDetailId = 14,
+                            OrderId = 7,
+                            ProductId = 104,
+                            Quantity = 1,
+                            SubTotal = 42000m,
+                            UnitPrice = 42000m
+                        },
+                        new
+                        {
+                            OrderDetailId = 15,
+                            OrderId = 8,
+                            ProductId = 801,
+                            Quantity = 3,
+                            SubTotal = 165000m,
+                            UnitPrice = 55000m
+                        },
+                        new
+                        {
+                            OrderDetailId = 16,
+                            OrderId = 8,
+                            ProductId = 603,
+                            Quantity = 1,
+                            SubTotal = 45000m,
+                            UnitPrice = 45000m
+                        },
+                        new
+                        {
+                            OrderDetailId = 17,
+                            OrderId = 9,
+                            ProductId = 403,
+                            Quantity = 2,
+                            SubTotal = 320000m,
+                            UnitPrice = 160000m
+                        },
+                        new
+                        {
+                            OrderDetailId = 18,
+                            OrderId = 9,
+                            ProductId = 1501,
+                            Quantity = 0,
+                            SubTotal = 0m,
+                            UnitPrice = 25000m
+                        },
+                        new
+                        {
+                            OrderDetailId = 19,
+                            OrderId = 10,
+                            ProductId = 1301,
+                            Quantity = 1,
+                            SubTotal = 38000m,
+                            UnitPrice = 38000m
+                        },
+                        new
+                        {
+                            OrderDetailId = 20,
+                            OrderId = 10,
+                            ProductId = 1001,
+                            Quantity = 2,
+                            SubTotal = 96000m,
+                            UnitPrice = 48000m
+                        },
+                        new
+                        {
+                            OrderDetailId = 21,
+                            OrderId = 11,
+                            ProductId = 701,
+                            Quantity = 3,
+                            SubTotal = 630000m,
+                            UnitPrice = 210000m
+                        },
+                        new
+                        {
+                            OrderDetailId = 22,
+                            OrderId = 11,
+                            ProductId = 1101,
+                            Quantity = 2,
+                            SubTotal = 230000m,
+                            UnitPrice = 115000m
+                        },
+                        new
+                        {
+                            OrderDetailId = 23,
+                            OrderId = 12,
+                            ProductId = 1401,
+                            Quantity = 1,
+                            SubTotal = 180000m,
+                            UnitPrice = 180000m
+                        },
+                        new
+                        {
+                            OrderDetailId = 24,
+                            OrderId = 12,
+                            ProductId = 1501,
+                            Quantity = 2,
+                            SubTotal = 50000m,
+                            UnitPrice = 25000m
+                        },
+                        new
+                        {
+                            OrderDetailId = 25,
+                            OrderId = 13,
+                            ProductId = 204,
+                            Quantity = 2,
+                            SubTotal = 240000m,
+                            UnitPrice = 120000m
+                        },
+                        new
+                        {
+                            OrderDetailId = 26,
+                            OrderId = 13,
+                            ProductId = 1101,
+                            Quantity = 2,
+                            SubTotal = 230000m,
+                            UnitPrice = 115000m
+                        },
+                        new
+                        {
+                            OrderDetailId = 27,
+                            OrderId = 14,
+                            ProductId = 104,
+                            Quantity = 1,
+                            SubTotal = 42000m,
+                            UnitPrice = 42000m
+                        },
+                        new
+                        {
+                            OrderDetailId = 28,
+                            OrderId = 14,
+                            ProductId = 603,
+                            Quantity = 1,
+                            SubTotal = 45000m,
+                            UnitPrice = 45000m
+                        },
+                        new
+                        {
+                            OrderDetailId = 29,
+                            OrderId = 15,
+                            ProductId = 503,
+                            Quantity = 2,
+                            SubTotal = 170000m,
+                            UnitPrice = 85000m
+                        },
+                        new
+                        {
+                            OrderDetailId = 30,
+                            OrderId = 15,
+                            ProductId = 403,
+                            Quantity = 1,
+                            SubTotal = 160000m,
+                            UnitPrice = 160000m
+                        });
                 });
 
             modelBuilder.Entity("MiniSupermarket.API.Models.Product", b =>

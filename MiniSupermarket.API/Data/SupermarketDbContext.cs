@@ -245,6 +245,71 @@ namespace MiniSupermarket.API.Data
                     RoleId = 1
                 }
             );
+            // === 15 ĐƠN HÀNG ===
+            modelBuilder.Entity<Order>().HasData(
+                new Order { OrderId = 1, UserId = 3, OrderDate = new DateTime(2026, 10, 1, 8, 30, 0), TotalAmount = 204000, Status = "Completed", PaymentMethod = "Cash", AmountReceived = 250000, ChangeAmount = 46000 },
+                new Order { OrderId = 2, UserId = 4, OrderDate = new DateTime(2026, 10, 1, 9, 15, 0), TotalAmount = 360000, Status = "Completed", PaymentMethod = "Transfer", AmountReceived = 360000, ChangeAmount = 0 },
+                new Order { OrderId = 3, UserId = 5, OrderDate = new DateTime(2026, 10, 2, 10, 20, 0), TotalAmount = 580000, Status = "Completed", PaymentMethod = "Cash", AmountReceived = 600000, ChangeAmount = 20000 },
+                new Order { OrderId = 4, UserId = 6, OrderDate = new DateTime(2026, 10, 2, 11, 45, 0), TotalAmount = 160000, Status = "Completed", PaymentMethod = "Cash", AmountReceived = 200000, ChangeAmount = 40000 },
+                new Order { OrderId = 5, UserId = 7, OrderDate = new DateTime(2026, 10, 3, 13, 10, 0), TotalAmount = 425000, Status = "Completed", PaymentMethod = "Transfer", AmountReceived = 425000, ChangeAmount = 0 },
+                new Order { OrderId = 6, UserId = 3, OrderDate = new DateTime(2026, 10, 3, 14, 25, 0), TotalAmount = 90000, Status = "Completed", PaymentMethod = "Cash", AmountReceived = 100000, ChangeAmount = 10000 },
+                new Order { OrderId = 7, UserId = 4, OrderDate = new DateTime(2026, 10, 4, 8, 40, 0), TotalAmount = 630000, Status = "Completed", PaymentMethod = "Transfer", AmountReceived = 630000, ChangeAmount = 0 },
+                new Order { OrderId = 8, UserId = 5, OrderDate = new DateTime(2026, 10, 4, 15, 30, 0), TotalAmount = 245000, Status = "Completed", PaymentMethod = "Cash", AmountReceived = 300000, ChangeAmount = 55000 },
+                new Order { OrderId = 9, UserId = 6, OrderDate = new DateTime(2026, 10, 5, 9, 5, 0), TotalAmount = 320000, Status = "Completed", PaymentMethod = "Transfer", AmountReceived = 320000, ChangeAmount = 0 },
+                new Order { OrderId = 10, UserId = 7, OrderDate = new DateTime(2026, 10, 5, 10, 50, 0), TotalAmount = 138000, Status = "Completed", PaymentMethod = "Cash", AmountReceived = 150000, ChangeAmount = 12000 },
+                new Order { OrderId = 11, UserId = 3, OrderDate = new DateTime(2026, 10, 6, 12, 15, 0), TotalAmount = 870000, Status = "Completed", PaymentMethod = "Transfer", AmountReceived = 870000, ChangeAmount = 0 },
+                new Order { OrderId = 12, UserId = 4, OrderDate = new DateTime(2026, 10, 7, 16, 20, 0), TotalAmount = 250000, Status = "Completed", PaymentMethod = "Cash", AmountReceived = 300000, ChangeAmount = 50000 },
+                new Order { OrderId = 13, UserId = 5, OrderDate = new DateTime(2026, 10, 8, 9, 35, 0), TotalAmount = 465000, Status = "Completed", PaymentMethod = "Transfer", AmountReceived = 465000, ChangeAmount = 0 },
+                new Order { OrderId = 14, UserId = 6, OrderDate = new DateTime(2026, 10, 9, 14, 45, 0), TotalAmount = 113000, Status = "Completed", PaymentMethod = "Cash", AmountReceived = 150000, ChangeAmount = 37000 },
+                new Order { OrderId = 15, UserId = 7, OrderDate = new DateTime(2026, 10, 10, 17, 10, 0), TotalAmount = 500000, Status = "Cancelled", PaymentMethod = "Cash", AmountReceived = 0, ChangeAmount = 0 }
+            );
+            // === 30 CHI TIẾT ĐƠN HÀNG ===
+            modelBuilder.Entity<OrderDetail>().HasData(
+                new OrderDetail { OrderDetailId = 1, OrderId = 1, ProductId = 104, Quantity = 2, UnitPrice = 42000, SubTotal = 84000 },
+                new OrderDetail { OrderDetailId = 2, OrderId = 1, ProductId = 603, Quantity = 1, UnitPrice = 45000, SubTotal = 45000 },
+
+                new OrderDetail { OrderDetailId = 3, OrderId = 2, ProductId = 204, Quantity = 2, UnitPrice = 120000, SubTotal = 240000 },
+                new OrderDetail { OrderDetailId = 4, OrderId = 2, ProductId = 901, Quantity = 2, UnitPrice = 65000, SubTotal = 130000 },
+
+                new OrderDetail { OrderDetailId = 5, OrderId = 3, ProductId = 304, Quantity = 1, UnitPrice = 290000, SubTotal = 290000 },
+                new OrderDetail { OrderDetailId = 6, OrderId = 3, ProductId = 503, Quantity = 2, UnitPrice = 85000, SubTotal = 170000 },
+
+                new OrderDetail { OrderDetailId = 7, OrderId = 4, ProductId = 403, Quantity = 1, UnitPrice = 160000, SubTotal = 160000 },
+                new OrderDetail { OrderDetailId = 8, OrderId = 4, ProductId = 603, Quantity = 0, UnitPrice = 45000, SubTotal = 0 },
+
+                new OrderDetail { OrderDetailId = 9, OrderId = 5, ProductId = 701, Quantity = 2, UnitPrice = 210000, SubTotal = 420000 },
+                new OrderDetail { OrderDetailId = 10, OrderId = 5, ProductId = 1301, Quantity = 1, UnitPrice = 38000, SubTotal = 38000 },
+
+                new OrderDetail { OrderDetailId = 11, OrderId = 6, ProductId = 1201, Quantity = 2, UnitPrice = 45000, SubTotal = 90000 },
+                new OrderDetail { OrderDetailId = 12, OrderId = 6, ProductId = 1501, Quantity = 0, UnitPrice = 25000, SubTotal = 0 },
+
+                new OrderDetail { OrderDetailId = 13, OrderId = 7, ProductId = 304, Quantity = 2, UnitPrice = 290000, SubTotal = 580000 },
+                new OrderDetail { OrderDetailId = 14, OrderId = 7, ProductId = 104, Quantity = 1, UnitPrice = 42000, SubTotal = 42000 },
+
+                new OrderDetail { OrderDetailId = 15, OrderId = 8, ProductId = 801, Quantity = 3, UnitPrice = 55000, SubTotal = 165000 },
+                new OrderDetail { OrderDetailId = 16, OrderId = 8, ProductId = 603, Quantity = 1, UnitPrice = 45000, SubTotal = 45000 },
+
+                new OrderDetail { OrderDetailId = 17, OrderId = 9, ProductId = 403, Quantity = 2, UnitPrice = 160000, SubTotal = 320000 },
+                new OrderDetail { OrderDetailId = 18, OrderId = 9, ProductId = 1501, Quantity = 0, UnitPrice = 25000, SubTotal = 0 },
+
+                new OrderDetail { OrderDetailId = 19, OrderId = 10, ProductId = 1301, Quantity = 1, UnitPrice = 38000, SubTotal = 38000 },
+                new OrderDetail { OrderDetailId = 20, OrderId = 10, ProductId = 1001, Quantity = 2, UnitPrice = 48000, SubTotal = 96000 },
+
+                new OrderDetail { OrderDetailId = 21, OrderId = 11, ProductId = 701, Quantity = 3, UnitPrice = 210000, SubTotal = 630000 },
+                new OrderDetail { OrderDetailId = 22, OrderId = 11, ProductId = 1101, Quantity = 2, UnitPrice = 115000, SubTotal = 230000 },
+
+                new OrderDetail { OrderDetailId = 23, OrderId = 12, ProductId = 1401, Quantity = 1, UnitPrice = 180000, SubTotal = 180000 },
+                new OrderDetail { OrderDetailId = 24, OrderId = 12, ProductId = 1501, Quantity = 2, UnitPrice = 25000, SubTotal = 50000 },
+
+                new OrderDetail { OrderDetailId = 25, OrderId = 13, ProductId = 204, Quantity = 2, UnitPrice = 120000, SubTotal = 240000 },
+                new OrderDetail { OrderDetailId = 26, OrderId = 13, ProductId = 1101, Quantity = 2, UnitPrice = 115000, SubTotal = 230000 },
+
+                new OrderDetail { OrderDetailId = 27, OrderId = 14, ProductId = 104, Quantity = 1, UnitPrice = 42000, SubTotal = 42000 },
+                new OrderDetail { OrderDetailId = 28, OrderId = 14, ProductId = 603, Quantity = 1, UnitPrice = 45000, SubTotal = 45000 },
+
+                new OrderDetail { OrderDetailId = 29, OrderId = 15, ProductId = 503, Quantity = 2, UnitPrice = 85000, SubTotal = 170000 },
+                new OrderDetail { OrderDetailId = 30, OrderId = 15, ProductId = 403, Quantity = 1, UnitPrice = 160000, SubTotal = 160000 }
+            );
         }
     }
 }

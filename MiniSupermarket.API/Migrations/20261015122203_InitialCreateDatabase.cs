@@ -256,6 +256,65 @@ namespace MiniSupermarket.API.Migrations
                     { 15, "Mai Giám Sát", "123456", 1, "supervisor" }
                 });
 
+            migrationBuilder.InsertData(
+                table: "Orders",
+                columns: new[] { "OrderId", "AmountReceived", "ChangeAmount", "OrderDate", "PaymentMethod", "Status", "TotalAmount", "UserId" },
+                values: new object[,]
+                {
+                    { 1, 250000m, 46000m, new DateTime(2026, 10, 1, 8, 30, 0, 0, DateTimeKind.Unspecified), "Cash", "Completed", 204000m, 3 },
+                    { 2, 360000m, 0m, new DateTime(2026, 10, 1, 9, 15, 0, 0, DateTimeKind.Unspecified), "Transfer", "Completed", 360000m, 4 },
+                    { 3, 600000m, 20000m, new DateTime(2026, 10, 2, 10, 20, 0, 0, DateTimeKind.Unspecified), "Cash", "Completed", 580000m, 5 },
+                    { 4, 200000m, 40000m, new DateTime(2026, 10, 2, 11, 45, 0, 0, DateTimeKind.Unspecified), "Cash", "Completed", 160000m, 6 },
+                    { 5, 425000m, 0m, new DateTime(2026, 10, 3, 13, 10, 0, 0, DateTimeKind.Unspecified), "Transfer", "Completed", 425000m, 7 },
+                    { 6, 100000m, 10000m, new DateTime(2026, 10, 3, 14, 25, 0, 0, DateTimeKind.Unspecified), "Cash", "Completed", 90000m, 3 },
+                    { 7, 630000m, 0m, new DateTime(2026, 10, 4, 8, 40, 0, 0, DateTimeKind.Unspecified), "Transfer", "Completed", 630000m, 4 },
+                    { 8, 300000m, 55000m, new DateTime(2026, 10, 4, 15, 30, 0, 0, DateTimeKind.Unspecified), "Cash", "Completed", 245000m, 5 },
+                    { 9, 320000m, 0m, new DateTime(2026, 10, 5, 9, 5, 0, 0, DateTimeKind.Unspecified), "Transfer", "Completed", 320000m, 6 },
+                    { 10, 150000m, 12000m, new DateTime(2026, 10, 5, 10, 50, 0, 0, DateTimeKind.Unspecified), "Cash", "Completed", 138000m, 7 },
+                    { 11, 870000m, 0m, new DateTime(2026, 10, 6, 12, 15, 0, 0, DateTimeKind.Unspecified), "Transfer", "Completed", 870000m, 3 },
+                    { 12, 300000m, 50000m, new DateTime(2026, 10, 7, 16, 20, 0, 0, DateTimeKind.Unspecified), "Cash", "Completed", 250000m, 4 },
+                    { 13, 465000m, 0m, new DateTime(2026, 10, 8, 9, 35, 0, 0, DateTimeKind.Unspecified), "Transfer", "Completed", 465000m, 5 },
+                    { 14, 150000m, 37000m, new DateTime(2026, 10, 9, 14, 45, 0, 0, DateTimeKind.Unspecified), "Cash", "Completed", 113000m, 6 },
+                    { 15, 0m, 0m, new DateTime(2026, 10, 10, 17, 10, 0, 0, DateTimeKind.Unspecified), "Cash", "Cancelled", 500000m, 7 }
+                });
+
+            migrationBuilder.InsertData(
+                table: "OrderDetails",
+                columns: new[] { "OrderDetailId", "OrderId", "ProductId", "Quantity", "SubTotal", "UnitPrice" },
+                values: new object[,]
+                {
+                    { 1, 1, 104, 2, 84000m, 42000m },
+                    { 2, 1, 603, 1, 45000m, 45000m },
+                    { 3, 2, 204, 2, 240000m, 120000m },
+                    { 4, 2, 901, 2, 130000m, 65000m },
+                    { 5, 3, 304, 1, 290000m, 290000m },
+                    { 6, 3, 503, 2, 170000m, 85000m },
+                    { 7, 4, 403, 1, 160000m, 160000m },
+                    { 8, 4, 603, 0, 0m, 45000m },
+                    { 9, 5, 701, 2, 420000m, 210000m },
+                    { 10, 5, 1301, 1, 38000m, 38000m },
+                    { 11, 6, 1201, 2, 90000m, 45000m },
+                    { 12, 6, 1501, 0, 0m, 25000m },
+                    { 13, 7, 304, 2, 580000m, 290000m },
+                    { 14, 7, 104, 1, 42000m, 42000m },
+                    { 15, 8, 801, 3, 165000m, 55000m },
+                    { 16, 8, 603, 1, 45000m, 45000m },
+                    { 17, 9, 403, 2, 320000m, 160000m },
+                    { 18, 9, 1501, 0, 0m, 25000m },
+                    { 19, 10, 1301, 1, 38000m, 38000m },
+                    { 20, 10, 1001, 2, 96000m, 48000m },
+                    { 21, 11, 701, 3, 630000m, 210000m },
+                    { 22, 11, 1101, 2, 230000m, 115000m },
+                    { 23, 12, 1401, 1, 180000m, 180000m },
+                    { 24, 12, 1501, 2, 50000m, 25000m },
+                    { 25, 13, 204, 2, 240000m, 120000m },
+                    { 26, 13, 1101, 2, 230000m, 115000m },
+                    { 27, 14, 104, 1, 42000m, 42000m },
+                    { 28, 14, 603, 1, 45000m, 45000m },
+                    { 29, 15, 503, 2, 170000m, 85000m },
+                    { 30, 15, 403, 1, 160000m, 160000m }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_OrderDetails_OrderId",
                 table: "OrderDetails",
