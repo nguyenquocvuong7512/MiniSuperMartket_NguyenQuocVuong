@@ -1,158 +1,142 @@
-🛒 MiniSupermarket - Buổi 5: ADO.NET Nâng Cao & Giao Dịch POS
+# Hệ Thống Quản Lý Bán Lẻ & Quầy POS Siêu Thị Nông Sản Hữu Cơ (MiniSupermarket)
 
-Dự án thực hành Buổi 5 - Lập trình ứng dụng .NET: Xây dựng hệ sinh thái bán lẻ MiniSupermarket tập trung vào tối ưu hóa truy xuất dữ liệu hiệu năng cao với ADO.NET thuần, báo cáo doanh thu ca với Stored Procedure, và bảo toàn giao dịch thanh toán đa bảng theo chuẩn ACID bằng SqlTransaction.
+> **Giải pháp kiến trúc kết hợp giữa ASP.NET Core Web API và Windows Forms Desktop App, tích hợp sâu ADO.NET thuần, T-SQL Stored Procedure và điều khiển giao dịch nguyên tử đa bảng với `SqlTransaction` theo chuẩn ACID.**
 
-📑 Mục Lục
+## 📌 1. Giới thiệu tổng quan
 
-1. Giới thiệu tổng quan
+Dự án **MiniSupermarket** được xây dựng phục vụ mô hình vận hành chuỗi siêu thị bán lẻ nông sản sạch và thực phẩm hữu cơ (**Organic Farm**). Hệ thống giải quyết các bài toán trọng tâm trong kỹ thuật phần mềm doanh nghiệp:
 
-2. Cấu trúc Solution & Công nghệ sử dụng
+* **Hiệu năng cao tầng thấp (High Performance):** Ứng dụng **ADO.NET thuần** kết hợp `SqlDataReader` (Forward-only, Connected Mode) để tra cứu mã vạch sản phẩm tại quầy POS với độ trễ phản hồi cực thấp (< 100ms), tránh chi phí tài nguyên (overhead) của ORM trong giờ cao điểm.
 
-3. Các tính năng & Trọng tâm kỹ thuật Buổi 5
+* **Bộ đệm dữ liệu ngoại tuyến (Disconnected Cache):** Sử dụng `DataTable` và `SqlDataAdapter` để tải danh mục hàng hóa lưu đệm trực tiếp lên bộ nhớ RAM, phục vụ hiển thị lưới giao diện kể cả khi ngắt kết nối.
 
-3.1. 5 Thành phần cốt lõi ADO.NET
+* **Tối ưu báo cáo tổng hợp:** Đóng gói logic thống kê ca bán lẻ phức tạp vào **Stored Procedure** (`sp_GetRevenueByCashier`) trên SQL Server, giải phóng băng thông mạng và tận dụng kế hoạch thực thi biên dịch sẵn (Compiled Execution Plan).
 
-3.2. API Tra cứu mã vạch siêu tốc (SqlDataReader)
+* **An toàn giao dịch đa bảng (ACID Compliance):** Toàn bộ quy trình thanh toán hóa đơn (`Orders` $\rightarrow$ `OrderDetails` $\rightarrow$ trừ tồn kho `Products` $\rightarrow$ tích điểm `Customers`) được bọc kín trong `SqlTransaction`. Cơ chế đảm bảo nguyên tắc: **Hoàn tất 100% (Commit) hoặc khôi phục nguyên trạng (Rollback), triệt tiêu hoàn toàn rác dữ liệu**.
 
-3.3. Mô hình ngắt kết nối với DataTable
+* **Bảo mật hệ thống:** Sử dụng 100% `SqlParameter` cho toàn bộ tham số đầu vào, triệt tiêu nguy cơ tấn công **SQL Injection**.
 
-3.4. Báo cáo doanh thu ca bằng Stored Procedure
+## 📂 2. Cấu trúc Solution & Cây thư mục dự án
 
-3.5. Quy trình POS Checkout bọc kín trong SqlTransaction (ACID)
+Hệ thống được tổ chức theo kiến trúc phân tách rõ ràng giữa Backend API và Desktop Client:
 
-4. Hướng dẫn cài đặt & Triển khai
-
-5. Tài liệu API & Kịch bản kiểm thử (Test Cases)
-
-6. Bảng kiểm tra nghiệm thu (Checklist)
-
-📌 1. Giới thiệu tổng quan
-
-Trong các hệ thống bán lẻ (POS) tại siêu thị, việc thao tác qua các ORM nặng (như Entity Framework) đôi khi gây ra độ trễ cao và khó kiểm soát giao dịch ở mức vi mô. Buổi 5 giải quyết các bài toán:
-
-Tốc độ: Quét mã vạch (Barcode Scanner) và đọc dữ liệu cực nhanh qua luồng một chiều SqlDataReader (<100ms).
-
-Tối ưu máy chủ: Chuyển các phép gom nhóm, tính tổng báo cáo phức tạp về Stored Procedure trên SQL Server.
-
-Toàn vẹn giao dịch: Áp dụng SqlTransaction bọc liên hoàn 4 bảng dữ liệu: Tạo đơn (Orders), lưu dòng đơn (OrderDetails), trừ tồn kho (Products), tích điểm khách hàng (Customers). Nếu có bất kỳ mặt hàng nào thiếu kho, hệ thống lập tức hoàn tác (Rollback) 100%.
-
-📂 2. Cấu trúc Solution & Công nghệ sử dụng
-
-Solution gồm 2 project chính:
-
-MiniSuperMartket.sln
+```
+MiniSuperMarket.sln
 │
-├── 🌐 MiniSupermarket.API/                   # .NET Web API phục vụ Client & Trạm POS
-│   ├── Controllers/
-│   │   ├── AdoProductController.cs          # [Mới] Tra cứu Barcode & Cache DataTable
-│   │   ├── ReportsController.cs             # [Mới] Báo cáo doanh thu ca bằng Stored Procedure
-│   │   ├── CheckoutController.cs            # [Mới] Giao dịch thanh toán POS (ACID Transaction)
-│   │   ├── AuthController.cs                # Xác thực & Phân quyền JWT
-│   │   ├── ProductsController.cs            # CRUD sản phẩm (ORM / EF Core)
-│   │   └── ...
-│   ├── Data/
-│   │   └── SupermarketDbContext.cs          # Entity Framework DbContext
-│   ├── Dto/
-│   │   ├── CashierRevenueDto.cs             # DTO nhận kết quả từ sp_GetRevenueByCashier
-│   │   ├── CheckoutDtos.cs                  # CheckoutRequestDto & CartItemCheckoutDto
-│   │   └── ProductLookupDto.cs              # DTO tra cứu nhanh Barcode
-│   └── appsettings.json                     # Chuỗi kết nối SQL Server
+├── 📁 MiniSupermarket.API                     # Backend Web API (.NET Core)
+│   ├── 📁 Connected Services
+│   ├── 📁 Dependencies
+│   ├── 📁 Properties
+│   ├── 📁 Controllers                         # Bộ điều hướng xử lý nghiệp vụ
+│   │   ├── AdoProductController.cs           # Tra cứu Barcode & DataTable Cache (ADO.NET)
+│   │   ├── AuthController.cs                 # Xác thực & Phân quyền đăng nhập
+│   │   ├── CategoriesController.cs           # Quản lý danh mục hàng
+│   │   ├── CheckoutController.cs             # Thanh toán POS bọc SqlTransaction (ACID)
+│   │   ├── CustomerController.cs             # Quản lý thông tin & điểm thưởng khách hàng
+│   │   ├── OrdersController.cs               # Quản lý lịch sử hóa đơn bán buôn/lẻ
+│   │   ├── ProductsController.cs             # CRUD danh mục sản phẩm (EF Core)
+│   │   ├── ReportsController.cs              # Gọi Stored Procedure xuất báo cáo doanh thu
+│   │   ├── RolesController.cs                # Quản lý nhóm vai trò
+│   │   ├── UsersController.cs                # Quản lý tài khoản nhân viên / thu ngân
+│   │   └── WeatherForecastController.cs
+│   ├── 📁 Data
+│   │   └── SupermarketDbContext.cs          # EF Core DbContext & Seed Data (Organic Farm)
+│   ├── 📁 Dto                                # Data Transfer Objects
+│   │   ├── CashierRevenueDto.cs              # DTO nhận kết quả từ sp_GetRevenueByCashier
+│   │   ├── CheckoutDtos.cs                   # CartItem & CheckoutRequest DTO
+│   │   ├── ProductLookupDto.cs               # DTO tra cứu nhanh sản phẩm POS
+│   │   └── TopSellingProductDto.cs           # DTO báo cáo mặt hàng bán chạy
+│   ├── 📁 Migrations                         # Lịch sử cập nhật Schema CSDL
+│   ├── 📁 Models                             # Định nghĩa Entities thực thể CSDL
+│   ├── appsettings.json                      # Cấu hình ConnectionString & Service
+│   ├── MiniSupermarket.API.http              # HTTP Client Test Script
+│   └── Program.cs                            # Pipeline khởi tạo Web Host & DI Container
 │
-└── 🖥️ MiniSupermarket.WinForm/               # Ứng dụng Desktop cho thu ngân & quản lý
-    ├── FormLogin.cs                         # Đăng nhập hệ thống
-    ├── FormMainShell.cs                     # Điều hướng giao diện chính
-    ├── FormPOS.cs                           # Giao diện bán lẻ, tích hợp quét Barcode & Checkout
-    ├── FormQuickReport.cs                   # Màn hình xem nhanh báo cáo doanh thu ca
-    └── SessionManager.cs                    # Quản lý phiên làm việc thu ngân hiện tại
+└── 📁 MiniSupermarket.WinForm                 # Desktop Client giao diện quầy POS (WinForms)
+    ├── 📁 Dependencies
+    ├── Form1.cs
+    ├── FormCategoryManagement.cs             # Màn hình quản lý danh mục
+    ├── FormCustomerManagement.cs             # Màn hình chăm sóc khách hàng & tích điểm
+    ├── FormLogin.cs                          # Đăng nhập hệ thống thu ngân
+    ├── FormMainShell.cs                      # Giao diện khung điều hướng chính
+    ├── FormPOS.cs                            # Giao diện màn hình thanh toán quầy thu ngân
+    ├── FormProductManagement.cs              # Màn hình quản lý kho & sản phẩm
+    ├── FormQuickReport.cs                    # Màn hình xem báo cáo nhanh doanh thu ca
+    ├── FormRoleManagement.cs                 # Quản lý phân quyền chức vụ
+    ├── FormUserManagement.cs                 # Quản lý danh sách nhân viên
+    ├── SessionManager.cs                     # Quản lý phiên làm việc & tài khoản hiện hành
+    └── Program.cs                            # Điểm khởi chạy ứng dụng Desktop
 
+```
 
-⚡ 3. Các tính năng & Trọng tâm kỹ thuật Buổi 5
+## 🗄️ 3. Cơ sở dữ liệu mẫu (Organic Farm Seed Data)
 
-3.1. 5 Thành phần cốt lõi ADO.NET
+Hệ thống được khởi tạo sẵn với **15 danh mục nông sản hữu cơ** và **15 sản phẩm đại diện** có mã vạch (Barcode EAN-13 chuẩn):
 
-Thành phần
+### Danh mục & Sản phẩm đại diện
 
-Vai trò thực tế
+| ID | Mã vạch (Barcode) | Tên sản phẩm | Danh mục | Đơn giá | Đơn vị | Tồn kho | 
+| ----- | ----- | ----- | ----- | ----- | ----- | ----- | 
+| **101** | `8930000001010` | Cải bó xôi hữu cơ Farm | Rau lá hữu cơ Farm | 35.000 đ | Bó 500g | 80 | 
+| **201** | `8930000002017` | Cà rốt giống củ bản địa | Củ quả tươi sạch | 38.000 đ | Kg | 100 | 
+| **301** | `8930000003014` | Ổi lê hữu cơ chín cây | Trái cây vườn sinh thái | 45.000 đ | Kg | 60 | 
+| **401** | `8930000004011` | Nấm đùi gà tươi Organic | Nấm tươi & Nấm ăn hữu cơ | 42.000 đ | Gói 250g | 50 | 
+| **501** | `8930000005018` | Thịt ba chỉ heo thảo mộc | Thịt sạch chăn thả tự nhiên | 165.000 đ | Khay 500g | 40 | 
+| **601** | `8930000006015` | Cá lăng sinh thái sông Đà | Thủy hải sản sinh thái | 195.000 đ | Kg | 30 | 
+| **701** | `8930000007012` | Trứng gà ta thảo mộc tự nhiên | Trứng gia cầm thả vườn | 48.000 đ | Hộp 10 quả | 120 | 
+| **801** | `8930000008019` | Sữa bò tươi thanh trùng Organic | Sữa tươi thanh trùng & Sữa hạt | 52.000 đ | Chai 900ml | 45 | 
+| **901** | `8930000009016` | Gạo ST25 hữu cơ ruộng rươi | Gạo sạch & Nông sản ngũ cốc | 125.000 đ | Túi 2kg | 70 | 
+| **1001** | `8930000010013` | Mật ong hoa rừng nguyên chất | Mật ong rừng & Dược liệu vườn | 220.000 đ | Hũ 500ml | 35 | 
+| **1101** | `8930000011010` | Nước mắm truyền thống cá cơm 40N | Gia vị & Nước mắm thủ công | 95.000 đ | Chai 500ml | 50 | 
+| **1201** | `8930000012017` | Dầu mè vàng ép lạnh thủ công | Dầu ép lạnh nguyên chất | 110.000 đ | Chai 250ml | 40 | 
+| **1301** | `8930000013014` | Trà hoa cúc sấy lạnh tự nhiên | Rau củ sấy & Trà thảo mộc Farm | 85.000 đ | Hũ 80g | 55 | 
+| **1401** | `8930000014011` | Dưa cải củ lên men tự nhiên | Thực phẩm lên men tự nhiên | 32.000 đ | Hũ 450g | 60 | 
+| **1501** | `8930000015018` | Combo Rau Củ Xanh Dinh Dưỡng Tuần | Combo Nông Sản Tuần | 250.000 đ | Set 5kg | 20 | 
 
-Lưu ý kỹ thuật
+## ⚙️ 4. Hướng dẫn thiết lập & Khởi chạy dự án
 
-SqlConnection
+### 4.1. Yêu cầu môi trường
 
-Quản lý phiên kết nối vật lý với SQL Server
+* **Hệ điều hành:** Windows 10/11
 
-Luôn đặt trong khối using (...) để tự động đóng kết nối (tránh cạn kiệt Connection Pool).
+* **IDE:** Visual Studio 2022 (phiên bản 17.4 trở lên) có cài đặt workload **ASP.NET and web development** và **.NET desktop development**.
 
-SqlCommand
+* **SDK:** .NET Core 6.0 / 8.0 SDK
 
-Chứa câu lệnh T-SQL hoặc tên Stored Procedure
+* **Hệ quản trị CSDL:** Microsoft SQL Server 2019/2022 hoặc SQL Server Express.
 
-Chỉ định đúng thuộc tính CommandType.
+### 4.2. Cấu hình chuỗi kết nối (`appsettings.json`)
 
-SqlParameter
+Kiểm tra tệp `MiniSupermarket.API/appsettings.json`, chỉnh sửa chuỗi kết nối cho phù hợp với máy trạm:
 
-Tham số hóa dữ liệu đầu vào
-
-Chống triệt để SQL Injection (không cộng chuỗi SQL trực tiếp).
-
-SqlDataReader
-
-Đọc dữ liệu nhanh, tiến một chiều (Forward-Only)
-
-Tiết kiệm RAM tối đa vì không nạp toàn bộ bảng lên bộ nhớ.
-
-DataTable / SqlDataAdapter
-
-Mô hình ngắt kết nối (Disconnected Mode)
-
-Tự động mở kết nối, Fill() dữ liệu vào RAM rồi đóng kết nối ngay lập tức.
-
-3.2. API Tra cứu mã vạch siêu tốc (SqlDataReader)
-
-Endpoint: GET /api/ado-products/barcode/{barcode}
-
-Cơ chế: Sử dụng SqlDataReader đọc tuần tự một bản ghi duy nhất khớp với Barcode. Trả về mã HTTP 200 OK hoặc 404 Not Found nếu không tìm thấy.
-
-using (SqlConnection connection = new SqlConnection(connectionString))
+```
 {
-    string query = @"SELECT ProductId, Barcode, ProductName, Price, StockQuantity 
-                     FROM Products WHERE Barcode = @Barcode";
-
-    using (SqlCommand command = new SqlCommand(query, connection))
-    {
-        command.Parameters.AddWithValue("@Barcode", barcode.Trim());
-        connection.Open();
-        using (SqlDataReader reader = command.ExecuteReader())
-        {
-            if (reader.Read())
-            {
-                return Ok(new ProductLookupDto {
-                    ProductId = Convert.ToInt32(reader["ProductId"]),
-                    Barcode = reader["Barcode"].ToString(),
-                    ProductName = reader["ProductName"].ToString(),
-                    Price = Convert.ToDecimal(reader["Price"]),
-                    StockQuantity = Convert.ToInt32(reader["StockQuantity"])
-                });
-            }
-        }
-    }
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Database=MiniSupermarketDb;Trusted_Connection=True;TrustServerCertificate=True;"
+  }
 }
-return NotFound(new { message = $"Không tìm thấy sản phẩm có mã: {barcode}" });
 
+```
 
-3.3. Mô hình ngắt kết nối với DataTable
+*(Nếu sử dụng SQL Express, thay `localhost` bằng `.\\SQLEXPRESS`).*
 
-Endpoint: GET /api/ado-products/disconnected-cache
+### 4.3. Tạo Stored Procedure trên SQL Server
 
-Đổ toàn bộ danh mục sản phẩm vào bộ đệm RAM qua SqlDataAdapter.Fill(dataTable) để các máy POS có thể sử dụng dữ liệu ngoại tuyến mà không cần duy trì kết nối mạng liên tục.
+Mở **SQL Server Management Studio (SSMS)**, chọn CSDL `MiniSupermarketDb` và thực thi kịch bản tạo thủ tục báo cáo:
 
-3.4. Báo cáo doanh thu ca bằng Stored Procedure
+```
+USE MiniSupermarketDb;
+GO
 
-T-SQL Script trên SQL Server (sp_GetRevenueByCashier):
+IF OBJECT_ID('sp_GetRevenueByCashier', 'P') IS NOT NULL
+    DROP PROCEDURE sp_GetRevenueByCashier;
+GO
 
 CREATE PROCEDURE sp_GetRevenueByCashier
 AS
 BEGIN
     SET NOCOUNT ON;
+
     SELECT 
         CashierUsername,
         COUNT(OrderId) AS TotalOrders,
@@ -164,217 +148,202 @@ BEGIN
 END
 GO
 
+```
 
-Thực thi trong C#:
+## 🧪 5. Hướng dẫn kiểm tra và đối soát hệ thống (Test Guide)
 
-using (SqlCommand command = new SqlCommand("sp_GetRevenueByCashier", connection))
+Khởi chạy đồng thời hoặc độc lập dự án Web API từ Visual Studio (**F5** hoặc **Ctrl + F5**). Trình duyệt sẽ mở giao diện Swagger UI tại đường dẫn: `https://localhost:7xxx/swagger/index.html`.
+
+### Cách 1: Kiểm thử trực tiếp qua Swagger UI
+
+#### 1. Tra cứu thông tin sản phẩm bằng Barcode (Connected Mode - `SqlDataReader`)
+
+* **Endpoint:** `GET /api/ado-products/barcode/8930000001010`
+
+* **Mô tả:** Quét mã vạch nông sản **Cải bó xôi hữu cơ Farm** (ID: 101, Giá: 35.000đ).
+
+* **Kết quả kỳ vọng (Status 200 OK):**
+
+```
 {
-    command.CommandType = CommandType.StoredProcedure; // Bắt buộc
-    connection.Open();
-    using (SqlDataReader reader = command.ExecuteReader())
+  "productId": 101,
+  "barcode": "8930000001010",
+  "productName": "Cải bó xôi hữu cơ Farm",
+  "price": 35000,
+  "stockQuantity": 80
+}
+
+```
+
+#### 2. Tải danh sách bộ đệm ngoại tuyến (Disconnected Mode - `DataTable` & `SqlDataAdapter`)
+
+* **Endpoint:** `GET /api/ado-products/disconnected-cache`
+
+* **Mô tả:** Lấy toàn bộ 15 sản phẩm đại diện đã nạp vào bộ nhớ RAM ngắt kết nối.
+
+* **Kết quả kỳ vọng (Status 200 OK):**
+
+```
+{
+  "totalLoaded": 15,
+  "cachedAt": "2026-10-22 15:30:00",
+  "data": [
     {
-        while (reader.Read())
-        {
-            reportList.Add(new CashierRevenueDto {
-                CashierUsername = reader["CashierUsername"].ToString()!,
-                TotalOrders = Convert.ToInt32(reader["TotalOrders"]),
-                TotalRevenue = Convert.ToDecimal(reader["TotalRevenue"]),
-                TotalPointsAwarded = reader["TotalPointsAwarded"] != DBNull.Value 
-                    ? Convert.ToInt32(reader["TotalPointsAwarded"]) : 0
-            });
-        }
+      "productId": 101,
+      "barcode": "8930000001010",
+      "productName": "Cải bó xôi hữu cơ Farm",
+      "price": 35000,
+      "stockQuantity": 80
+    },
+    {
+      "productId": 201,
+      "barcode": "8930000002017",
+      "productName": "Cà rốt giống củ bản địa",
+      "price": 38000,
+      "stockQuantity": 100
     }
+  ]
 }
 
+```
 
-3.5. Quy trình POS Checkout bọc kín trong SqlTransaction (ACID)
+#### 3. Báo cáo doanh thu ca theo thu ngân (`Stored Procedure`)
 
-[ Client gửi CheckoutRequestDto ]
-               │
-               ▼
-   [ connection.BeginTransaction() ]
-               │
-   ┌───────────┴─────────────────────────────────────────────┐
-   │ BƯỚC 1: INSERT INTO Orders (Lấy OUTPUT INSERTED.OrderId)│
-   │                                                         │
-   │ BƯỚC 2: Duyệt từng sản phẩm trong giỏ:                  │
-   │         ├── SELECT StockQuantity (Kiểm tra tồn kho)     │
-   │         │   └── Tồn kho < Mua? ──► THROW EXCEPTION ──┐  │
-   │         ├── INSERT INTO OrderDetails                 │  │
-   │         └── UPDATE Products (Trừ tồn kho)            │  │
-   │                                                      │  │
-   │ BƯỚC 3: UPDATE Customers (Cộng điểm tích lũy)        │  │
-   └───────────────────────────┬─────────────────────────────┘  │
-                               │ Tất cả thành công              │ Lỗi
-                               ▼                                ▼
-                     [ transaction.Commit() ]          [ transaction.Rollback() ]
-                               │                                │
-                     HTTP 200 OK (Thành công)          HTTP 400 (Dữ liệu vẹn nguyên)
+* **Endpoint:** `GET /api/reports/revenue-by-cashier`
 
+* **Mô tả:** Thực thi thủ tục lưu trữ `sp_GetRevenueByCashier` để tổng hợp doanh thu theo 5 tài khoản thu ngân (`cashier01` $\rightarrow$ `cashier05`) từ 15 hóa đơn bán hàng có sẵn.
 
-🚀 4. Hướng dẫn cài đặt & Triển khai
+* **Kết quả kỳ vọng (Status 200 OK):**
 
-Bước 1: Chuẩn bị cơ sở dữ liệu
-
-Mở SQL Server Management Studio (SSMS).
-
-Đảm bảo database MiniSupermarketDb đã tồn tại dữ liệu mẫu.
-
-Mở tab truy vấn mới, dán đoạn script tạo procedure sp_GetRevenueByCashier và nhấn Execute (F5).
-
-Bước 2: Cấu hình Connection String
-
-Mở file MiniSupermarket.API/appsettings.json:
-
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Database=MiniSupermarketDb;Trusted_Connection=True;TrustServerCertificate=True;"
-  }
-}
-
-
-(Nếu dùng SQL Server Express cục bộ, thay đổi Server=localhost thành Server=.\\SQLEXPRESS).
-
-Bước 3: Chạy ứng dụng
-
-Chạy Web API: Trong Visual Studio, chọn MiniSupermarket.API làm Startup Project và bấm F5. Truy cập Swagger tại https://localhost:7xxx/swagger/index.html.
-
-Chạy WinForms POS: Đặt Startup Project là MiniSupermarket.WinForm và khởi chạy để kiểm tra giao diện bán hàng máy trạm.
-
-🧪 5. Tài liệu API & Kịch bản kiểm thử (Test Cases)
-
-Test Case 1: Tra cứu Barcode hợp lệ
-
-Method: GET
-
-URL: /api/ado-products/barcode/893456789001
-
-Response 200 OK:
-
-{
-  "productId": 1,
-  "barcode": "893456789001",
-  "productName": "Snack Khoai Tây O'Star Gói 60g",
-  "price": 12500,
-  "stockQuantity": 150
-}
-
-
-Test Case 2: Báo cáo doanh thu ca (Stored Procedure)
-
-Method: GET
-
-URL: /api/reports/revenue-by-cashier
-
-Response 200 OK:
-
+```
 {
   "success": true,
+  "generatedAt": "2026-10-22 15:31:10",
   "totalCashiers": 5,
-  "grandTotalRevenue": 4822000.0,
+  "grandTotalRevenue": 4822000.00,
   "data": [
     {
       "cashierUsername": "cashier03",
       "totalOrders": 2,
-      "totalRevenue": 1435000.0,
+      "totalRevenue": 1435000.00,
       "totalPointsAwarded": 143
+    },
+    {
+      "cashierUsername": "cashier05",
+      "totalOrders": 3,
+      "totalRevenue": 1328000.00,
+      "totalPointsAwarded": 132
+    },
+    {
+      "cashierUsername": "cashier01",
+      "totalOrders": 4,
+      "totalRevenue": 1322000.00,
+      "totalPointsAwarded": 131
+    },
+    {
+      "cashierUsername": "cashier04",
+      "totalOrders": 3,
+      "totalRevenue": 484000.00,
+      "totalPointsAwarded": 48
+    },
+    {
+      "cashierUsername": "cashier02",
+      "totalOrders": 3,
+      "totalRevenue": 253000.00,
+      "totalPointsAwarded": 24
     }
   ]
 }
 
+```
 
-Test Case 3: Thanh toán giỏ hàng hợp lệ (Commit)
+#### 4. Kịch bản thanh toán thành công (Transaction Commit)
 
-Method: POST
+* **Endpoint:** `POST /api/checkout`
 
-URL: /api/checkout
+* **Mô tả:** Mua 2 bó **Cải bó xôi hữu cơ Farm** (ID: 101, tồn kho ban đầu 80) và 1 kg **Cá lăng sinh thái sông Đà** (ID: 601, tồn kho ban đầu 30).
 
-Request Body:
+* **Request Body:**
 
+```
 {
   "cashierUsername": "cashier01",
   "customerId": 1,
   "items": [
-    {
-      "productId": 1,
-      "quantity": 2,
-      "unitPrice": 12500
-    },
-    {
-      "productId": 5,
-      "quantity": 3,
-      "unitPrice": 10000
-    }
+    { "productId": 101, "quantity": 2, "unitPrice": 35000 },
+    { "productId": 601, "quantity": 1, "unitPrice": 195000 }
   ]
 }
 
+```
 
-Response 200 OK:
+* **Kết quả kỳ vọng (Status 200 OK):**
 
-{
-  "success": true,
-  "message": "Thanh toán hóa đơn POS thành công!",
-  "orderId": 16,
-  "orderCode": "HD-20261022-A1B2",
-  "totalItems": 5,
-  "finalAmount": 55000.0,
-  "rewardPointsAdded": 5
-}
+  * Hệ thống tính tổng tiền $2 \times 35.000 + 1 \times 195.000 = 265.000$ đ, tích $26$ điểm thưởng.
 
+  * Tồn kho SP 101 giảm còn **78**, SP 601 giảm còn **29**.
 
-Test Case 4: Mua hàng vượt tồn kho (Kiểm chứng Rollback ACID)
+  * Điểm thưởng khách hàng ID 1 được cộng dồn.
 
-Method: POST
+#### 5. Kịch bản thiếu kho - Kích hoạt hoàn tác (Transaction Rollback)
 
-URL: /api/checkout
+* **Endpoint:** `POST /api/checkout`
 
-Request Body (Đặt 999 đơn vị trong khi kho chỉ còn 40):
+* **Mô tả:** Mua 1 bó **Cải bó xôi hữu cơ Farm** (ID: 101) và cố tình mua **999 kg** **Cà rốt giống củ bản địa** (ID: 201, tồn kho chỉ có 100).
 
+* **Request Body:**
+
+```
 {
   "cashierUsername": "cashier01",
   "customerId": 1,
   "items": [
-    {
-      "productId": 1,
-      "quantity": 1,
-      "unitPrice": 12500
-    },
-    {
-      "productId": 2,
-      "quantity": 999,
-      "unitPrice": 135000
-    }
+    { "productId": 101, "quantity": 1, "unitPrice": 35000 },
+    { "productId": 201, "quantity": 999, "unitPrice": 38000 }
   ]
 }
 
+```
 
-Response 400 Bad Request:
+* **Kết quả kỳ vọng (Status 400 Bad Request):**
 
+```
 {
   "success": false,
   "message": "Giao dịch thanh toán bị hủy và đã được Rollback an toàn!",
-  "errorDetail": "Sản phẩm 'Bánh Quy Bơ Danisa Hộp Thiếc 454g' (ID: 2) không đủ tồn kho! (Tồn kho thực tế: 40, Số lượng yêu cầu mua: 999)"
+  "errorDetail": "Sản phẩm 'Cà rốt giống củ bản địa' (ID: 201) không đủ tồn kho! (Tồn kho thực tế: 100, Số lượng yêu cầu mua: 999)"
 }
 
+```
 
-Kiểm tra đối soát SSMS:
+* **Đối soát thực tế trên SQL Server (Chứng minh chuẩn ACID):**
 
-SELECT TOP 1 * FROM Orders ORDER BY OrderId DESC; $\rightarrow$ Không có đơn rác nào được sinh ra.
+  * Tồn kho của sản phẩm ID 101 **vẫn giữ nguyên 78**, không bị trừ 1 bó dù đứng trước sản phẩm lỗi.
 
-Tồn kho của sản phẩm ID 1 không hề bị trừ đi 1 đơn vị. Toàn bộ phiên quay về nguyên trạng ban đầu.
+  * Không có bản ghi hóa đơn rác nào được chèn vào bảng `Orders` hay `OrderDetails`.
 
-🎯 6. Bảng kiểm tra nghiệm thu (Checklist)
+### Cách 2: Kiểm thử trên ứng dụng máy trạm Windows Forms (`MiniSupermarket.WinForm`)
 
-[x] Sử dụng using bọc kín SqlConnection, phòng ngừa rò rỉ Connection Pool.
+1. Đặt startup project là **MiniSupermarket.WinForm** (hoặc cấu hình Multiple Startup Projects chạy cả API và WinForm).
 
-[x] Sử dụng SqlParameter cho toàn bộ tham số, chống lỗ hổng SQL Injection.
+2. Đăng nhập bằng tài khoản thu ngân (ví dụ: `cashier01`).
 
-[x] Endpoint Tra cứu mã vạch sử dụng SqlDataReader phản hồi nhanh dưới 100ms.
+3. Mở màn hình **FormPOS**:
 
-[x] Tạo và ánh xạ thành công kết quả từ Stored Procedure sp_GetRevenueByCashier.
+   * Nhập mã vạch `8930000001010` và nhấn **Enter** $\rightarrow$ Dữ liệu sản phẩm Cải bó xôi hữu cơ hiển thị lập tức lên danh sách mua hàng.
 
-[x] API Checkout sử dụng SqlTransaction điều phối đủ 4 bước (Order, OrderDetails, Stock, Points).
+   * Thử nghiệm bấm nút **Thanh toán** để kích hoạt luồng gọi Web API transaction khép kín.
 
-[x] Kịch bản Rollback hoạt động hoàn hảo khi phát sinh ngoại lệ thiếu hàng trong kho.
+4. Mở màn hình **FormQuickReport** để xem dữ liệu doanh thu tự động load từ Stored Procedure.
 
-[x] (Nâng cao) Bổ sung API Hủy đơn hàng và hoàn trả tồn kho tự động trong 1 Transaction.
+## 🛡️ 6. Tổng kết kiến thức kỹ thuật đạt được
+
+* \[x\] **ADO.NET Cơ bản:** Quản lý vòng đời kết nối với `using(SqlConnection)`, phân định chính xác `ExecuteScalar()`, `ExecuteNonQuery()`, `ExecuteReader()`.
+
+* \[x\] **Chống SQL Injection:** Tuyệt đối không cộng chuỗi SQL, tham số hóa toàn diện với `SqlParameter`.
+
+* \[x\] **Connected vs Disconnected:** Nắm vững sự khác biệt giữa stream đọc nhanh một chiều `SqlDataReader` và bảng dữ liệu RAM ngoại tuyến `DataTable`/`SqlDataAdapter`.
+
+* \[x\] **Tối ưu Stored Procedure:** Giảm phân tích cú pháp SQL lặp lại, tối ưu băng thông và bảo mật tầng dữ liệu.
+
+* \[x\] **Toàn vẹn giao dịch ACID:** Kiểm soát luồng ghi dữ liệu phức tạp nhiều bảng bằng `SqlTransaction` (`BeginTransaction`, `Commit`, `Rollback`).
