@@ -47,92 +47,92 @@ namespace MiniSupermarket.API.Migrations
                         new
                         {
                             CategoryId = 1,
-                            CategoryName = "Rau củ quả hữu cơ",
-                            Description = "Rau xanh, củ quả sạch đạt chuẩn Organic, thu hoạch trong ngày"
+                            CategoryName = "Rau lá hữu cơ Farm",
+                            Description = "Rau ăn lá canh tác hữu cơ theo mùa, thu hoạch trực tiếp tại vườn mỗi sớm"
                         },
                         new
                         {
                             CategoryId = 2,
-                            CategoryName = "Trái cây tươi",
-                            Description = "Trái cây nội địa và nhập khẩu tươi ngon, không hóa chất bảo quản"
+                            CategoryName = "Củ quả tươi sạch",
+                            Description = "Củ quả sạch tự nhiên, không tồn dư thuốc BVTV và phân bón hóa học"
                         },
                         new
                         {
                             CategoryId = 3,
-                            CategoryName = "Thịt & Thủy hải sản",
-                            Description = "Thịt heo sạch, bò thả rông, cá tươi sống đánh bắt tự nhiên"
+                            CategoryName = "Trái cây vườn sinh thái",
+                            Description = "Trái cây chín tự nhiên, không chất kích thích tăng trưởng và hóa chất bảo quản"
                         },
                         new
                         {
                             CategoryId = 4,
-                            CategoryName = "Thực phẩm khô & Hạt",
-                            Description = "Các loại hạt dinh dưỡng, ngũ cốc nguyên cám, gạo lứt"
+                            CategoryName = "Nấm tươi & Nấm ăn hữu cơ",
+                            Description = "Các loại nấm tươi trồng trên giá thể mùn cưa và rơm sạch tiêu chuẩn Organic"
                         },
                         new
                         {
                             CategoryId = 5,
-                            CategoryName = "Sữa & Sản phẩm từ sữa",
-                            Description = "Sữa tươi thanh trùng, sữa chua hữu cơ, bơ phô mai tự nhiên"
+                            CategoryName = "Thịt sạch chăn thả tự nhiên",
+                            Description = "Thịt heo, gà, bò thả đồi/thảo mộc, ăn thức ăn tự nhiên, không chất tạo nạc"
                         },
                         new
                         {
                             CategoryId = 6,
-                            CategoryName = "Đồ uống & Trà thảo mộc",
-                            Description = "Trà hoa cúc, mật ong rừng nguyên chất, nước ép trái cây tươi"
+                            CategoryName = "Thủy hải sản sinh thái",
+                            Description = "Cá, tôm sinh thái nuôi đầm tự nhiên hoặc đánh bắt bền vững"
                         },
                         new
                         {
                             CategoryId = 7,
-                            CategoryName = "Gia vị & Dầu ăn hữu cơ",
-                            Description = "Dầu ô liu, nước mắm truyền thống, hạt nêm hữu cơ, muối thảo dược"
+                            CategoryName = "Trứng gia cầm thả vườn",
+                            Description = "Trứng gà ta, trứng vịt cỏ thả vườn tự nhiên, giàu đạm và không kháng sinh"
                         },
                         new
                         {
                             CategoryId = 8,
-                            CategoryName = "Thực phẩm chay & Dinh dưỡng",
-                            Description = "Thực phẩm chay sạch, đạm thực vật, bột dinh dưỡng các loại"
+                            CategoryName = "Sữa tươi thanh trùng & Sữa hạt",
+                            Description = "Sữa bò tươi nguyên chất từ trang trại và các loại sữa hạt nấu thủ công"
                         },
                         new
                         {
                             CategoryId = 9,
-                            CategoryName = "Thực phẩm chế biến sẵn sạch",
-                            Description = "Đồ ăn vặt hữu cơ, bánh kẹo healthy, thực phẩm đóng hộp không phụ gia"
+                            CategoryName = "Gạo sạch & Nông sản ngũ cốc",
+                            Description = "Gạo lứt, lúa rươi, nếp nương và các loại đậu hạt nguyên bản không tẩy trắng"
                         },
                         new
                         {
                             CategoryId = 10,
-                            CategoryName = "Mẹ và Bé (Sản phẩm hữu cơ)",
-                            Description = "Thực phẩm ăn dặm, sữa hạt, sản phẩm chăm sóc an toàn cho bé"
+                            CategoryName = "Mật ong rừng & Dược liệu vườn",
+                            Description = "Mật ong tự nhiên, thảo mộc sấy lạnh, nghệ, gừng sẻ từ vùng đệm sinh thái"
                         },
                         new
                         {
                             CategoryId = 11,
-                            CategoryName = "Thảo dược & Đông dược",
-                            Description = "Các loại sâm, nấm linh chi, thảo mộc bồi bổ sức khỏe tự nhiên"
+                            CategoryName = "Gia vị & Nước mắm thủ công",
+                            Description = "Nước mắm ủ chượp truyền thống, muối hầm, tiêu rừng, tương ủ tự nhiên"
                         },
                         new
                         {
                             CategoryId = 12,
-                            CategoryName = "Trứng gia cầm sạch",
-                            Description = "Trứng gà ta, trứng gà ác, trứng vịt thả vườn không chất tăng trọng"
+                            CategoryName = "Dầu ép lạnh nguyên chất",
+                            Description = "Dầu mè, dầu phộng, dầu sacha inchi ép cơ học không tinh luyện"
                         },
                         new
                         {
                             CategoryId = 13,
-                            CategoryName = "Bánh mì & Ngũ cốc tươi",
-                            Description = "Bánh mì nguyên cám, bánh ngọt healthy làm từ bột mì hữu cơ"
+                            CategoryName = "Rau củ sấy & Trà thảo mộc Farm",
+                            Description = "Rau củ quả sấy thăng hoa giữ trọn khoáng chất, trà hoa thảo mộc sấy mộc"
                         },
                         new
                         {
                             CategoryId = 14,
-                            CategoryName = "Sản phẩm chăm sóc cá nhân Organic",
-                            Description = "Mỹ phẩm thiên nhiên, dầu gội, sữa tắm hữu cơ an toàn cho da"
+                            CategoryName = "Thực phẩm lên men tự nhiên",
+                            Description = "Dưa cải chua men tự nhiên, kim chi hữu cơ, giấm táo thủ công không phụ gia"
                         },
                         new
                         {
                             CategoryId = 15,
-                            CategoryName = "Sản phẩm gia dụng thân thiện môi trường",
-                            Description = "Túi vải sinh học, ống hút tre, chất tẩy rửa hữu cơ lành tính"
+                            CategoryName = "Combo Nông Sản Tuần",
+                            Description = "Gói nông sản tiện lợi theo mùa được tuyển chọn tươi mới từ trang trại"
                         });
                 });
 
@@ -355,155 +355,155 @@ namespace MiniSupermarket.API.Migrations
                         new
                         {
                             OrderId = 1,
-                            AmountReceived = 250000m,
-                            ChangeAmount = 46000m,
+                            AmountReceived = 300000m,
+                            ChangeAmount = 35000m,
                             OrderDate = new DateTime(2026, 10, 1, 8, 30, 0, 0, DateTimeKind.Unspecified),
                             PaymentMethod = "Cash",
                             Status = "Completed",
-                            TotalAmount = 204000m,
+                            TotalAmount = 265000m,
                             UserId = 3
                         },
                         new
                         {
                             OrderId = 2,
-                            AmountReceived = 360000m,
+                            AmountReceived = 326000m,
                             ChangeAmount = 0m,
                             OrderDate = new DateTime(2026, 10, 1, 9, 15, 0, 0, DateTimeKind.Unspecified),
                             PaymentMethod = "Transfer",
                             Status = "Completed",
-                            TotalAmount = 360000m,
+                            TotalAmount = 326000m,
                             UserId = 4
                         },
                         new
                         {
                             OrderId = 3,
-                            AmountReceived = 600000m,
-                            ChangeAmount = 20000m,
+                            AmountReceived = 500000m,
+                            ChangeAmount = 80000m,
                             OrderDate = new DateTime(2026, 10, 2, 10, 20, 0, 0, DateTimeKind.Unspecified),
                             PaymentMethod = "Cash",
                             Status = "Completed",
-                            TotalAmount = 580000m,
+                            TotalAmount = 420000m,
                             UserId = 5
                         },
                         new
                         {
                             OrderId = 4,
-                            AmountReceived = 200000m,
-                            ChangeAmount = 40000m,
+                            AmountReceived = 150000m,
+                            ChangeAmount = 18000m,
                             OrderDate = new DateTime(2026, 10, 2, 11, 45, 0, 0, DateTimeKind.Unspecified),
                             PaymentMethod = "Cash",
                             Status = "Completed",
-                            TotalAmount = 160000m,
+                            TotalAmount = 132000m,
                             UserId = 6
                         },
                         new
                         {
                             OrderId = 5,
-                            AmountReceived = 425000m,
+                            AmountReceived = 181000m,
                             ChangeAmount = 0m,
                             OrderDate = new DateTime(2026, 10, 3, 13, 10, 0, 0, DateTimeKind.Unspecified),
                             PaymentMethod = "Transfer",
                             Status = "Completed",
-                            TotalAmount = 425000m,
+                            TotalAmount = 181000m,
                             UserId = 7
                         },
                         new
                         {
                             OrderId = 6,
-                            AmountReceived = 100000m,
-                            ChangeAmount = 10000m,
+                            AmountReceived = 150000m,
+                            ChangeAmount = 8000m,
                             OrderDate = new DateTime(2026, 10, 3, 14, 25, 0, 0, DateTimeKind.Unspecified),
                             PaymentMethod = "Cash",
                             Status = "Completed",
-                            TotalAmount = 90000m,
+                            TotalAmount = 142000m,
                             UserId = 3
                         },
                         new
                         {
                             OrderId = 7,
-                            AmountReceived = 630000m,
+                            AmountReceived = 475000m,
                             ChangeAmount = 0m,
                             OrderDate = new DateTime(2026, 10, 4, 8, 40, 0, 0, DateTimeKind.Unspecified),
                             PaymentMethod = "Transfer",
                             Status = "Completed",
-                            TotalAmount = 630000m,
+                            TotalAmount = 475000m,
                             UserId = 4
                         },
                         new
                         {
                             OrderId = 8,
                             AmountReceived = 300000m,
-                            ChangeAmount = 55000m,
+                            ChangeAmount = 49000m,
                             OrderDate = new DateTime(2026, 10, 4, 15, 30, 0, 0, DateTimeKind.Unspecified),
                             PaymentMethod = "Cash",
                             Status = "Completed",
-                            TotalAmount = 245000m,
+                            TotalAmount = 251000m,
                             UserId = 5
                         },
                         new
                         {
                             OrderId = 9,
-                            AmountReceived = 320000m,
+                            AmountReceived = 334000m,
                             ChangeAmount = 0m,
                             OrderDate = new DateTime(2026, 10, 5, 9, 5, 0, 0, DateTimeKind.Unspecified),
                             PaymentMethod = "Transfer",
                             Status = "Completed",
-                            TotalAmount = 320000m,
+                            TotalAmount = 334000m,
                             UserId = 6
                         },
                         new
                         {
                             OrderId = 10,
-                            AmountReceived = 150000m,
-                            ChangeAmount = 12000m,
+                            AmountReceived = 350000m,
+                            ChangeAmount = 45000m,
                             OrderDate = new DateTime(2026, 10, 5, 10, 50, 0, 0, DateTimeKind.Unspecified),
                             PaymentMethod = "Cash",
                             Status = "Completed",
-                            TotalAmount = 138000m,
+                            TotalAmount = 305000m,
                             UserId = 7
                         },
                         new
                         {
                             OrderId = 11,
-                            AmountReceived = 870000m,
+                            AmountReceived = 685000m,
                             ChangeAmount = 0m,
                             OrderDate = new DateTime(2026, 10, 6, 12, 15, 0, 0, DateTimeKind.Unspecified),
                             PaymentMethod = "Transfer",
                             Status = "Completed",
-                            TotalAmount = 870000m,
+                            TotalAmount = 685000m,
                             UserId = 3
                         },
                         new
                         {
                             OrderId = 12,
                             AmountReceived = 300000m,
-                            ChangeAmount = 50000m,
+                            ChangeAmount = 18000m,
                             OrderDate = new DateTime(2026, 10, 7, 16, 20, 0, 0, DateTimeKind.Unspecified),
                             PaymentMethod = "Cash",
                             Status = "Completed",
-                            TotalAmount = 250000m,
+                            TotalAmount = 282000m,
                             UserId = 4
                         },
                         new
                         {
                             OrderId = 13,
-                            AmountReceived = 465000m,
+                            AmountReceived = 296000m,
                             ChangeAmount = 0m,
                             OrderDate = new DateTime(2026, 10, 8, 9, 35, 0, 0, DateTimeKind.Unspecified),
                             PaymentMethod = "Transfer",
                             Status = "Completed",
-                            TotalAmount = 465000m,
+                            TotalAmount = 296000m,
                             UserId = 5
                         },
                         new
                         {
                             OrderId = 14,
-                            AmountReceived = 150000m,
-                            ChangeAmount = 37000m,
+                            AmountReceived = 100000m,
+                            ChangeAmount = 13000m,
                             OrderDate = new DateTime(2026, 10, 9, 14, 45, 0, 0, DateTimeKind.Unspecified),
                             PaymentMethod = "Cash",
                             Status = "Completed",
-                            TotalAmount = 113000m,
+                            TotalAmount = 87000m,
                             UserId = 6
                         },
                         new
@@ -514,7 +514,7 @@ namespace MiniSupermarket.API.Migrations
                             OrderDate = new DateTime(2026, 10, 10, 17, 10, 0, 0, DateTimeKind.Unspecified),
                             PaymentMethod = "Cash",
                             Status = "Cancelled",
-                            TotalAmount = 500000m,
+                            TotalAmount = 340000m,
                             UserId = 7
                         });
                 });
@@ -555,28 +555,28 @@ namespace MiniSupermarket.API.Migrations
                         {
                             OrderDetailId = 1,
                             OrderId = 1,
-                            ProductId = 104,
+                            ProductId = 101,
                             Quantity = 2,
-                            SubTotal = 84000m,
-                            UnitPrice = 42000m
+                            SubTotal = 70000m,
+                            UnitPrice = 35000m
                         },
                         new
                         {
                             OrderDetailId = 2,
                             OrderId = 1,
-                            ProductId = 603,
+                            ProductId = 601,
                             Quantity = 1,
-                            SubTotal = 45000m,
-                            UnitPrice = 45000m
+                            SubTotal = 195000m,
+                            UnitPrice = 195000m
                         },
                         new
                         {
                             OrderDetailId = 3,
                             OrderId = 2,
-                            ProductId = 204,
+                            ProductId = 201,
                             Quantity = 2,
-                            SubTotal = 240000m,
-                            UnitPrice = 120000m
+                            SubTotal = 76000m,
+                            UnitPrice = 38000m
                         },
                         new
                         {
@@ -584,44 +584,44 @@ namespace MiniSupermarket.API.Migrations
                             OrderId = 2,
                             ProductId = 901,
                             Quantity = 2,
-                            SubTotal = 130000m,
-                            UnitPrice = 65000m
+                            SubTotal = 250000m,
+                            UnitPrice = 125000m
                         },
                         new
                         {
                             OrderDetailId = 5,
                             OrderId = 3,
-                            ProductId = 304,
-                            Quantity = 1,
-                            SubTotal = 290000m,
-                            UnitPrice = 290000m
+                            ProductId = 301,
+                            Quantity = 2,
+                            SubTotal = 90000m,
+                            UnitPrice = 45000m
                         },
                         new
                         {
                             OrderDetailId = 6,
                             OrderId = 3,
-                            ProductId = 503,
+                            ProductId = 501,
                             Quantity = 2,
-                            SubTotal = 170000m,
-                            UnitPrice = 85000m
+                            SubTotal = 330000m,
+                            UnitPrice = 165000m
                         },
                         new
                         {
                             OrderDetailId = 7,
                             OrderId = 4,
-                            ProductId = 403,
-                            Quantity = 1,
-                            SubTotal = 160000m,
-                            UnitPrice = 160000m
+                            ProductId = 401,
+                            Quantity = 2,
+                            SubTotal = 84000m,
+                            UnitPrice = 42000m
                         },
                         new
                         {
                             OrderDetailId = 8,
                             OrderId = 4,
-                            ProductId = 603,
-                            Quantity = 0,
-                            SubTotal = 0m,
-                            UnitPrice = 45000m
+                            ProductId = 701,
+                            Quantity = 1,
+                            SubTotal = 48000m,
+                            UnitPrice = 48000m
                         },
                         new
                         {
@@ -629,8 +629,8 @@ namespace MiniSupermarket.API.Migrations
                             OrderId = 5,
                             ProductId = 701,
                             Quantity = 2,
-                            SubTotal = 420000m,
-                            UnitPrice = 210000m
+                            SubTotal = 96000m,
+                            UnitPrice = 48000m
                         },
                         new
                         {
@@ -638,44 +638,44 @@ namespace MiniSupermarket.API.Migrations
                             OrderId = 5,
                             ProductId = 1301,
                             Quantity = 1,
-                            SubTotal = 38000m,
-                            UnitPrice = 38000m
+                            SubTotal = 85000m,
+                            UnitPrice = 85000m
                         },
                         new
                         {
                             OrderDetailId = 11,
                             OrderId = 6,
                             ProductId = 1201,
-                            Quantity = 2,
-                            SubTotal = 90000m,
-                            UnitPrice = 45000m
+                            Quantity = 1,
+                            SubTotal = 110000m,
+                            UnitPrice = 110000m
                         },
                         new
                         {
                             OrderDetailId = 12,
                             OrderId = 6,
-                            ProductId = 1501,
-                            Quantity = 0,
-                            SubTotal = 0m,
-                            UnitPrice = 25000m
+                            ProductId = 1401,
+                            Quantity = 1,
+                            SubTotal = 32000m,
+                            UnitPrice = 32000m
                         },
                         new
                         {
                             OrderDetailId = 13,
                             OrderId = 7,
-                            ProductId = 304,
+                            ProductId = 1001,
                             Quantity = 2,
-                            SubTotal = 580000m,
-                            UnitPrice = 290000m
+                            SubTotal = 440000m,
+                            UnitPrice = 220000m
                         },
                         new
                         {
                             OrderDetailId = 14,
                             OrderId = 7,
-                            ProductId = 104,
+                            ProductId = 101,
                             Quantity = 1,
-                            SubTotal = 42000m,
-                            UnitPrice = 42000m
+                            SubTotal = 35000m,
+                            UnitPrice = 35000m
                         },
                         new
                         {
@@ -683,35 +683,35 @@ namespace MiniSupermarket.API.Migrations
                             OrderId = 8,
                             ProductId = 801,
                             Quantity = 3,
-                            SubTotal = 165000m,
-                            UnitPrice = 55000m
+                            SubTotal = 156000m,
+                            UnitPrice = 52000m
                         },
                         new
                         {
                             OrderDetailId = 16,
                             OrderId = 8,
-                            ProductId = 603,
+                            ProductId = 1101,
                             Quantity = 1,
-                            SubTotal = 45000m,
-                            UnitPrice = 45000m
+                            SubTotal = 95000m,
+                            UnitPrice = 95000m
                         },
                         new
                         {
                             OrderDetailId = 17,
                             OrderId = 9,
-                            ProductId = 403,
+                            ProductId = 401,
                             Quantity = 2,
-                            SubTotal = 320000m,
-                            UnitPrice = 160000m
+                            SubTotal = 84000m,
+                            UnitPrice = 42000m
                         },
                         new
                         {
                             OrderDetailId = 18,
                             OrderId = 9,
                             ProductId = 1501,
-                            Quantity = 0,
-                            SubTotal = 0m,
-                            UnitPrice = 25000m
+                            Quantity = 1,
+                            SubTotal = 250000m,
+                            UnitPrice = 250000m
                         },
                         new
                         {
@@ -719,26 +719,26 @@ namespace MiniSupermarket.API.Migrations
                             OrderId = 10,
                             ProductId = 1301,
                             Quantity = 1,
-                            SubTotal = 38000m,
-                            UnitPrice = 38000m
+                            SubTotal = 85000m,
+                            UnitPrice = 85000m
                         },
                         new
                         {
                             OrderDetailId = 20,
                             OrderId = 10,
                             ProductId = 1001,
-                            Quantity = 2,
-                            SubTotal = 96000m,
-                            UnitPrice = 48000m
+                            Quantity = 1,
+                            SubTotal = 220000m,
+                            UnitPrice = 220000m
                         },
                         new
                         {
                             OrderDetailId = 21,
                             OrderId = 11,
-                            ProductId = 701,
+                            ProductId = 501,
                             Quantity = 3,
-                            SubTotal = 630000m,
-                            UnitPrice = 210000m
+                            SubTotal = 495000m,
+                            UnitPrice = 165000m
                         },
                         new
                         {
@@ -746,8 +746,8 @@ namespace MiniSupermarket.API.Migrations
                             OrderId = 11,
                             ProductId = 1101,
                             Quantity = 2,
-                            SubTotal = 230000m,
-                            UnitPrice = 115000m
+                            SubTotal = 190000m,
+                            UnitPrice = 95000m
                         },
                         new
                         {
@@ -755,71 +755,71 @@ namespace MiniSupermarket.API.Migrations
                             OrderId = 12,
                             ProductId = 1401,
                             Quantity = 1,
-                            SubTotal = 180000m,
-                            UnitPrice = 180000m
+                            SubTotal = 32000m,
+                            UnitPrice = 32000m
                         },
                         new
                         {
                             OrderDetailId = 24,
                             OrderId = 12,
                             ProductId = 1501,
-                            Quantity = 2,
-                            SubTotal = 50000m,
-                            UnitPrice = 25000m
+                            Quantity = 1,
+                            SubTotal = 250000m,
+                            UnitPrice = 250000m
                         },
                         new
                         {
                             OrderDetailId = 25,
                             OrderId = 13,
-                            ProductId = 204,
+                            ProductId = 201,
                             Quantity = 2,
-                            SubTotal = 240000m,
-                            UnitPrice = 120000m
+                            SubTotal = 76000m,
+                            UnitPrice = 38000m
                         },
                         new
                         {
                             OrderDetailId = 26,
                             OrderId = 13,
-                            ProductId = 1101,
+                            ProductId = 1201,
                             Quantity = 2,
-                            SubTotal = 230000m,
-                            UnitPrice = 115000m
+                            SubTotal = 220000m,
+                            UnitPrice = 110000m
                         },
                         new
                         {
                             OrderDetailId = 27,
                             OrderId = 14,
-                            ProductId = 104,
+                            ProductId = 101,
                             Quantity = 1,
-                            SubTotal = 42000m,
-                            UnitPrice = 42000m
+                            SubTotal = 35000m,
+                            UnitPrice = 35000m
                         },
                         new
                         {
                             OrderDetailId = 28,
                             OrderId = 14,
-                            ProductId = 603,
+                            ProductId = 801,
                             Quantity = 1,
-                            SubTotal = 45000m,
-                            UnitPrice = 45000m
+                            SubTotal = 52000m,
+                            UnitPrice = 52000m
                         },
                         new
                         {
                             OrderDetailId = 29,
                             OrderId = 15,
-                            ProductId = 503,
+                            ProductId = 301,
                             Quantity = 2,
-                            SubTotal = 170000m,
-                            UnitPrice = 85000m
+                            SubTotal = 90000m,
+                            UnitPrice = 45000m
                         },
                         new
                         {
                             OrderDetailId = 30,
                             OrderId = 15,
-                            ProductId = 403,
-                            Quantity = 1,
-                            SubTotal = 160000m,
-                            UnitPrice = 160000m
+                            ProductId = 901,
+                            Quantity = 2,
+                            SubTotal = 250000m,
+                            UnitPrice = 125000m
                         });
                 });
 
@@ -863,153 +863,153 @@ namespace MiniSupermarket.API.Migrations
                     b.HasData(
                         new
                         {
-                            ProductId = 104,
-                            Barcode = "8930000001041",
+                            ProductId = 101,
+                            Barcode = "8930000001010",
                             CategoryId = 1,
-                            Price = 42000m,
-                            ProductName = "Bông cải xanh hữu cơ",
-                            StockQuantity = 75,
-                            Unit = "Kg"
+                            Price = 35000m,
+                            ProductName = "Cải bó xôi hữu cơ Farm",
+                            StockQuantity = 80,
+                            Unit = "Bó 500g"
                         },
                         new
                         {
-                            ProductId = 204,
-                            Barcode = "8930000002048",
+                            ProductId = 201,
+                            Barcode = "8930000002017",
                             CategoryId = 2,
-                            Price = 120000m,
-                            ProductName = "Dâu tây Đà Lạt sạch",
-                            StockQuantity = 40,
-                            Unit = "Hộp 500g"
-                        },
-                        new
-                        {
-                            ProductId = 304,
-                            Barcode = "8930000003045",
-                            CategoryId = 3,
-                            Price = 290000m,
-                            ProductName = "Tôm sú sinh thái tự nhiên",
-                            StockQuantity = 25,
+                            Price = 38000m,
+                            ProductName = "Cà rốt giống củ bản địa",
+                            StockQuantity = 100,
                             Unit = "Kg"
                         },
                         new
                         {
-                            ProductId = 403,
-                            Barcode = "8930000004039",
-                            CategoryId = 4,
-                            Price = 160000m,
-                            ProductName = "Hạt óc chó Mỹ tách vỏ",
-                            StockQuantity = 60,
-                            Unit = "Túi 300g"
-                        },
-                        new
-                        {
-                            ProductId = 503,
-                            Barcode = "8930000005036",
-                            CategoryId = 5,
-                            Price = 85000m,
-                            ProductName = "Phô mai tự nhiên hữu cơ",
-                            StockQuantity = 35,
-                            Unit = "Hộp 200g"
-                        },
-                        new
-                        {
-                            ProductId = 603,
-                            Barcode = "8930000006033",
-                            CategoryId = 6,
+                            ProductId = 301,
+                            Barcode = "8930000003014",
+                            CategoryId = 3,
                             Price = 45000m,
-                            ProductName = "Nước ép táo nguyên chất không đường",
+                            ProductName = "Ổi lê hữu cơ chín cây",
+                            StockQuantity = 60,
+                            Unit = "Kg"
+                        },
+                        new
+                        {
+                            ProductId = 401,
+                            Barcode = "8930000004011",
+                            CategoryId = 4,
+                            Price = 42000m,
+                            ProductName = "Nấm đùi gà tươi Organic",
                             StockQuantity = 50,
-                            Unit = "Chai 330ml"
+                            Unit = "Gói 250g"
+                        },
+                        new
+                        {
+                            ProductId = 501,
+                            Barcode = "8930000005018",
+                            CategoryId = 5,
+                            Price = 165000m,
+                            ProductName = "Thịt ba chỉ heo thảo mộc",
+                            StockQuantity = 40,
+                            Unit = "Khay 500g"
+                        },
+                        new
+                        {
+                            ProductId = 601,
+                            Barcode = "8930000006015",
+                            CategoryId = 6,
+                            Price = 195000m,
+                            ProductName = "Cá lăng sinh thái sông Đà",
+                            StockQuantity = 30,
+                            Unit = "Kg"
                         },
                         new
                         {
                             ProductId = 701,
-                            Barcode = "8930000007016",
+                            Barcode = "8930000007012",
                             CategoryId = 7,
-                            Price = 210000m,
-                            ProductName = "Dầu ô liu nguyên chất Extra Virgin",
-                            StockQuantity = 30,
-                            Unit = "Chai 500ml"
+                            Price = 48000m,
+                            ProductName = "Trứng gà ta thảo mộc tự nhiên",
+                            StockQuantity = 120,
+                            Unit = "Hộp 10 quả"
                         },
                         new
                         {
                             ProductId = 801,
-                            Barcode = "8930000008013",
+                            Barcode = "8930000008019",
                             CategoryId = 8,
-                            Price = 55000m,
-                            ProductName = "Sườn non thực vật hữu cơ",
-                            StockQuantity = 80,
-                            Unit = "Gói 200g"
+                            Price = 52000m,
+                            ProductName = "Sữa bò tươi thanh trùng Organic",
+                            StockQuantity = 45,
+                            Unit = "Chai 900ml"
                         },
                         new
                         {
                             ProductId = 901,
-                            Barcode = "8930000009010",
+                            Barcode = "8930000009016",
                             CategoryId = 9,
-                            Price = 65000m,
-                            ProductName = "Bánh quy yến mạch nguyên cám",
-                            StockQuantity = 90,
-                            Unit = "Hộp 150g"
+                            Price = 125000m,
+                            ProductName = "Gạo ST25 hữu cơ ruộng rươi",
+                            StockQuantity = 70,
+                            Unit = "Túi 2kg"
                         },
                         new
                         {
                             ProductId = 1001,
-                            Barcode = "8930000010014",
+                            Barcode = "8930000010013",
                             CategoryId = 10,
-                            Price = 48000m,
-                            ProductName = "Bánh ăn dặm hữu cơ vị gạo lứt",
-                            StockQuantity = 65,
-                            Unit = "Hộp 50g"
+                            Price = 220000m,
+                            ProductName = "Mật ong hoa rừng nguyên chất",
+                            StockQuantity = 35,
+                            Unit = "Hũ 500ml"
                         },
                         new
                         {
                             ProductId = 1101,
-                            Barcode = "8930000011011",
+                            Barcode = "8930000011010",
                             CategoryId = 11,
-                            Price = 115000m,
-                            ProductName = "Nấm đông cô khô hữu cơ",
-                            StockQuantity = 45,
-                            Unit = "Túi 100g"
+                            Price = 95000m,
+                            ProductName = "Nước mắm truyền thống cá cơm 40N",
+                            StockQuantity = 50,
+                            Unit = "Chai 500ml"
                         },
                         new
                         {
                             ProductId = 1201,
-                            Barcode = "8930000012018",
+                            Barcode = "8930000012017",
                             CategoryId = 12,
-                            Price = 45000m,
-                            ProductName = "Trứng gà ta thả vườn hữu cơ",
-                            StockQuantity = 100,
-                            Unit = "Vỉ 10 quả"
+                            Price = 110000m,
+                            ProductName = "Dầu mè vàng ép lạnh thủ công",
+                            StockQuantity = 40,
+                            Unit = "Chai 250ml"
                         },
                         new
                         {
                             ProductId = 1301,
-                            Barcode = "8930000013015",
+                            Barcode = "8930000013014",
                             CategoryId = 13,
-                            Price = 38000m,
-                            ProductName = "Bánh mì sandwich nguyên cám",
-                            StockQuantity = 40,
-                            Unit = "Túi 350g"
+                            Price = 85000m,
+                            ProductName = "Trà hoa cúc sấy lạnh tự nhiên",
+                            StockQuantity = 55,
+                            Unit = "Hũ 80g"
                         },
                         new
                         {
                             ProductId = 1401,
-                            Barcode = "8930000014012",
+                            Barcode = "8930000014011",
                             CategoryId = 14,
-                            Price = 180000m,
-                            ProductName = "Dầu gội bồ kết thảo dược thiên nhiên",
-                            StockQuantity = 20,
-                            Unit = "Chai 400ml"
+                            Price = 32000m,
+                            ProductName = "Dưa cải củ lên men tự nhiên",
+                            StockQuantity = 60,
+                            Unit = "Hũ 450g"
                         },
                         new
                         {
                             ProductId = 1501,
-                            Barcode = "8930000015019",
+                            Barcode = "8930000015018",
                             CategoryId = 15,
-                            Price = 25000m,
-                            ProductName = "Túi lưới đựng rau củ tái sử dụng",
-                            StockQuantity = 150,
-                            Unit = "Set 3 cái"
+                            Price = 250000m,
+                            ProductName = "Combo Rau Củ Xanh Dinh Dưỡng Tuần",
+                            StockQuantity = 20,
+                            Unit = "Set 5kg"
                         });
                 });
 

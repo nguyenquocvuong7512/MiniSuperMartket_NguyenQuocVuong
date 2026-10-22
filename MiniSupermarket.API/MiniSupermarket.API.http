@@ -1,6 +1,97 @@
 @MiniSupermarket.API_HostAddress = http://localhost:5000
 
+### WeatherForecast
 GET {{MiniSupermarket.API_HostAddress}}/weatherforecast/
 Accept: application/json
 
-###
+### =========================================================
+### BUỔI 5 - TIẾT 2: ADO.NET TRA CỨU BARCODE & DATATABLE (DỮ LIỆU /Data)
+### =========================================================
+
+### 1. Tra cứu mã vạch có thật trong /Data (Bông cải xanh hữu cơ - ID 104)
+GET {{MiniSupermarket.API_HostAddress}}/api/ado-products/barcode/8930000001041
+Accept: application/json
+
+### 2. Tra cứu mã vạch không tồn tại (Kiểm tra 404 Not Found)
+GET {{MiniSupermarket.API_HostAddress}}/api/ado-products/barcode/999999999999
+Accept: application/json
+
+### 3. Tải danh sách sản phẩm lưu đệm ngoại tuyến (DataTable & SqlDataAdapter)
+GET {{MiniSupermarket.API_HostAddress}}/api/ado-products/disconnected-cache
+Accept: application/json
+
+### 4. [Bài tập 2.1] Lọc sản phẩm tồn kho thấp (Cảnh báo nhập hàng)
+GET {{MiniSupermarket.API_HostAddress}}/api/ado-products/filter-stock?minStock=50
+Accept: application/json
+
+### 5. [Bài tập 2.2] Đếm số lượng sản phẩm theo từng nhóm danh mục (DataTable)
+GET {{MiniSupermarket.API_HostAddress}}/api/ado-products/category-summary
+Accept: application/json
+
+### =========================================================
+### BUỔI 5 - TIẾT 3: BÁO CÁO DOANH THU (DỮ LIỆU /Data)
+### =========================================================
+
+### 6. Báo cáo doanh thu theo từng thu ngân (Orders JOIN Users trong /Data)
+GET {{MiniSupermarket.API_HostAddress}}/api/reports/revenue-by-cashier
+Accept: application/json
+
+### 7. [Bài tập 3.1] Báo cáo doanh thu theo khoảng ngày
+GET {{MiniSupermarket.API_HostAddress}}/api/reports/revenue-by-date-range?fromDate=2026-10-01&toDate=2026-10-31
+Accept: application/json
+
+### 8. [Bài tập 3.2] Top 5 sản phẩm bán chạy nhất
+GET {{MiniSupermarket.API_HostAddress}}/api/reports/top-selling
+Accept: application/json
+
+### =========================================================
+### BUỔI 5 - TIẾT 5: GIAO DỊCH THANH TOÁN POS (SQLTRANSACTION - DỮ LIỆU /Data)
+### =========================================================
+
+### 9. Thanh toán hợp lệ (Sản phẩm ID 104 và 603 từ /Data)
+POST {{MiniSupermarket.API_HostAddress}}/api/checkout
+Content-Type: application/json
+
+{
+  "cashierUsername": "cashier01",
+  "customerId": 1,
+  "paymentMethod": "Cash",
+  "items": [
+    {
+      "productId": 104,
+      "quantity": 2,
+      "unitPrice": 42000
+    },
+    {
+      "productId": 603,
+      "quantity": 1,
+      "unitPrice": 45000
+    }
+  ]
+}
+
+### 10. Thanh toán vượt quá tồn kho (Kích hoạt Rollback toàn phần - 400 BadRequest)
+POST {{MiniSupermarket.API_HostAddress}}/api/checkout
+Content-Type: application/json
+
+{
+  "cashierUsername": "cashier01",
+  "customerId": 1,
+  "paymentMethod": "Cash",
+  "items": [
+    {
+      "productId": 104,
+      "quantity": 1,
+      "unitPrice": 42000
+    },
+    {
+      "productId": 204,
+      "quantity": 999,
+      "unitPrice": 120000
+    }
+  ]
+}
+
+### 11. [Bài tập mở rộng] Hủy đơn hàng và tự động hoàn trả tồn kho (Truyền OrderId cần hủy)
+DELETE {{MiniSupermarket.API_HostAddress}}/api/checkout/cancel/16
+Accept: application/json

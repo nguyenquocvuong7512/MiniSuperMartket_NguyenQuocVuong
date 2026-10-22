@@ -39,42 +39,42 @@ namespace MiniSupermarket.API.Data
                 .HasForeignKey(od => od.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // === 15 DANH MỤC ===
+            // === 15 DANH MỤC (ORGANIC FARM) ===
             modelBuilder.Entity<Category>().HasData(
-                new Category { CategoryId = 1, CategoryName = "Rau củ quả hữu cơ", Description = "Rau xanh, củ quả sạch đạt chuẩn Organic, thu hoạch trong ngày" },
-                new Category { CategoryId = 2, CategoryName = "Trái cây tươi", Description = "Trái cây nội địa và nhập khẩu tươi ngon, không hóa chất bảo quản" },
-                new Category { CategoryId = 3, CategoryName = "Thịt & Thủy hải sản", Description = "Thịt heo sạch, bò thả rông, cá tươi sống đánh bắt tự nhiên" },
-                new Category { CategoryId = 4, CategoryName = "Thực phẩm khô & Hạt", Description = "Các loại hạt dinh dưỡng, ngũ cốc nguyên cám, gạo lứt" },
-                new Category { CategoryId = 5, CategoryName = "Sữa & Sản phẩm từ sữa", Description = "Sữa tươi thanh trùng, sữa chua hữu cơ, bơ phô mai tự nhiên" },
-                new Category { CategoryId = 6, CategoryName = "Đồ uống & Trà thảo mộc", Description = "Trà hoa cúc, mật ong rừng nguyên chất, nước ép trái cây tươi" },
-                new Category { CategoryId = 7, CategoryName = "Gia vị & Dầu ăn hữu cơ", Description = "Dầu ô liu, nước mắm truyền thống, hạt nêm hữu cơ, muối thảo dược" },
-                new Category { CategoryId = 8, CategoryName = "Thực phẩm chay & Dinh dưỡng", Description = "Thực phẩm chay sạch, đạm thực vật, bột dinh dưỡng các loại" },
-                new Category { CategoryId = 9, CategoryName = "Thực phẩm chế biến sẵn sạch", Description = "Đồ ăn vặt hữu cơ, bánh kẹo healthy, thực phẩm đóng hộp không phụ gia" },
-                new Category { CategoryId = 10, CategoryName = "Mẹ và Bé (Sản phẩm hữu cơ)", Description = "Thực phẩm ăn dặm, sữa hạt, sản phẩm chăm sóc an toàn cho bé" },
-                new Category { CategoryId = 11, CategoryName = "Thảo dược & Đông dược", Description = "Các loại sâm, nấm linh chi, thảo mộc bồi bổ sức khỏe tự nhiên" },
-                new Category { CategoryId = 12, CategoryName = "Trứng gia cầm sạch", Description = "Trứng gà ta, trứng gà ác, trứng vịt thả vườn không chất tăng trọng" },
-                new Category { CategoryId = 13, CategoryName = "Bánh mì & Ngũ cốc tươi", Description = "Bánh mì nguyên cám, bánh ngọt healthy làm từ bột mì hữu cơ" },
-                new Category { CategoryId = 14, CategoryName = "Sản phẩm chăm sóc cá nhân Organic", Description = "Mỹ phẩm thiên nhiên, dầu gội, sữa tắm hữu cơ an toàn cho da" },
-                new Category { CategoryId = 15, CategoryName = "Sản phẩm gia dụng thân thiện môi trường", Description = "Túi vải sinh học, ống hút tre, chất tẩy rửa hữu cơ lành tính" }
+                new Category { CategoryId = 1, CategoryName = "Rau lá hữu cơ Farm", Description = "Rau ăn lá canh tác hữu cơ theo mùa, thu hoạch trực tiếp tại vườn mỗi sớm" },
+                new Category { CategoryId = 2, CategoryName = "Củ quả tươi sạch", Description = "Củ quả sạch tự nhiên, không tồn dư thuốc BVTV và phân bón hóa học" },
+                new Category { CategoryId = 3, CategoryName = "Trái cây vườn sinh thái", Description = "Trái cây chín tự nhiên, không chất kích thích tăng trưởng và hóa chất bảo quản" },
+                new Category { CategoryId = 4, CategoryName = "Nấm tươi & Nấm ăn hữu cơ", Description = "Các loại nấm tươi trồng trên giá thể mùn cưa và rơm sạch tiêu chuẩn Organic" },
+                new Category { CategoryId = 5, CategoryName = "Thịt sạch chăn thả tự nhiên", Description = "Thịt heo, gà, bò thả đồi/thảo mộc, ăn thức ăn tự nhiên, không chất tạo nạc" },
+                new Category { CategoryId = 6, CategoryName = "Thủy hải sản sinh thái", Description = "Cá, tôm sinh thái nuôi đầm tự nhiên hoặc đánh bắt bền vững" },
+                new Category { CategoryId = 7, CategoryName = "Trứng gia cầm thả vườn", Description = "Trứng gà ta, trứng vịt cỏ thả vườn tự nhiên, giàu đạm và không kháng sinh" },
+                new Category { CategoryId = 8, CategoryName = "Sữa tươi thanh trùng & Sữa hạt", Description = "Sữa bò tươi nguyên chất từ trang trại và các loại sữa hạt nấu thủ công" },
+                new Category { CategoryId = 9, CategoryName = "Gạo sạch & Nông sản ngũ cốc", Description = "Gạo lứt, lúa rươi, nếp nương và các loại đậu hạt nguyên bản không tẩy trắng" },
+                new Category { CategoryId = 10, CategoryName = "Mật ong rừng & Dược liệu vườn", Description = "Mật ong tự nhiên, thảo mộc sấy lạnh, nghệ, gừng sẻ từ vùng đệm sinh thái" },
+                new Category { CategoryId = 11, CategoryName = "Gia vị & Nước mắm thủ công", Description = "Nước mắm ủ chượp truyền thống, muối hầm, tiêu rừng, tương ủ tự nhiên" },
+                new Category { CategoryId = 12, CategoryName = "Dầu ép lạnh nguyên chất", Description = "Dầu mè, dầu phộng, dầu sacha inchi ép cơ học không tinh luyện" },
+                new Category { CategoryId = 13, CategoryName = "Rau củ sấy & Trà thảo mộc Farm", Description = "Rau củ quả sấy thăng hoa giữ trọn khoáng chất, trà hoa thảo mộc sấy mộc" },
+                new Category { CategoryId = 14, CategoryName = "Thực phẩm lên men tự nhiên", Description = "Dưa cải chua men tự nhiên, kim chi hữu cơ, giấm táo thủ công không phụ gia" },
+                new Category { CategoryId = 15, CategoryName = "Combo Nông Sản Tuần", Description = "Gói nông sản tiện lợi theo mùa được tuyển chọn tươi mới từ trang trại" }
             );
 
-            // === 15 SẢN PHẨM ===
+            // === 15 SẢN PHẨM ĐẠI DIỆN TƯƠNG ỨNG TỪNG DANH MỤC ===
             modelBuilder.Entity<Product>().HasData(
-                new Product { ProductId = 104, Barcode = "8930000001041", ProductName = "Bông cải xanh hữu cơ", CategoryId = 1, Price = 42000, StockQuantity = 75, Unit = "Kg" },
-                new Product { ProductId = 204, Barcode = "8930000002048", ProductName = "Dâu tây Đà Lạt sạch", CategoryId = 2, Price = 120000, StockQuantity = 40, Unit = "Hộp 500g" },
-                new Product { ProductId = 304, Barcode = "8930000003045", ProductName = "Tôm sú sinh thái tự nhiên", CategoryId = 3, Price = 290000, StockQuantity = 25, Unit = "Kg" },
-                new Product { ProductId = 403, Barcode = "8930000004039", ProductName = "Hạt óc chó Mỹ tách vỏ", CategoryId = 4, Price = 160000, StockQuantity = 60, Unit = "Túi 300g" },
-                new Product { ProductId = 503, Barcode = "8930000005036", ProductName = "Phô mai tự nhiên hữu cơ", CategoryId = 5, Price = 85000, StockQuantity = 35, Unit = "Hộp 200g" },
-                new Product { ProductId = 603, Barcode = "8930000006033", ProductName = "Nước ép táo nguyên chất không đường", CategoryId = 6, Price = 45000, StockQuantity = 50, Unit = "Chai 330ml" },
-                new Product { ProductId = 701, Barcode = "8930000007016", ProductName = "Dầu ô liu nguyên chất Extra Virgin", CategoryId = 7, Price = 210000, StockQuantity = 30, Unit = "Chai 500ml" },
-                new Product { ProductId = 801, Barcode = "8930000008013", ProductName = "Sườn non thực vật hữu cơ", CategoryId = 8, Price = 55000, StockQuantity = 80, Unit = "Gói 200g" },
-                new Product { ProductId = 901, Barcode = "8930000009010", ProductName = "Bánh quy yến mạch nguyên cám", CategoryId = 9, Price = 65000, StockQuantity = 90, Unit = "Hộp 150g" },
-                new Product { ProductId = 1001, Barcode = "8930000010014", ProductName = "Bánh ăn dặm hữu cơ vị gạo lứt", CategoryId = 10, Price = 48000, StockQuantity = 65, Unit = "Hộp 50g" },
-                new Product { ProductId = 1101, Barcode = "8930000011011", ProductName = "Nấm đông cô khô hữu cơ", CategoryId = 11, Price = 115000, StockQuantity = 45, Unit = "Túi 100g" },
-                new Product { ProductId = 1201, Barcode = "8930000012018", ProductName = "Trứng gà ta thả vườn hữu cơ", CategoryId = 12, Price = 45000, StockQuantity = 100, Unit = "Vỉ 10 quả" },
-                new Product { ProductId = 1301, Barcode = "8930000013015", ProductName = "Bánh mì sandwich nguyên cám", CategoryId = 13, Price = 38000, StockQuantity = 40, Unit = "Túi 350g" },
-                new Product { ProductId = 1401, Barcode = "8930000014012", ProductName = "Dầu gội bồ kết thảo dược thiên nhiên", CategoryId = 14, Price = 180000, StockQuantity = 20, Unit = "Chai 400ml" },
-                new Product { ProductId = 1501, Barcode = "8930000015019", ProductName = "Túi lưới đựng rau củ tái sử dụng", CategoryId = 15, Price = 25000, StockQuantity = 150, Unit = "Set 3 cái" }
+                new Product { ProductId = 101, Barcode = "8930000001010", ProductName = "Cải bó xôi hữu cơ Farm", CategoryId = 1, Price = 35000, StockQuantity = 80, Unit = "Bó 500g" },
+                new Product { ProductId = 201, Barcode = "8930000002017", ProductName = "Cà rốt giống củ bản địa", CategoryId = 2, Price = 38000, StockQuantity = 100, Unit = "Kg" },
+                new Product { ProductId = 301, Barcode = "8930000003014", ProductName = "Ổi lê hữu cơ chín cây", CategoryId = 3, Price = 45000, StockQuantity = 60, Unit = "Kg" },
+                new Product { ProductId = 401, Barcode = "8930000004011", ProductName = "Nấm đùi gà tươi Organic", CategoryId = 4, Price = 42000, StockQuantity = 50, Unit = "Gói 250g" },
+                new Product { ProductId = 501, Barcode = "8930000005018", ProductName = "Thịt ba chỉ heo thảo mộc", CategoryId = 5, Price = 165000, StockQuantity = 40, Unit = "Khay 500g" },
+                new Product { ProductId = 601, Barcode = "8930000006015", ProductName = "Cá lăng sinh thái sông Đà", CategoryId = 6, Price = 195000, StockQuantity = 30, Unit = "Kg" },
+                new Product { ProductId = 701, Barcode = "8930000007012", ProductName = "Trứng gà ta thảo mộc tự nhiên", CategoryId = 7, Price = 48000, StockQuantity = 120, Unit = "Hộp 10 quả" },
+                new Product { ProductId = 801, Barcode = "8930000008019", ProductName = "Sữa bò tươi thanh trùng Organic", CategoryId = 8, Price = 52000, StockQuantity = 45, Unit = "Chai 900ml" },
+                new Product { ProductId = 901, Barcode = "8930000009016", ProductName = "Gạo ST25 hữu cơ ruộng rươi", CategoryId = 9, Price = 125000, StockQuantity = 70, Unit = "Túi 2kg" },
+                new Product { ProductId = 1001, Barcode = "8930000010013", ProductName = "Mật ong hoa rừng nguyên chất", CategoryId = 10, Price = 220000, StockQuantity = 35, Unit = "Hũ 500ml" },
+                new Product { ProductId = 1101, Barcode = "8930000011010", ProductName = "Nước mắm truyền thống cá cơm 40N", CategoryId = 11, Price = 95000, StockQuantity = 50, Unit = "Chai 500ml" },
+                new Product { ProductId = 1201, Barcode = "8930000012017", ProductName = "Dầu mè vàng ép lạnh thủ công", CategoryId = 12, Price = 110000, StockQuantity = 40, Unit = "Chai 250ml" },
+                new Product { ProductId = 1301, Barcode = "8930000013014", ProductName = "Trà hoa cúc sấy lạnh tự nhiên", CategoryId = 13, Price = 85000, StockQuantity = 55, Unit = "Hũ 80g" },
+                new Product { ProductId = 1401, Barcode = "8930000014011", ProductName = "Dưa cải củ lên men tự nhiên", CategoryId = 14, Price = 32000, StockQuantity = 60, Unit = "Hũ 450g" },
+                new Product { ProductId = 1501, Barcode = "8930000015018", ProductName = "Combo Rau Củ Xanh Dinh Dưỡng Tuần", CategoryId = 15, Price = 250000, StockQuantity = 20, Unit = "Set 5kg" }
             );
 
             // === 15 KHÁCH HÀNG ===
@@ -247,68 +247,83 @@ namespace MiniSupermarket.API.Data
             );
             // === 15 ĐƠN HÀNG ===
             modelBuilder.Entity<Order>().HasData(
-                new Order { OrderId = 1, UserId = 3, OrderDate = new DateTime(2026, 10, 1, 8, 30, 0), TotalAmount = 204000, Status = "Completed", PaymentMethod = "Cash", AmountReceived = 250000, ChangeAmount = 46000 },
-                new Order { OrderId = 2, UserId = 4, OrderDate = new DateTime(2026, 10, 1, 9, 15, 0), TotalAmount = 360000, Status = "Completed", PaymentMethod = "Transfer", AmountReceived = 360000, ChangeAmount = 0 },
-                new Order { OrderId = 3, UserId = 5, OrderDate = new DateTime(2026, 10, 2, 10, 20, 0), TotalAmount = 580000, Status = "Completed", PaymentMethod = "Cash", AmountReceived = 600000, ChangeAmount = 20000 },
-                new Order { OrderId = 4, UserId = 6, OrderDate = new DateTime(2026, 10, 2, 11, 45, 0), TotalAmount = 160000, Status = "Completed", PaymentMethod = "Cash", AmountReceived = 200000, ChangeAmount = 40000 },
-                new Order { OrderId = 5, UserId = 7, OrderDate = new DateTime(2026, 10, 3, 13, 10, 0), TotalAmount = 425000, Status = "Completed", PaymentMethod = "Transfer", AmountReceived = 425000, ChangeAmount = 0 },
-                new Order { OrderId = 6, UserId = 3, OrderDate = new DateTime(2026, 10, 3, 14, 25, 0), TotalAmount = 90000, Status = "Completed", PaymentMethod = "Cash", AmountReceived = 100000, ChangeAmount = 10000 },
-                new Order { OrderId = 7, UserId = 4, OrderDate = new DateTime(2026, 10, 4, 8, 40, 0), TotalAmount = 630000, Status = "Completed", PaymentMethod = "Transfer", AmountReceived = 630000, ChangeAmount = 0 },
-                new Order { OrderId = 8, UserId = 5, OrderDate = new DateTime(2026, 10, 4, 15, 30, 0), TotalAmount = 245000, Status = "Completed", PaymentMethod = "Cash", AmountReceived = 300000, ChangeAmount = 55000 },
-                new Order { OrderId = 9, UserId = 6, OrderDate = new DateTime(2026, 10, 5, 9, 5, 0), TotalAmount = 320000, Status = "Completed", PaymentMethod = "Transfer", AmountReceived = 320000, ChangeAmount = 0 },
-                new Order { OrderId = 10, UserId = 7, OrderDate = new DateTime(2026, 10, 5, 10, 50, 0), TotalAmount = 138000, Status = "Completed", PaymentMethod = "Cash", AmountReceived = 150000, ChangeAmount = 12000 },
-                new Order { OrderId = 11, UserId = 3, OrderDate = new DateTime(2026, 10, 6, 12, 15, 0), TotalAmount = 870000, Status = "Completed", PaymentMethod = "Transfer", AmountReceived = 870000, ChangeAmount = 0 },
-                new Order { OrderId = 12, UserId = 4, OrderDate = new DateTime(2026, 10, 7, 16, 20, 0), TotalAmount = 250000, Status = "Completed", PaymentMethod = "Cash", AmountReceived = 300000, ChangeAmount = 50000 },
-                new Order { OrderId = 13, UserId = 5, OrderDate = new DateTime(2026, 10, 8, 9, 35, 0), TotalAmount = 465000, Status = "Completed", PaymentMethod = "Transfer", AmountReceived = 465000, ChangeAmount = 0 },
-                new Order { OrderId = 14, UserId = 6, OrderDate = new DateTime(2026, 10, 9, 14, 45, 0), TotalAmount = 113000, Status = "Completed", PaymentMethod = "Cash", AmountReceived = 150000, ChangeAmount = 37000 },
-                new Order { OrderId = 15, UserId = 7, OrderDate = new DateTime(2026, 10, 10, 17, 10, 0), TotalAmount = 500000, Status = "Cancelled", PaymentMethod = "Cash", AmountReceived = 0, ChangeAmount = 0 }
+                new Order { OrderId = 1, UserId = 3, OrderDate = new DateTime(2026, 10, 1, 8, 30, 0), TotalAmount = 265000, Status = "Completed", PaymentMethod = "Cash", AmountReceived = 300000, ChangeAmount = 35000 },
+                new Order { OrderId = 2, UserId = 4, OrderDate = new DateTime(2026, 10, 1, 9, 15, 0), TotalAmount = 326000, Status = "Completed", PaymentMethod = "Transfer", AmountReceived = 326000, ChangeAmount = 0 },
+                new Order { OrderId = 3, UserId = 5, OrderDate = new DateTime(2026, 10, 2, 10, 20, 0), TotalAmount = 420000, Status = "Completed", PaymentMethod = "Cash", AmountReceived = 500000, ChangeAmount = 80000 },
+                new Order { OrderId = 4, UserId = 6, OrderDate = new DateTime(2026, 10, 2, 11, 45, 0), TotalAmount = 132000, Status = "Completed", PaymentMethod = "Cash", AmountReceived = 150000, ChangeAmount = 18000 },
+                new Order { OrderId = 5, UserId = 7, OrderDate = new DateTime(2026, 10, 3, 13, 10, 0), TotalAmount = 181000, Status = "Completed", PaymentMethod = "Transfer", AmountReceived = 181000, ChangeAmount = 0 },
+                new Order { OrderId = 6, UserId = 3, OrderDate = new DateTime(2026, 10, 3, 14, 25, 0), TotalAmount = 142000, Status = "Completed", PaymentMethod = "Cash", AmountReceived = 150000, ChangeAmount = 8000 },
+                new Order { OrderId = 7, UserId = 4, OrderDate = new DateTime(2026, 10, 4, 8, 40, 0), TotalAmount = 475000, Status = "Completed", PaymentMethod = "Transfer", AmountReceived = 475000, ChangeAmount = 0 },
+                new Order { OrderId = 8, UserId = 5, OrderDate = new DateTime(2026, 10, 4, 15, 30, 0), TotalAmount = 251000, Status = "Completed", PaymentMethod = "Cash", AmountReceived = 300000, ChangeAmount = 49000 },
+                new Order { OrderId = 9, UserId = 6, OrderDate = new DateTime(2026, 10, 5, 9, 5, 0), TotalAmount = 334000, Status = "Completed", PaymentMethod = "Transfer", AmountReceived = 334000, ChangeAmount = 0 },
+                new Order { OrderId = 10, UserId = 7, OrderDate = new DateTime(2026, 10, 5, 10, 50, 0), TotalAmount = 305000, Status = "Completed", PaymentMethod = "Cash", AmountReceived = 350000, ChangeAmount = 45000 },
+                new Order { OrderId = 11, UserId = 3, OrderDate = new DateTime(2026, 10, 6, 12, 15, 0), TotalAmount = 685000, Status = "Completed", PaymentMethod = "Transfer", AmountReceived = 685000, ChangeAmount = 0 },
+                new Order { OrderId = 12, UserId = 4, OrderDate = new DateTime(2026, 10, 7, 16, 20, 0), TotalAmount = 282000, Status = "Completed", PaymentMethod = "Cash", AmountReceived = 300000, ChangeAmount = 18000 },
+                new Order { OrderId = 13, UserId = 5, OrderDate = new DateTime(2026, 10, 8, 9, 35, 0), TotalAmount = 296000, Status = "Completed", PaymentMethod = "Transfer", AmountReceived = 296000, ChangeAmount = 0 },
+                new Order { OrderId = 14, UserId = 6, OrderDate = new DateTime(2026, 10, 9, 14, 45, 0), TotalAmount = 87000, Status = "Completed", PaymentMethod = "Cash", AmountReceived = 100000, ChangeAmount = 13000 },
+                new Order { OrderId = 15, UserId = 7, OrderDate = new DateTime(2026, 10, 10, 17, 10, 0), TotalAmount = 340000, Status = "Cancelled", PaymentMethod = "Cash", AmountReceived = 0, ChangeAmount = 0 }
             );
             // === 30 CHI TIẾT ĐƠN HÀNG ===
             modelBuilder.Entity<OrderDetail>().HasData(
-                new OrderDetail { OrderDetailId = 1, OrderId = 1, ProductId = 104, Quantity = 2, UnitPrice = 42000, SubTotal = 84000 },
-                new OrderDetail { OrderDetailId = 2, OrderId = 1, ProductId = 603, Quantity = 1, UnitPrice = 45000, SubTotal = 45000 },
+                // Đơn 1: Cải bó xôi (35k x 2) + Cá lăng (195k x 1) = 265k
+                new OrderDetail { OrderDetailId = 1, OrderId = 1, ProductId = 101, Quantity = 2, UnitPrice = 35000, SubTotal = 70000 },
+                new OrderDetail { OrderDetailId = 2, OrderId = 1, ProductId = 601, Quantity = 1, UnitPrice = 195000, SubTotal = 195000 },
 
-                new OrderDetail { OrderDetailId = 3, OrderId = 2, ProductId = 204, Quantity = 2, UnitPrice = 120000, SubTotal = 240000 },
-                new OrderDetail { OrderDetailId = 4, OrderId = 2, ProductId = 901, Quantity = 2, UnitPrice = 65000, SubTotal = 130000 },
+                // Đơn 2: Cà rốt (38k x 2) + Gạo ST25 (125k x 2) = 326k
+                new OrderDetail { OrderDetailId = 3, OrderId = 2, ProductId = 201, Quantity = 2, UnitPrice = 38000, SubTotal = 76000 },
+                new OrderDetail { OrderDetailId = 4, OrderId = 2, ProductId = 901, Quantity = 2, UnitPrice = 125000, SubTotal = 250000 },
 
-                new OrderDetail { OrderDetailId = 5, OrderId = 3, ProductId = 304, Quantity = 1, UnitPrice = 290000, SubTotal = 290000 },
-                new OrderDetail { OrderDetailId = 6, OrderId = 3, ProductId = 503, Quantity = 2, UnitPrice = 85000, SubTotal = 170000 },
+                // Đơn 3: Ổi lê (45k x 2) + Thịt ba chỉ (165k x 2) = 420k
+                new OrderDetail { OrderDetailId = 5, OrderId = 3, ProductId = 301, Quantity = 2, UnitPrice = 45000, SubTotal = 90000 },
+                new OrderDetail { OrderDetailId = 6, OrderId = 3, ProductId = 501, Quantity = 2, UnitPrice = 165000, SubTotal = 330000 },
 
-                new OrderDetail { OrderDetailId = 7, OrderId = 4, ProductId = 403, Quantity = 1, UnitPrice = 160000, SubTotal = 160000 },
-                new OrderDetail { OrderDetailId = 8, OrderId = 4, ProductId = 603, Quantity = 0, UnitPrice = 45000, SubTotal = 0 },
+                // Đơn 4: Nấm đùi gà (42k x 2) + Trứng gà (48k x 1) = 132k
+                new OrderDetail { OrderDetailId = 7, OrderId = 4, ProductId = 401, Quantity = 2, UnitPrice = 42000, SubTotal = 84000 },
+                new OrderDetail { OrderDetailId = 8, OrderId = 4, ProductId = 701, Quantity = 1, UnitPrice = 48000, SubTotal = 48000 },
 
-                new OrderDetail { OrderDetailId = 9, OrderId = 5, ProductId = 701, Quantity = 2, UnitPrice = 210000, SubTotal = 420000 },
-                new OrderDetail { OrderDetailId = 10, OrderId = 5, ProductId = 1301, Quantity = 1, UnitPrice = 38000, SubTotal = 38000 },
+                // Đơn 5: Trứng gà (48k x 2) + Trà hoa cúc (85k x 1) = 181k
+                new OrderDetail { OrderDetailId = 9, OrderId = 5, ProductId = 701, Quantity = 2, UnitPrice = 48000, SubTotal = 96000 },
+                new OrderDetail { OrderDetailId = 10, OrderId = 5, ProductId = 1301, Quantity = 1, UnitPrice = 85000, SubTotal = 85000 },
 
-                new OrderDetail { OrderDetailId = 11, OrderId = 6, ProductId = 1201, Quantity = 2, UnitPrice = 45000, SubTotal = 90000 },
-                new OrderDetail { OrderDetailId = 12, OrderId = 6, ProductId = 1501, Quantity = 0, UnitPrice = 25000, SubTotal = 0 },
+                // Đơn 6: Dầu mè (110k x 1) + Dưa cải củ (32k x 1) = 142k
+                new OrderDetail { OrderDetailId = 11, OrderId = 6, ProductId = 1201, Quantity = 1, UnitPrice = 110000, SubTotal = 110000 },
+                new OrderDetail { OrderDetailId = 12, OrderId = 6, ProductId = 1401, Quantity = 1, UnitPrice = 32000, SubTotal = 32000 },
 
-                new OrderDetail { OrderDetailId = 13, OrderId = 7, ProductId = 304, Quantity = 2, UnitPrice = 290000, SubTotal = 580000 },
-                new OrderDetail { OrderDetailId = 14, OrderId = 7, ProductId = 104, Quantity = 1, UnitPrice = 42000, SubTotal = 42000 },
+                // Đơn 7: Mật ong hoa rừng (220k x 2) + Cải bó xôi (35k x 1) = 475k
+                new OrderDetail { OrderDetailId = 13, OrderId = 7, ProductId = 1001, Quantity = 2, UnitPrice = 220000, SubTotal = 440000 },
+                new OrderDetail { OrderDetailId = 14, OrderId = 7, ProductId = 101, Quantity = 1, UnitPrice = 35000, SubTotal = 35000 },
 
-                new OrderDetail { OrderDetailId = 15, OrderId = 8, ProductId = 801, Quantity = 3, UnitPrice = 55000, SubTotal = 165000 },
-                new OrderDetail { OrderDetailId = 16, OrderId = 8, ProductId = 603, Quantity = 1, UnitPrice = 45000, SubTotal = 45000 },
+                // Đơn 8: Sữa tươi (52k x 3) + Nước mắm (95k x 1) = 251k
+                new OrderDetail { OrderDetailId = 15, OrderId = 8, ProductId = 801, Quantity = 3, UnitPrice = 52000, SubTotal = 156000 },
+                new OrderDetail { OrderDetailId = 16, OrderId = 8, ProductId = 1101, Quantity = 1, UnitPrice = 95000, SubTotal = 95000 },
 
-                new OrderDetail { OrderDetailId = 17, OrderId = 9, ProductId = 403, Quantity = 2, UnitPrice = 160000, SubTotal = 320000 },
-                new OrderDetail { OrderDetailId = 18, OrderId = 9, ProductId = 1501, Quantity = 0, UnitPrice = 25000, SubTotal = 0 },
+                // Đơn 9: Nấm đùi gà (42k x 2) + Combo rau củ (250k x 1) = 334k
+                new OrderDetail { OrderDetailId = 17, OrderId = 9, ProductId = 401, Quantity = 2, UnitPrice = 42000, SubTotal = 84000 },
+                new OrderDetail { OrderDetailId = 18, OrderId = 9, ProductId = 1501, Quantity = 1, UnitPrice = 250000, SubTotal = 250000 },
 
-                new OrderDetail { OrderDetailId = 19, OrderId = 10, ProductId = 1301, Quantity = 1, UnitPrice = 38000, SubTotal = 38000 },
-                new OrderDetail { OrderDetailId = 20, OrderId = 10, ProductId = 1001, Quantity = 2, UnitPrice = 48000, SubTotal = 96000 },
+                // Đơn 10: Trà hoa cúc (85k x 1) + Mật ong hoa rừng (220k x 1) = 305k
+                new OrderDetail { OrderDetailId = 19, OrderId = 10, ProductId = 1301, Quantity = 1, UnitPrice = 85000, SubTotal = 85000 },
+                new OrderDetail { OrderDetailId = 20, OrderId = 10, ProductId = 1001, Quantity = 1, UnitPrice = 220000, SubTotal = 220000 },
 
-                new OrderDetail { OrderDetailId = 21, OrderId = 11, ProductId = 701, Quantity = 3, UnitPrice = 210000, SubTotal = 630000 },
-                new OrderDetail { OrderDetailId = 22, OrderId = 11, ProductId = 1101, Quantity = 2, UnitPrice = 115000, SubTotal = 230000 },
+                // Đơn 11: Thịt ba chỉ (165k x 3) + Nước mắm (95k x 2) = 685k
+                new OrderDetail { OrderDetailId = 21, OrderId = 11, ProductId = 501, Quantity = 3, UnitPrice = 165000, SubTotal = 495000 },
+                new OrderDetail { OrderDetailId = 22, OrderId = 11, ProductId = 1101, Quantity = 2, UnitPrice = 95000, SubTotal = 190000 },
 
-                new OrderDetail { OrderDetailId = 23, OrderId = 12, ProductId = 1401, Quantity = 1, UnitPrice = 180000, SubTotal = 180000 },
-                new OrderDetail { OrderDetailId = 24, OrderId = 12, ProductId = 1501, Quantity = 2, UnitPrice = 25000, SubTotal = 50000 },
+                // Đơn 12: Dưa cải củ (32k x 1) + Combo rau củ (250k x 1) = 282k
+                new OrderDetail { OrderDetailId = 23, OrderId = 12, ProductId = 1401, Quantity = 1, UnitPrice = 32000, SubTotal = 32000 },
+                new OrderDetail { OrderDetailId = 24, OrderId = 12, ProductId = 1501, Quantity = 1, UnitPrice = 250000, SubTotal = 250000 },
 
-                new OrderDetail { OrderDetailId = 25, OrderId = 13, ProductId = 204, Quantity = 2, UnitPrice = 120000, SubTotal = 240000 },
-                new OrderDetail { OrderDetailId = 26, OrderId = 13, ProductId = 1101, Quantity = 2, UnitPrice = 115000, SubTotal = 230000 },
+                // Đơn 13: Cà rốt (38k x 2) + Dầu mè (110k x 2) = 296k
+                new OrderDetail { OrderDetailId = 25, OrderId = 13, ProductId = 201, Quantity = 2, UnitPrice = 38000, SubTotal = 76000 },
+                new OrderDetail { OrderDetailId = 26, OrderId = 13, ProductId = 1201, Quantity = 2, UnitPrice = 110000, SubTotal = 220000 },
 
-                new OrderDetail { OrderDetailId = 27, OrderId = 14, ProductId = 104, Quantity = 1, UnitPrice = 42000, SubTotal = 42000 },
-                new OrderDetail { OrderDetailId = 28, OrderId = 14, ProductId = 603, Quantity = 1, UnitPrice = 45000, SubTotal = 45000 },
+                // Đơn 14: Cải bó xôi (35k x 1) + Sữa tươi (52k x 1) = 87k
+                new OrderDetail { OrderDetailId = 27, OrderId = 14, ProductId = 101, Quantity = 1, UnitPrice = 35000, SubTotal = 35000 },
+                new OrderDetail { OrderDetailId = 28, OrderId = 14, ProductId = 801, Quantity = 1, UnitPrice = 52000, SubTotal = 52000 },
 
-                new OrderDetail { OrderDetailId = 29, OrderId = 15, ProductId = 503, Quantity = 2, UnitPrice = 85000, SubTotal = 170000 },
-                new OrderDetail { OrderDetailId = 30, OrderId = 15, ProductId = 403, Quantity = 1, UnitPrice = 160000, SubTotal = 160000 }
+                // Đơn 15 (Đơn hủy): Ổi lê (45k x 2) + Gạo ST25 (125k x 2) = 340k
+                new OrderDetail { OrderDetailId = 29, OrderId = 15, ProductId = 301, Quantity = 2, UnitPrice = 45000, SubTotal = 90000 },
+                new OrderDetail { OrderDetailId = 30, OrderId = 15, ProductId = 901, Quantity = 2, UnitPrice = 125000, SubTotal = 250000 }
             );
         }
     }
