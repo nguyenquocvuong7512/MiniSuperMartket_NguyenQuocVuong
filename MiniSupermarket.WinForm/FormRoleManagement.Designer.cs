@@ -1,4 +1,4 @@
-﻿namespace MiniSupermarket.WinForms
+namespace MiniSupermarket.WinForms
 {
     partial class FormRoleManagement
     {
@@ -217,7 +217,7 @@
             // 
             lblApiUrl.Name = "lblApiUrl";
             lblApiUrl.Size = new Size(173, 17);
-            lblApiUrl.Text = "https://localhost:7123/api/roles";
+            lblApiUrl.Text = "http://localhost:5000/api/roles";
             // 
             // FormRoleManagement
             // 

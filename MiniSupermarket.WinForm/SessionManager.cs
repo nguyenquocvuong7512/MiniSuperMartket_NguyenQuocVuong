@@ -15,10 +15,12 @@ namespace MiniSupermarket.WinForms
 
     public static class ApiClientService
     {
+        public const string ApiBaseUrl = "http://localhost:5000/api/";
+
         // ⚠️ Chỉnh cổng cho khớp với API của bạn (Kiểm tra trong Properties/launchSettings.json của API)
         private static readonly HttpClient _client = new HttpClient
         {
-            BaseAddress = new Uri("https://localhost:7292/api/")
+            BaseAddress = new Uri(ApiBaseUrl)
         };
 
         public static HttpClient Client

@@ -1,4 +1,4 @@
-﻿namespace MiniSupermarket.WinForms
+namespace MiniSupermarket.WinForms
 {
     partial class FormCategoryManagement
     {
@@ -267,7 +267,7 @@
             // 
             lblApiUrl.Name = "lblApiUrl";
             lblApiUrl.Size = new Size(202, 17);
-            lblApiUrl.Text = "https://localhost:7292/api/categories";
+            lblApiUrl.Text = "http://localhost:5000/api/categories";
             // 
             // FormCategoryManagement
             // 

@@ -12,7 +12,7 @@ using MiniSupermarket.API.Data;
 namespace MiniSupermarket.API.Migrations
 {
     [DbContext(typeof(SupermarketDbContext))]
-    [Migration("20261015122203_InitialCreateDatabase")]
+    [Migration("20261021105814_InitialCreateDatabase")]
     partial class InitialCreateDatabase
     {
         /// <inheritdoc />
