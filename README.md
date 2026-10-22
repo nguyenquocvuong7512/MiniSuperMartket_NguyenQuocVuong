@@ -1,151 +1,349 @@
-# 🛒 HỆ THỐNG QUẢN LÝ SIÊU THỊ MINI (MINISUPERMARKET SYSTEM)
+# Hệ Thống Quản Lý Bán Lẻ & Quầy POS Siêu Thị Nông Sản Hữu Cơ (MiniSupermarket)
 
-**Môn học:** Lập trình Ứng dụng .NET Core  
-**Mã môn học:** 229162  
-**Buổi thực hành:** Buổi 4 – Thiết kế kiến trúc giao diện WinForms Shell và điều hướng phân quyền  
-**Sinh viên:** Nguyễn Quốc Vương  
-**Mã sinh viên:** 2124110272  
-**Lớp học phần:** CCQ2411D  
+> **Giải pháp kiến trúc kết hợp giữa ASP.NET Core Web API và Windows Forms Desktop App, tích hợp sâu ADO.NET thuần, T-SQL Stored Procedure và điều khiển giao dịch nguyên tử đa bảng với `SqlTransaction` theo chuẩn ACID.**
 
----
+## 📌 1. Giới thiệu tổng quan
 
-## 1. 📝 Giới thiệu buổi thực hành
+Dự án **MiniSupermarket** được xây dựng phục vụ mô hình vận hành chuỗi siêu thị bán lẻ nông sản sạch và thực phẩm hữu cơ (**Organic Farm**). Hệ thống giải quyết các bài toán trọng tâm trong kỹ thuật phần mềm doanh nghiệp:
 
-Buổi thực hành 4 tập trung xây dựng kiến trúc giao diện WinForms Shell theo mô hình Single-Form Architecture, thiết kế Sidebar và Main Workspace, đồng thời triển khai cơ chế điều hướng và phân quyền người dùng theo ba vai trò: Admin, Cashier và Warehouse.
+* **Hiệu năng cao tầng thấp (High Performance):** Ứng dụng **ADO.NET thuần** kết hợp `SqlDataReader` (Forward-only, Connected Mode) để tra cứu mã vạch sản phẩm tại quầy POS với độ trễ phản hồi cực thấp (< 100ms), tránh chi phí tài nguyên (overhead) của ORM trong giờ cao điểm.
 
-## 2. 🖥️ Xây dựng giao diện WinForms Shell
+* **Bộ đệm dữ liệu ngoại tuyến (Disconnected Cache):** Sử dụng `DataTable` và `SqlDataAdapter` để tải danh mục hàng hóa lưu đệm trực tiếp lên bộ nhớ RAM, phục vụ hiển thị lưới giao diện kể cả khi ngắt kết nối.
 
-### 2.1. FormMainShell.cs
+* **Tối ưu báo cáo tổng hợp:** Đóng gói logic thống kê ca bán lẻ phức tạp vào **Stored Procedure** (`sp_GetRevenueByCashier`) trên SQL Server, giải phóng băng thông mạng và tận dụng kế hoạch thực thi biên dịch sẵn (Compiled Execution Plan).
 
-Thiết kế giao diện chính của hệ thống với các thành phần:
+* **An toàn giao dịch đa bảng (ACID Compliance):** Toàn bộ quy trình thanh toán hóa đơn (`Orders` $\rightarrow$ `OrderDetails` $\rightarrow$ trừ tồn kho `Products` $\rightarrow$ tích điểm `Customers`) được bọc kín trong `SqlTransaction`. Cơ chế đảm bảo nguyên tắc: **Hoàn tất 100% (Commit) hoặc khôi phục nguyên trạng (Rollback), triệt tiêu hoàn toàn rác dữ liệu**.
 
-- **`panelSidebar`**: Thanh điều hướng bên trái, có chiều rộng 230px, màu xanh đen, chứa logo và các nút chức năng.
-- **`panelTopHeader`**: Thanh tiêu đề phía trên, cao 60px, nền trắng, hiển thị tiêu đề màn hình và thông tin người dùng đăng nhập.
-- **`panelMainContent`**: Vùng nội dung trung tâm, sử dụng `Dock = Fill` để hiển thị các Form con.
-- **`lblTitle`**: Hiển thị tiêu đề màn hình hiện tại.
-- **`lblUserInfo`**: Hiển thị thông tin tài khoản đăng nhập.
+* **Bảo mật hệ thống:** Sử dụng 100% `SqlParameter` cho toàn bộ tham số đầu vào, triệt tiêu nguy cơ tấn công **SQL Injection**.
 
-Các nút chức năng trên Sidebar:
+## 📂 2. Cấu trúc Solution & Cây thư mục dự án
 
-- `btnPOS`: Bán hàng POS.
-- `btnCategory`: Quản lý danh mục.
-- `btnProduct`: Quản lý sản phẩm.
-- `btnCustomer`: Quản lý khách hàng.
-- `btnReports`: Báo cáo doanh thu.
-- `btnUserManage`: Quản lý tài khoản.
-- `btnLogout`: Đăng xuất.
+Hệ thống được tổ chức theo kiến trúc phân tách rõ ràng giữa Backend API và Desktop Client:
 
-## 3. 🔄 Nhúng động Form con
+```
+MiniSuperMarket.sln
+│
+├── 📁 MiniSupermarket.API                     # Backend Web API (.NET Core)
+│   ├── 📁 Connected Services
+│   ├── 📁 Dependencies
+│   ├── 📁 Properties
+│   ├── 📁 Controllers                         # Bộ điều hướng xử lý nghiệp vụ
+│   │   ├── AdoProductController.cs           # Tra cứu Barcode & DataTable Cache (ADO.NET)
+│   │   ├── AuthController.cs                 # Xác thực & Phân quyền đăng nhập
+│   │   ├── CategoriesController.cs           # Quản lý danh mục hàng
+│   │   ├── CheckoutController.cs             # Thanh toán POS bọc SqlTransaction (ACID)
+│   │   ├── CustomerController.cs             # Quản lý thông tin & điểm thưởng khách hàng
+│   │   ├── OrdersController.cs               # Quản lý lịch sử hóa đơn bán buôn/lẻ
+│   │   ├── ProductsController.cs             # CRUD danh mục sản phẩm (EF Core)
+│   │   ├── ReportsController.cs              # Gọi Stored Procedure xuất báo cáo doanh thu
+│   │   ├── RolesController.cs                # Quản lý nhóm vai trò
+│   │   ├── UsersController.cs                # Quản lý tài khoản nhân viên / thu ngân
+│   │   └── WeatherForecastController.cs
+│   ├── 📁 Data
+│   │   └── SupermarketDbContext.cs          # EF Core DbContext & Seed Data (Organic Farm)
+│   ├── 📁 Dto                                # Data Transfer Objects
+│   │   ├── CashierRevenueDto.cs              # DTO nhận kết quả từ sp_GetRevenueByCashier
+│   │   ├── CheckoutDtos.cs                   # CartItem & CheckoutRequest DTO
+│   │   ├── ProductLookupDto.cs               # DTO tra cứu nhanh sản phẩm POS
+│   │   └── TopSellingProductDto.cs           # DTO báo cáo mặt hàng bán chạy
+│   ├── 📁 Migrations                         # Lịch sử cập nhật Schema CSDL
+│   ├── 📁 Models                             # Định nghĩa Entities thực thể CSDL
+│   ├── appsettings.json                      # Cấu hình ConnectionString & Service
+│   ├── MiniSupermarket.API.http              # HTTP Client Test Script
+│   └── Program.cs                            # Pipeline khởi tạo Web Host & DI Container
+│
+└── 📁 MiniSupermarket.WinForm                 # Desktop Client giao diện quầy POS (WinForms)
+    ├── 📁 Dependencies
+    ├── Form1.cs
+    ├── FormCategoryManagement.cs             # Màn hình quản lý danh mục
+    ├── FormCustomerManagement.cs             # Màn hình chăm sóc khách hàng & tích điểm
+    ├── FormLogin.cs                          # Đăng nhập hệ thống thu ngân
+    ├── FormMainShell.cs                      # Giao diện khung điều hướng chính
+    ├── FormPOS.cs                            # Giao diện màn hình thanh toán quầy thu ngân
+    ├── FormProductManagement.cs              # Màn hình quản lý kho & sản phẩm
+    ├── FormQuickReport.cs                    # Màn hình xem báo cáo nhanh doanh thu ca
+    ├── FormRoleManagement.cs                 # Quản lý phân quyền chức vụ
+    ├── FormUserManagement.cs                 # Quản lý danh sách nhân viên
+    ├── SessionManager.cs                     # Quản lý phiên làm việc & tài khoản hiện hành
+    └── Program.cs                            # Điểm khởi chạy ứng dụng Desktop
 
-### 3.1. Hàm OpenChildForm
+```
 
-Xây dựng cơ chế nhúng các Form nghiệp vụ vào `panelMainContent` thay vì mở nhiều cửa sổ riêng biệt.
+## 🗄️ 3. Cơ sở dữ liệu mẫu (Organic Farm Seed Data)
 
-Các bước thực hiện:
+Hệ thống được khởi tạo sẵn với **15 danh mục nông sản hữu cơ** và **15 sản phẩm đại diện** có mã vạch (Barcode EAN-13 chuẩn):
 
-1. Thiết lập `TopLevel = false` cho Form con.
-2. Thiết lập `FormBorderStyle = None` để loại bỏ viền cửa sổ.
-3. Thiết lập `Dock = Fill` để Form con vừa khít vùng nội dung.
-4. Đóng và dọn dẹp Form con cũ trước khi hiển thị Form mới.
-5. Đưa Form mới lên phía trước bằng `BringToFront`.
-6. Cập nhật tiêu đề màn hình trên `lblTitle`.
-7. Sử dụng `HighlightActiveButton` để làm nổi bật nút điều hướng đang được chọn.
+### Danh mục & Sản phẩm đại diện
 
-**Kết quả:** Giao diện chuyển đổi giữa các chức năng trong cùng một cửa sổ chính, hạn chế việc mở nhiều cửa sổ và tạo trải nghiệm sử dụng thống nhất.
+| ID | Mã vạch (Barcode) | Tên sản phẩm | Danh mục | Đơn giá | Đơn vị | Tồn kho | 
+| ----- | ----- | ----- | ----- | ----- | ----- | ----- | 
+| **101** | `8930000001010` | Cải bó xôi hữu cơ Farm | Rau lá hữu cơ Farm | 35.000 đ | Bó 500g | 80 | 
+| **201** | `8930000002017` | Cà rốt giống củ bản địa | Củ quả tươi sạch | 38.000 đ | Kg | 100 | 
+| **301** | `8930000003014` | Ổi lê hữu cơ chín cây | Trái cây vườn sinh thái | 45.000 đ | Kg | 60 | 
+| **401** | `8930000004011` | Nấm đùi gà tươi Organic | Nấm tươi & Nấm ăn hữu cơ | 42.000 đ | Gói 250g | 50 | 
+| **501** | `8930000005018` | Thịt ba chỉ heo thảo mộc | Thịt sạch chăn thả tự nhiên | 165.000 đ | Khay 500g | 40 | 
+| **601** | `8930000006015` | Cá lăng sinh thái sông Đà | Thủy hải sản sinh thái | 195.000 đ | Kg | 30 | 
+| **701** | `8930000007012` | Trứng gà ta thảo mộc tự nhiên | Trứng gia cầm thả vườn | 48.000 đ | Hộp 10 quả | 120 | 
+| **801** | `8930000008019` | Sữa bò tươi thanh trùng Organic | Sữa tươi thanh trùng & Sữa hạt | 52.000 đ | Chai 900ml | 45 | 
+| **901** | `8930000009016` | Gạo ST25 hữu cơ ruộng rươi | Gạo sạch & Nông sản ngũ cốc | 125.000 đ | Túi 2kg | 70 | 
+| **1001** | `8930000010013` | Mật ong hoa rừng nguyên chất | Mật ong rừng & Dược liệu vườn | 220.000 đ | Hũ 500ml | 35 | 
+| **1101** | `8930000011010` | Nước mắm truyền thống cá cơm 40N | Gia vị & Nước mắm thủ công | 95.000 đ | Chai 500ml | 50 | 
+| **1201** | `8930000012017` | Dầu mè vàng ép lạnh thủ công | Dầu ép lạnh nguyên chất | 110.000 đ | Chai 250ml | 40 | 
+| **1301** | `8930000013014` | Trà hoa cúc sấy lạnh tự nhiên | Rau củ sấy & Trà thảo mộc Farm | 85.000 đ | Hũ 80g | 55 | 
+| **1401** | `8930000014011` | Dưa cải củ lên men tự nhiên | Thực phẩm lên men tự nhiên | 32.000 đ | Hũ 450g | 60 | 
+| **1501** | `8930000015018` | Combo Rau Củ Xanh Dinh Dưỡng Tuần | Combo Nông Sản Tuần | 250.000 đ | Set 5kg | 20 | 
 
-## 4. 🛡️ Phân quyền người dùng (RBAC)
+## ⚙️ 4. Hướng dẫn thiết lập & Khởi chạy dự án
 
-### 4.1. Hàm ApplyRolePermissions
+### 4.1. Yêu cầu môi trường
 
-Triển khai cơ chế phân quyền hiển thị chức năng dựa trên vai trò của tài khoản đăng nhập.
+* **Hệ điều hành:** Windows 10/11
 
-| Vai trò | Quyền truy cập |
-|---|---|
-| Admin | Toàn quyền truy cập các chức năng quản lý |
-| Cashier | Bán hàng POS và quản lý khách hàng |
-| Warehouse | Quản lý danh mục và sản phẩm |
+* **IDE:** Visual Studio 2022 (phiên bản 17.4 trở lên) có cài đặt workload **ASP.NET and web development** và **.NET desktop development**.
 
-### 4.2. Hàm OpenDefaultScreenByRole
+* **SDK:** .NET Core 6.0 / 8.0 SDK
 
-Sau khi đăng nhập thành công, hệ thống tự động mở màn hình làm việc mặc định tương ứng với vai trò người dùng.
+* **Hệ quản trị CSDL:** Microsoft SQL Server 2019/2022 hoặc SQL Server Express.
 
-- **Admin:** Mở màn hình Quản lý danh mục.
-- **Cashier:** Mở màn hình Bán hàng POS.
-- **Warehouse:** Mở màn hình Quản lý sản phẩm.
+### 4.2. Cấu hình chuỗi kết nối (`appsettings.json`)
 
-### 4.3. Phân quyền ở cấp độ thao tác
+Kiểm tra tệp `MiniSupermarket.API/appsettings.json`, chỉnh sửa chuỗi kết nối cho phù hợp với máy trạm:
 
-Bên cạnh việc ẩn hoặc hiện các nút trên Sidebar, hệ thống bổ sung kiểm tra quyền trực tiếp tại các sự kiện xử lý chức năng.
+```
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Database=MiniSupermarketDb;Trusted_Connection=True;TrustServerCertificate=True;"
+  }
+}
 
-Ví dụ: Chỉ tài khoản Admin mới được phép truy cập chức năng Báo cáo doanh thu.
+```
 
-Cách tiếp cận này giúp hạn chế việc truy cập trái phép vào các chức năng không thuộc quyền hạn của người dùng.
+*(Nếu sử dụng SQL Express, thay `localhost` bằng `.\\SQLEXPRESS`).*
 
-## 5. 🧩 Xây dựng các Form nghiệp vụ
+### 4.3. Tạo Stored Procedure trên SQL Server
 
-### 5.1. FormPOS.cs – Màn hình bán hàng
+Mở **SQL Server Management Studio (SSMS)**, chọn CSDL `MiniSupermarketDb` và thực thi kịch bản tạo thủ tục báo cáo:
 
-Các chức năng chính:
+```
+USE MiniSupermarketDb;
+GO
 
-- Nhập hoặc quét mã vạch sản phẩm thông qua `txtBarcode`.
-- Quản lý danh sách sản phẩm trong giỏ hàng bằng `dgvCart`.
-- Tính tổng tiền đơn hàng.
-- Tính tiền khách đưa và tiền thừa.
-- Thực hiện thanh toán đơn hàng thông qua API.
+IF OBJECT_ID('sp_GetRevenueByCashier', 'P') IS NOT NULL
+    DROP PROCEDURE sp_GetRevenueByCashier;
+GO
 
-### 5.2. FormProductManagement.cs – Quản lý sản phẩm
+CREATE PROCEDURE sp_GetRevenueByCashier
+AS
+BEGIN
+    SET NOCOUNT ON;
 
-Các chức năng chính:
+    SELECT 
+        CashierUsername,
+        COUNT(OrderId) AS TotalOrders,
+        SUM(FinalAmount) AS TotalRevenue,
+        SUM(RewardPoints) AS TotalPointsAwarded
+    FROM Orders
+    GROUP BY CashierUsername
+    ORDER BY TotalRevenue DESC;
+END
+GO
 
-- Hiển thị danh sách sản phẩm.
-- Tìm kiếm sản phẩm.
-- Thêm, sửa và xóa thông tin sản phẩm.
-- Đồng bộ thông tin danh mục với dữ liệu từ API.
+```
 
-### 5.3. FormUserManagement.cs – Quản trị tài khoản
+## 🧪 5. Hướng dẫn kiểm tra và đối soát hệ thống (Test Guide)
 
-Chức năng dành riêng cho Admin, bao gồm:
+Khởi chạy đồng thời hoặc độc lập dự án Web API từ Visual Studio (**F5** hoặc **Ctrl + F5**). Trình duyệt sẽ mở giao diện Swagger UI tại đường dẫn: `https://localhost:7xxx/swagger/index.html`.
 
-- Thêm mới tài khoản người dùng.
-- Quản lý thông tin tài khoản.
-- Phân quyền người dùng theo các vai trò Admin, Cashier và Warehouse.
+### Cách 1: Kiểm thử trực tiếp qua Swagger UI
 
-## 6. 🧪 Kiểm thử và xác minh phân quyền
+#### 1. Tra cứu thông tin sản phẩm bằng Barcode (Connected Mode - `SqlDataReader`)
 
-### 6.1. Tài khoản kiểm thử
+* **Endpoint:** `GET /api/ado-products/barcode/8930000001010`
 
-| Tài khoản | Mật khẩu | Vai trò | Màn hình mặc định |
-|---|---|---|---|
-| `admin01` | `123456` | Admin | Quản lý danh mục |
-| `cashier01` | `123456` | Cashier | Bán hàng POS |
-| `ware01` | `123456` | Warehouse | Quản lý sản phẩm |
+* **Mô tả:** Quét mã vạch nông sản **Cải bó xôi hữu cơ Farm** (ID: 101, Giá: 35.000đ).
 
-### 6.2. Kết quả kiểm thử phân quyền
+* **Kết quả kỳ vọng (Status 200 OK):**
 
-- [x] **Admin:** Sidebar hiển thị đầy đủ các chức năng quản lý.
-- [x] **Cashier:** Sidebar chỉ hiển thị Bán hàng POS và Quản lý khách hàng.
-- [x] **Warehouse:** Sidebar chỉ hiển thị Quản lý danh mục và Quản lý sản phẩm.
-- [x] Hệ thống tự động mở màn hình mặc định theo vai trò.
-- [x] Các Form con được nhúng vừa khít trong `panelMainContent`.
-- [x] Chuyển đổi giữa các Form không tạo thêm cửa sổ chính.
-- [x] Nút điều hướng đang hoạt động được đổi màu để phân biệt với các nút còn lại.
+```
+{
+  "productId": 101,
+  "barcode": "8930000001010",
+  "productName": "Cải bó xôi hữu cơ Farm",
+  "price": 35000,
+  "stockQuantity": 80
+}
 
-## 7. ✅ Kết quả đạt được
+```
 
-Sau buổi thực hành 4, hệ thống đã triển khai các nội dung chính:
+#### 2. Tải danh sách bộ đệm ngoại tuyến (Disconnected Mode - `DataTable` & `SqlDataAdapter`)
 
-- Xây dựng kiến trúc giao diện WinForms Shell theo mô hình Single-Form Architecture.
-- Thiết kế Sidebar, Header và vùng làm việc trung tâm.
-- Triển khai cơ chế nhúng động Form con.
-- Xây dựng chức năng điều hướng giữa các màn hình nghiệp vụ.
-- Áp dụng phân quyền giao diện theo ba vai trò Admin, Cashier và Warehouse.
-- Tự động điều hướng đến màn hình mặc định sau khi đăng nhập.
-- Bổ sung kiểm tra quyền truy cập tại cấp độ thao tác.
-- Kiểm thử giao diện và xác minh kết quả phân quyền bằng các tài khoản mẫu.
+* **Endpoint:** `GET /api/ado-products/disconnected-cache`
 
-## 8. 👨‍💻 Thông tin sinh viên
+* **Mô tả:** Lấy toàn bộ 15 sản phẩm đại diện đã nạp vào bộ nhớ RAM ngắt kết nối.
 
-- **Họ và tên:** Nguyễn Quốc Vương
-- **Mã sinh viên:** 2124110272
-- **Lớp học phần:** CCQ2411D
-- **Môn học:** Lập trình Ứng dụng .NET Core (229162)
+* **Kết quả kỳ vọng (Status 200 OK):**
+
+```
+{
+  "totalLoaded": 15,
+  "cachedAt": "2026-10-22 15:30:00",
+  "data": [
+    {
+      "productId": 101,
+      "barcode": "8930000001010",
+      "productName": "Cải bó xôi hữu cơ Farm",
+      "price": 35000,
+      "stockQuantity": 80
+    },
+    {
+      "productId": 201,
+      "barcode": "8930000002017",
+      "productName": "Cà rốt giống củ bản địa",
+      "price": 38000,
+      "stockQuantity": 100
+    }
+  ]
+}
+
+```
+
+#### 3. Báo cáo doanh thu ca theo thu ngân (`Stored Procedure`)
+
+* **Endpoint:** `GET /api/reports/revenue-by-cashier`
+
+* **Mô tả:** Thực thi thủ tục lưu trữ `sp_GetRevenueByCashier` để tổng hợp doanh thu theo 5 tài khoản thu ngân (`cashier01` $\rightarrow$ `cashier05`) từ 15 hóa đơn bán hàng có sẵn.
+
+* **Kết quả kỳ vọng (Status 200 OK):**
+
+```
+{
+  "success": true,
+  "generatedAt": "2026-10-22 15:31:10",
+  "totalCashiers": 5,
+  "grandTotalRevenue": 4822000.00,
+  "data": [
+    {
+      "cashierUsername": "cashier03",
+      "totalOrders": 2,
+      "totalRevenue": 1435000.00,
+      "totalPointsAwarded": 143
+    },
+    {
+      "cashierUsername": "cashier05",
+      "totalOrders": 3,
+      "totalRevenue": 1328000.00,
+      "totalPointsAwarded": 132
+    },
+    {
+      "cashierUsername": "cashier01",
+      "totalOrders": 4,
+      "totalRevenue": 1322000.00,
+      "totalPointsAwarded": 131
+    },
+    {
+      "cashierUsername": "cashier04",
+      "totalOrders": 3,
+      "totalRevenue": 484000.00,
+      "totalPointsAwarded": 48
+    },
+    {
+      "cashierUsername": "cashier02",
+      "totalOrders": 3,
+      "totalRevenue": 253000.00,
+      "totalPointsAwarded": 24
+    }
+  ]
+}
+
+```
+
+#### 4. Kịch bản thanh toán thành công (Transaction Commit)
+
+* **Endpoint:** `POST /api/checkout`
+
+* **Mô tả:** Mua 2 bó **Cải bó xôi hữu cơ Farm** (ID: 101, tồn kho ban đầu 80) và 1 kg **Cá lăng sinh thái sông Đà** (ID: 601, tồn kho ban đầu 30).
+
+* **Request Body:**
+
+```
+{
+  "cashierUsername": "cashier01",
+  "customerId": 1,
+  "items": [
+    { "productId": 101, "quantity": 2, "unitPrice": 35000 },
+    { "productId": 601, "quantity": 1, "unitPrice": 195000 }
+  ]
+}
+
+```
+
+* **Kết quả kỳ vọng (Status 200 OK):**
+
+  * Hệ thống tính tổng tiền $2 \times 35.000 + 1 \times 195.000 = 265.000$ đ, tích $26$ điểm thưởng.
+
+  * Tồn kho SP 101 giảm còn **78**, SP 601 giảm còn **29**.
+
+  * Điểm thưởng khách hàng ID 1 được cộng dồn.
+
+#### 5. Kịch bản thiếu kho - Kích hoạt hoàn tác (Transaction Rollback)
+
+* **Endpoint:** `POST /api/checkout`
+
+* **Mô tả:** Mua 1 bó **Cải bó xôi hữu cơ Farm** (ID: 101) và cố tình mua **999 kg** **Cà rốt giống củ bản địa** (ID: 201, tồn kho chỉ có 100).
+
+* **Request Body:**
+
+```
+{
+  "cashierUsername": "cashier01",
+  "customerId": 1,
+  "items": [
+    { "productId": 101, "quantity": 1, "unitPrice": 35000 },
+    { "productId": 201, "quantity": 999, "unitPrice": 38000 }
+  ]
+}
+
+```
+
+* **Kết quả kỳ vọng (Status 400 Bad Request):**
+
+```
+{
+  "success": false,
+  "message": "Giao dịch thanh toán bị hủy và đã được Rollback an toàn!",
+  "errorDetail": "Sản phẩm 'Cà rốt giống củ bản địa' (ID: 201) không đủ tồn kho! (Tồn kho thực tế: 100, Số lượng yêu cầu mua: 999)"
+}
+
+```
+
+* **Đối soát thực tế trên SQL Server (Chứng minh chuẩn ACID):**
+
+  * Tồn kho của sản phẩm ID 101 **vẫn giữ nguyên 78**, không bị trừ 1 bó dù đứng trước sản phẩm lỗi.
+
+  * Không có bản ghi hóa đơn rác nào được chèn vào bảng `Orders` hay `OrderDetails`.
+
+### Cách 2: Kiểm thử trên ứng dụng máy trạm Windows Forms (`MiniSupermarket.WinForm`)
+
+1. Đặt startup project là **MiniSupermarket.WinForm** (hoặc cấu hình Multiple Startup Projects chạy cả API và WinForm).
+
+2. Đăng nhập bằng tài khoản thu ngân (ví dụ: `cashier01`).
+
+3. Mở màn hình **FormPOS**:
+
+   * Nhập mã vạch `8930000001010` và nhấn **Enter** $\rightarrow$ Dữ liệu sản phẩm Cải bó xôi hữu cơ hiển thị lập tức lên danh sách mua hàng.
+
+   * Thử nghiệm bấm nút **Thanh toán** để kích hoạt luồng gọi Web API transaction khép kín.
+
+4. Mở màn hình **FormQuickReport** để xem dữ liệu doanh thu tự động load từ Stored Procedure.
+
+## 🛡️ 6. Tổng kết kiến thức kỹ thuật đạt được
+
+* \[x\] **ADO.NET Cơ bản:** Quản lý vòng đời kết nối với `using(SqlConnection)`, phân định chính xác `ExecuteScalar()`, `ExecuteNonQuery()`, `ExecuteReader()`.
+
+* \[x\] **Chống SQL Injection:** Tuyệt đối không cộng chuỗi SQL, tham số hóa toàn diện với `SqlParameter`.
+
+* \[x\] **Connected vs Disconnected:** Nắm vững sự khác biệt giữa stream đọc nhanh một chiều `SqlDataReader` và bảng dữ liệu RAM ngoại tuyến `DataTable`/`SqlDataAdapter`.
+
+* \[x\] **Tối ưu Stored Procedure:** Giảm phân tích cú pháp SQL lặp lại, tối ưu băng thông và bảo mật tầng dữ liệu.
+
+* \[x\] **Toàn vẹn giao dịch ACID:** Kiểm soát luồng ghi dữ liệu phức tạp nhiều bảng bằng `SqlTransaction` (`BeginTransaction`, `Commit`, `Rollback`).
