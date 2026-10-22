@@ -1,151 +1,317 @@
-# 🛒 HỆ THỐNG QUẢN LÝ SIÊU THỊ MINI (MINISUPERMARKET SYSTEM)
+BUỔI 5: ADO.NET NÂNG CAO, STORED PROCEDURE & GIAO DỊCH POS CHECKOUT
 
-**Môn học:** Lập trình Ứng dụng .NET Core  
-**Mã môn học:** 229162  
-**Buổi thực hành:** Buổi 4 – Thiết kế kiến trúc giao diện WinForms Shell và điều hướng phân quyền  
-**Sinh viên:** Nguyễn Quốc Vương  
-**Mã sinh viên:** 2124110272  
-**Lớp học phần:** CCQ2411D  
+Tài liệu hướng dẫn thực hành và tóm tắt kiến trúc cho hệ thống MiniSupermarket (bao gồm MiniSupermarket.API và MiniSupermarket.WinForm), tập trung vào kỹ thuật truy xuất dữ liệu hiệu năng cao với ADO.NET thuần, tối ưu báo cáo bằng Stored Procedure và bảo toàn dữ liệu bằng SqlTransaction (chuẩn ACID).
 
----
+📋 MỤC LỤC
 
-## 1. 📝 Giới thiệu buổi thực hành
+Mục tiêu buổi học
 
-Buổi thực hành 4 tập trung xây dựng kiến trúc giao diện WinForms Shell theo mô hình Single-Form Architecture, thiết kế Sidebar và Main Workspace, đồng thời triển khai cơ chế điều hướng và phân quyền người dùng theo ba vai trò: Admin, Cashier và Warehouse.
+Cấu trúc Solution & Tệp tin phát triển
 
-## 2. 🖥️ Xây dựng giao diện WinForms Shell
+Nội dung trọng tâm 5 tiết học
 
-### 2.1. FormMainShell.cs
+Tiết 1: 5 Thành phần cốt lõi ADO.NET
 
-Thiết kế giao diện chính của hệ thống với các thành phần:
+Tiết 2: API Tra cứu Barcode & Mô hình DataTable Cache
 
-- **`panelSidebar`**: Thanh điều hướng bên trái, có chiều rộng 230px, màu xanh đen, chứa logo và các nút chức năng.
-- **`panelTopHeader`**: Thanh tiêu đề phía trên, cao 60px, nền trắng, hiển thị tiêu đề màn hình và thông tin người dùng đăng nhập.
-- **`panelMainContent`**: Vùng nội dung trung tâm, sử dụng `Dock = Fill` để hiển thị các Form con.
-- **`lblTitle`**: Hiển thị tiêu đề màn hình hiện tại.
-- **`lblUserInfo`**: Hiển thị thông tin tài khoản đăng nhập.
+Tiết 3: Stored Procedure & Báo cáo doanh thu ca
 
-Các nút chức năng trên Sidebar:
+Tiết 4: Chuẩn ACID & Kỹ thuật SqlTransaction
 
-- `btnPOS`: Bán hàng POS.
-- `btnCategory`: Quản lý danh mục.
-- `btnProduct`: Quản lý sản phẩm.
-- `btnCustomer`: Quản lý khách hàng.
-- `btnReports`: Báo cáo doanh thu.
-- `btnUserManage`: Quản lý tài khoản.
-- `btnLogout`: Đăng xuất.
+Tiết 5: Khép kín luồng POS Checkout & Kịch bản Rollback
 
-## 3. 🔄 Nhúng động Form con
+Hướng dẫn cài đặt & Chạy kiểm thử
 
-### 3.1. Hàm OpenChildForm
+Kịch bản kiểm thử API (Swagger UI / Postman)
 
-Xây dựng cơ chế nhúng các Form nghiệp vụ vào `panelMainContent` thay vì mở nhiều cửa sổ riêng biệt.
+Checklist nghiệm thu thực hành
 
-Các bước thực hiện:
+1. MỤC TIÊU BUỔI HỌC
 
-1. Thiết lập `TopLevel = false` cho Form con.
-2. Thiết lập `FormBorderStyle = None` để loại bỏ viền cửa sổ.
-3. Thiết lập `Dock = Fill` để Form con vừa khít vùng nội dung.
-4. Đóng và dọn dẹp Form con cũ trước khi hiển thị Form mới.
-5. Đưa Form mới lên phía trước bằng `BringToFront`.
-6. Cập nhật tiêu đề màn hình trên `lblTitle`.
-7. Sử dụng `HighlightActiveButton` để làm nổi bật nút điều hướng đang được chọn.
+Nắm vững kiến trúc ADO.NET thuần: Phân biệt và làm chủ 5 thành phần: SqlConnection, SqlCommand, SqlParameter, SqlDataReader, DataTable / SqlDataAdapter.
 
-**Kết quả:** Giao diện chuyển đổi giữa các chức năng trong cùng một cửa sổ chính, hạn chế việc mở nhiều cửa sổ và tạo trải nghiệm sử dụng thống nhất.
+An toàn bảo mật: Triệt tiêu hoàn toàn lỗ hổng tấn công SQL Injection bằng kỹ thuật tham số hóa SqlParameter.
 
-## 4. 🛡️ Phân quyền người dùng (RBAC)
+Hiệu năng & Tối ưu hóa:
 
-### 4.1. Hàm ApplyRolePermissions
+Ứng dụng luồng đọc siêu tốc một chiều (SqlDataReader, Forward-Only) cho bài toán quét mã vạch (Barcode) dưới 100ms.
 
-Triển khai cơ chế phân quyền hiển thị chức năng dựa trên vai trò của tài khoản đăng nhập.
+Sử dụng Stored Procedure (sp_GetRevenueByCashier) giảm tải băng thông và tối ưu kế hoạch thực thi trên SQL Server.
 
-| Vai trò | Quyền truy cập |
-|---|---|
-| Admin | Toàn quyền truy cập các chức năng quản lý |
-| Cashier | Bán hàng POS và quản lý khách hàng |
-| Warehouse | Quản lý danh mục và sản phẩm |
+Bảo toàn dữ liệu theo chuẩn ACID: Điều khiển giao dịch đa bảng (Orders, OrderDetails, Products, Customers) bằng SqlTransaction, đảm bảo tự động Rollback khi gặp lỗi vượt tồn kho hoặc sự cố hệ thống.
 
-### 4.2. Hàm OpenDefaultScreenByRole
+2. CẤU TRÚC SOLUTION & TỆP TIN PHÁT TRIỂN
 
-Sau khi đăng nhập thành công, hệ thống tự động mở màn hình làm việc mặc định tương ứng với vai trò người dùng.
+MiniSuperMartket/
+│
+├── MiniSupermarket.API/                   # Dự án Web API (.NET Core)
+│   ├── Controllers/
+│   │   ├── AdoProductController.cs        # [MỚI - Tiết 2] Tra cứu Barcode & DataTable cache
+│   │   ├── ReportsController.cs           # [MỚI - Tiết 3] Báo cáo doanh thu qua Stored Procedure
+│   │   ├── CheckoutController.cs          # [MỚI - Tiết 5] Xử lý thanh toán POS với SqlTransaction
+│   │   └── ... (Các controller khác)
+│   ├── Dto/ (hoặc Models/)
+│   │   ├── ProductLookupDto.cs            # DTO trả về thông tin tra cứu mã vạch
+│   │   ├── CashierRevenueDto.cs           # DTO nhận kết quả từ sp_GetRevenueByCashier
+│   │   └── CheckoutDtos.cs                # CheckoutRequestDto & CartItemCheckoutDto
+│   ├── Data/
+│   │   └── SupermarketDbContext.cs
+│   └── appsettings.json                   # Chuỗi kết nối "DefaultConnection"
+│
+└── MiniSupermarket.WinForm/               # Dự án giao diện máy trạm quầy thu ngân
+    ├── FormPOS.cs                         # Giao diện bán hàng POS tích hợp
+    ├── FormQuickReport.cs                 # Giao diện xem nhanh báo cáo doanh thu ca
+    └── ...
 
-- **Admin:** Mở màn hình Quản lý danh mục.
-- **Cashier:** Mở màn hình Bán hàng POS.
-- **Warehouse:** Mở màn hình Quản lý sản phẩm.
 
-### 4.3. Phân quyền ở cấp độ thao tác
+3. NỘI DUNG TRỌNG TÂM 5 TIẾT HỌC
 
-Bên cạnh việc ẩn hoặc hiện các nút trên Sidebar, hệ thống bổ sung kiểm tra quyền trực tiếp tại các sự kiện xử lý chức năng.
+Tiết 1: 5 Thành phần cốt lõi ADO.NET
 
-Ví dụ: Chỉ tài khoản Admin mới được phép truy cập chức năng Báo cáo doanh thu.
+Mô hình đời thường:
 
-Cách tiếp cận này giúp hạn chế việc truy cập trái phép vào các chức năng không thuộc quyền hạn của người dùng.
+SqlConnection: Đường dây điện thoại đến siêu thị (bắt buộc Open() và bọc trong using).
 
-## 5. 🧩 Xây dựng các Form nghiệp vụ
+SqlCommand: Phiếu đặt hàng chứa lệnh thực thi (Text hoặc Stored Procedure).
 
-### 5.1. FormPOS.cs – Màn hình bán hàng
+SqlParameter: Tham số an toàn, chống nối chuỗi SQL Injection (@Barcode, @Stock).
 
-Các chức năng chính:
+SqlDataReader: Băng chuyền quét mã siêu tốc (Connected, Read-Only, Forward-Only).
 
-- Nhập hoặc quét mã vạch sản phẩm thông qua `txtBarcode`.
-- Quản lý danh sách sản phẩm trong giỏ hàng bằng `dgvCart`.
-- Tính tổng tiền đơn hàng.
-- Tính tiền khách đưa và tiền thừa.
-- Thực hiện thanh toán đơn hàng thông qua API.
+DataTable / SqlDataAdapter: Thùng hàng đóng gói mang về nhà (Disconnected Mode).
 
-### 5.2. FormProductManagement.cs – Quản lý sản phẩm
+Phân biệt 3 phương thức thực thi của SqlCommand:
 
-Các chức năng chính:
+ExecuteScalar(): Trả về 1 ô duy nhất (Dòng 1, Cột 1) $\rightarrow$ COUNT(*), SUM(), SCOPE_IDENTITY().
 
-- Hiển thị danh sách sản phẩm.
-- Tìm kiếm sản phẩm.
-- Thêm, sửa và xóa thông tin sản phẩm.
-- Đồng bộ thông tin danh mục với dữ liệu từ API.
+ExecuteNonQuery(): Trả về số dòng bị ảnh hưởng $\rightarrow$ INSERT, UPDATE, DELETE.
 
-### 5.3. FormUserManagement.cs – Quản trị tài khoản
+ExecuteReader(): Trả về đối tượng SqlDataReader $\rightarrow$ Đọc duyệt danh sách bản ghi.
 
-Chức năng dành riêng cho Admin, bao gồm:
+Tiết 2: API Tra cứu Barcode & Mô hình DataTable Cache
 
-- Thêm mới tài khoản người dùng.
-- Quản lý thông tin tài khoản.
-- Phân quyền người dùng theo các vai trò Admin, Cashier và Warehouse.
+Vấn đề quầy POS: Thao tác quét mã vạch cần tốc độ phản hồi tức thì (<100ms), không thể chịu overhead từ ORM.
 
-## 6. 🧪 Kiểm thử và xác minh phân quyền
+Giải pháp: Xây dựng AdoProductController:
 
-### 6.1. Tài khoản kiểm thử
+GET /api/ado-products/barcode/{barcode}: Mở SqlConnection, dùng SqlDataReader đọc đúng 1 dòng và đóng ngay.
 
-| Tài khoản | Mật khẩu | Vai trò | Màn hình mặc định |
-|---|---|---|---|
-| `admin01` | `123456` | Admin | Quản lý danh mục |
-| `cashier01` | `123456` | Cashier | Bán hàng POS |
-| `ware01` | `123456` | Warehouse | Quản lý sản phẩm |
+GET /api/ado-products/disconnected-cache: Dùng SqlDataAdapter.Fill(dataTable) để lấy dữ liệu về RAM, tự động giải phóng kết nối vật lý ngay khi nạp xong.
 
-### 6.2. Kết quả kiểm thử phân quyền
+Tiết 3: Stored Procedure & Báo cáo doanh thu ca
 
-- [x] **Admin:** Sidebar hiển thị đầy đủ các chức năng quản lý.
-- [x] **Cashier:** Sidebar chỉ hiển thị Bán hàng POS và Quản lý khách hàng.
-- [x] **Warehouse:** Sidebar chỉ hiển thị Quản lý danh mục và Quản lý sản phẩm.
-- [x] Hệ thống tự động mở màn hình mặc định theo vai trò.
-- [x] Các Form con được nhúng vừa khít trong `panelMainContent`.
-- [x] Chuyển đổi giữa các Form không tạo thêm cửa sổ chính.
-- [x] Nút điều hướng đang hoạt động được đổi màu để phân biệt với các nút còn lại.
+Lợi ích Stored Procedure: Biên dịch sẵn kế hoạch thực thi (Execution Plan), giảm băng thông đường truyền, tách biệt tầng logic dữ liệu và tăng cường bảo mật phân quyền.
 
-## 7. ✅ Kết quả đạt được
+Script T-SQL tạo thủ tục:
 
-Sau buổi thực hành 4, hệ thống đã triển khai các nội dung chính:
+CREATE PROCEDURE sp_GetRevenueByCashier
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT 
+        CashierUsername,
+        COUNT(OrderId) AS TotalOrders,
+        SUM(FinalAmount) AS TotalRevenue,
+        SUM(RewardPoints) AS TotalPointsAwarded
+    FROM Orders
+    GROUP BY CashierUsername
+    ORDER BY TotalRevenue DESC;
+END
+GO
 
-- Xây dựng kiến trúc giao diện WinForms Shell theo mô hình Single-Form Architecture.
-- Thiết kế Sidebar, Header và vùng làm việc trung tâm.
-- Triển khai cơ chế nhúng động Form con.
-- Xây dựng chức năng điều hướng giữa các màn hình nghiệp vụ.
-- Áp dụng phân quyền giao diện theo ba vai trò Admin, Cashier và Warehouse.
-- Tự động điều hướng đến màn hình mặc định sau khi đăng nhập.
-- Bổ sung kiểm tra quyền truy cập tại cấp độ thao tác.
-- Kiểm thử giao diện và xác minh kết quả phân quyền bằng các tài khoản mẫu.
 
-## 8. 👨‍💻 Thông tin sinh viên
+Khai báo trong C#:
 
-- **Họ và tên:** Nguyễn Quốc Vương
-- **Mã sinh viên:** 2124110272
-- **Lớp học phần:** CCQ2411D
-- **Môn học:** Lập trình Ứng dụng .NET Core (229162)
+using (SqlCommand cmd = new SqlCommand("sp_GetRevenueByCashier", conn))
+{
+    cmd.CommandType = CommandType.StoredProcedure; // BẮT BUỘC
+    // Thực thi qua ExecuteReader...
+}
+
+
+Tiết 4: Chuẩn ACID & Kỹ thuật SqlTransaction
+
+4 Nguyên tắc ACID:
+
+A (Atomicity): Tính nguyên tử - Tất cả thành công hoặc không có gì thay đổi.
+
+C (Consistency): Tính nhất quán - Ràng buộc và logic dữ liệu luôn toàn vẹn.
+
+I (Isolation): Tính cô lập - Các giao dịch chạy song song không thấy dữ liệu rác của nhau.
+
+D (Durability): Tính bền vững - Đã Commit là ghi đĩa vĩnh viễn, không sợ sập nguồn.
+
+Quy tắc vàng khi code SqlTransaction:
+
+Phải gọi connection.Open() trước khi connection.BeginTransaction().
+
+Mọi SqlCommand tham gia phiên đều phải gán cmd.Transaction = transaction.
+
+Chỉ gọi transaction.Commit() ở dòng lệnh cuối cùng của khối try.
+
+Luôn bọc transaction.Rollback() trong khối catch.
+
+Tiết 5: Khép kín luồng POS Checkout & Kịch bản Rollback
+
+Xây dựng CheckoutController.cs giải quyết bài toán giao dịch POS liên hoàn:
+
+[BẮT ĐẦU TRANSACTION]
+  │
+  ├── 1. Tạo hóa đơn trong bảng `Orders` (OUTPUT INSERTED.OrderId -> ExecuteScalar)
+  │
+  ├── 2. Lặp từng món hàng trong giỏ:
+  │      ├─ Kiểm tra tồn kho (SELECT StockQuantity FROM Products)
+  │      ├─ Nếu Stock < Request -> Throw Exception (Kích hoạt Rollback)
+  │      ├─ Thêm dòng chi tiết vào `OrderDetails`
+  │      └─ Cập nhật trừ tồn kho bảng `Products`
+  │
+  ├── 3. Cộng điểm thưởng cho khách hàng trong bảng `Customers`
+  │
+[COMMIT THÀNH CÔNG]  hoặc  [CATCH EXCEPTION -> ROLLBACK SẠCH SẼ]
+
+
+4. HƯỚNG DẪN CÀI ĐẶT & CHẠY KIỂM THỬ
+
+Bước 1: Khởi tạo Database & Stored Procedure
+
+Mở SQL Server Management Studio (SSMS).
+
+Đảm bảo CSDL MiniSupermarketDb đã tồn tại dữ liệu mẫu.
+
+Chạy script tạo thủ tục sp_GetRevenueByCashier trong cơ sở dữ liệu MiniSupermarketDb.
+
+Bước 2: Cấu hình chuỗi kết nối
+
+Mở MiniSupermarket.API/appsettings.json, kiểm tra connection string:
+
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Database=MiniSupermarketDb;Trusted_Connection=True;TrustServerCertificate=True;"
+  }
+}
+
+
+(Nếu dùng SQL Express: Đổi Server=localhost thành Server=.\\SQLEXPRESS).
+
+Bước 3: Khởi chạy dự án
+
+Trong Visual Studio, chọn Startup Project là MiniSupermarket.API $\rightarrow$ Nhấn F5 hoặc Ctrl + F5.
+
+Trình duyệt sẽ mở giao diện Swagger UI tại đường dẫn: https://localhost:7xxx/swagger/index.html.
+
+5. KỊCH BẢN KIỂM THỬ API (SWAGGER UI)
+
+Kịch bản 1: Quét mã vạch sản phẩm (Tiết 2)
+
+Endpoint: GET /api/ado-products/barcode/893456789001
+
+Kết quả mong đợi: HTTP 200 OK
+
+{
+  "productId": 1,
+  "barcode": "893456789001",
+  "productName": "Snack Khoai Tây O'Star Gói 60g",
+  "price": 12500,
+  "stockQuantity": 150
+}
+
+
+Kịch bản 2: Báo cáo doanh thu theo thu ngân (Tiết 3)
+
+Endpoint: GET /api/Reports/revenue-by-cashier
+
+Kết quả mong đợi: HTTP 200 OK
+
+{
+  "success": true,
+  "totalCashiers": 5,
+  "grandTotalRevenue": 4822000.00,
+  "data": [
+    {
+      "cashierUsername": "cashier03",
+      "totalOrders": 2,
+      "totalRevenue": 1435000.00,
+      "totalPointsAwarded": 143
+    }
+  ]
+}
+
+
+Kịch bản 3: Thanh toán POS thành công (Tiết 5 - Commit)
+
+Endpoint: POST /api/Checkout
+
+Request Body:
+
+{
+  "cashierUsername": "cashier01",
+  "customerId": 1,
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 2,
+      "unitPrice": 12500
+    },
+    {
+      "productId": 5,
+      "quantity": 3,
+      "unitPrice": 10000
+    }
+  ]
+}
+
+
+Kết quả mong đợi: HTTP 200 OK
+
+Đối soát SSMS: Bảng Orders tăng 1 bản ghi, OrderDetails có 2 dòng, tồn kho SP 1 giảm 2 và SP 5 giảm 3.
+
+Kịch bản 4: Mua hàng vượt tồn kho (Tiết 5 - Rollback)
+
+Endpoint: POST /api/Checkout
+
+Request Body (Đặt 999 đơn vị sản phẩm chỉ còn tồn kho 40):
+
+{
+  "cashierUsername": "cashier01",
+  "customerId": 1,
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 1,
+      "unitPrice": 12500
+    },
+    {
+      "productId": 2,
+      "quantity": 999,
+      "unitPrice": 135000
+    }
+  ]
+}
+
+
+Kết quả mong đợi: HTTP 400 Bad Request
+
+{
+  "success": false,
+  "message": "Giao dịch thanh toán bị hủy và đã được Rollback an toàn!",
+  "errorDetail": "Sản phẩm 'Bánh Quy Bơ Danisa Hộp Thiếc 454g' (ID: 2) không đủ tồn kho! (Tồn kho thực tế: 40, Số lượng yêu cầu mua: 999)"
+}
+
+
+Đối soát SSMS: Không có Order mới nào được tạo, sản phẩm ID 1 không hề bị trừ tồn kho.
+
+6. CHECKLIST NGHIỆM THU THỰC HÀNH
+
+[ ] 1. Kiến trúc cơ bản: Khởi tạo kết nối an toàn với using (SqlConnection ...), sử dụng SqlParameter ngăn ngừa SQL Injection.
+
+[ ] 2. Phân biệt thực thi: Chọn chuẩn xác giữa ExecuteScalar(), ExecuteNonQuery() và ExecuteReader().
+
+[ ] 3. Tra cứu nhanh: Endpoint /api/ado-products/barcode/{barcode} hoạt động ổn định, trả về dữ liệu nhanh chóng.
+
+[ ] 4. Stored Procedure: Viết và chạy thành công sp_GetRevenueByCashier trên SSMS, map dữ liệu đúng qua ReportsController.
+
+[ ] 5. Cơ chế ACID: Giải thích được 4 đặc tính ACID và cấu trúc bọc SqlTransaction.
+
+[ ] 6. Giao dịch Checkout: API /api/checkout hoàn tất đủ 4 bước (Order, OrderDetails, trừ tồn kho, tích điểm).
+
+[ ] 7. Kiểm chứng Rollback: Đảm bảo khi phát sinh lỗi quá tồn kho, toàn bộ dữ liệu trở về trạng thái toàn vẹn ban đầu.
