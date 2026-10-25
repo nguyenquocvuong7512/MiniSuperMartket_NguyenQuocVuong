@@ -9,6 +9,12 @@ namespace MiniSupermarket.WinForms
         public FormCategoryManagement()
         {
             InitializeComponent();
+            Theme.UITheme.ApplyModernDataGridView(dgvCategories);
+            Theme.UITheme.StyleButton(btnAdd, Theme.UITheme.ButtonVariant.Primary);
+            Theme.UITheme.StyleButton(btnUpdate, Theme.UITheme.ButtonVariant.Secondary);
+            Theme.UITheme.StyleButton(btnDelete, Theme.UITheme.ButtonVariant.Danger);
+            Theme.UITheme.StyleButton(btnSearch, Theme.UITheme.ButtonVariant.Secondary);
+            Theme.UITheme.StyleButton(btnLoad, Theme.UITheme.ButtonVariant.Neutral);
         }
 
         private HttpClient GetAuthenticatedClient()

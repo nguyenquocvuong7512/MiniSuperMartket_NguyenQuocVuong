@@ -21,6 +21,9 @@ namespace MiniSupermarket.API.Dto
         // Mã định danh khách hàng (nếu là khách vãng lai, truyền CustomerId = 15)
         public int CustomerId { get; set; }
 
+        // Số điện thoại khách hàng tra cứu tích điểm
+        public string? CustomerPhone { get; set; }
+
         // Phương thức thanh toán (Cash / Transfer)
         public string PaymentMethod { get; set; } = "Cash";
 

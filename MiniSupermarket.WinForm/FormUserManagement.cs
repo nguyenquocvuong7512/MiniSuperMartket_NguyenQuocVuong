@@ -14,6 +14,12 @@ namespace MiniSupermarket.WinForms
         public FormUserManagement()
         {
             InitializeComponent();
+            Theme.UITheme.ApplyModernDataGridView(dgvUsers);
+            Theme.UITheme.StyleButton(btnAddUser, Theme.UITheme.ButtonVariant.Primary);
+            Theme.UITheme.StyleButton(btnResetPassword, Theme.UITheme.ButtonVariant.Warning);
+            Theme.UITheme.StyleButton(btnDeleteUser, Theme.UITheme.ButtonVariant.Danger);
+            Theme.UITheme.StyleButton(btnRefresh, Theme.UITheme.ButtonVariant.Neutral);
+
             cboRole.Items.AddRange(new object[] { "Admin", "Cashier", "Warehouse" });
             cboRole.SelectedIndex = 1;
 

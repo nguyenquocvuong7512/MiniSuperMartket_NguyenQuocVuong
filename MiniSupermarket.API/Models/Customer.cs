@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MiniSupermarket.API.Models
@@ -26,6 +26,7 @@ namespace MiniSupermarket.API.Models
         public string? Address { get; set; }
 
         [Column("RewardPoints")]
+        [Range(0, int.MaxValue, ErrorMessage = "Điểm tích lũy không được là số âm!")]
         public int RewardPoints { get; set; } = 0;
 
         [StringLength(50)]

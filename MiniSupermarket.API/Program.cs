@@ -52,6 +52,17 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddControllers();
 
+// === Cấu hình CORS cho WinForms / Web Client truy cập API ===
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment()) { app.UseSwagger(); app.UseSwaggerUI(); }
@@ -60,6 +71,8 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
+
+app.UseCors("AllowAll"); // Bật CORS
 app.UseAuthentication(); // ⚠️ Đúng thứ tự
 app.UseAuthorization();
 app.MapControllers();

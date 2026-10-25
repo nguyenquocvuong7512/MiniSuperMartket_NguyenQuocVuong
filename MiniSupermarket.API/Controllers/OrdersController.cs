@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MiniSupermarket.API.Data;
@@ -343,7 +343,42 @@ namespace MiniSupermarket.API.Controllers
 
 
                 // -------------------------------------------------
-                // 10. Lưu Database
+                // 10. Tích điểm cho khách hàng (nếu có thông tin)
+                // -------------------------------------------------
+                Customer? customer = null;
+                if (request.CustomerId.HasValue && request.CustomerId.Value > 0)
+                {
+                    customer = await _context.Customers.FindAsync(request.CustomerId.Value);
+                }
+                else if (!string.IsNullOrWhiteSpace(request.CustomerPhone))
+                {
+                    string phone = request.CustomerPhone.Trim();
+                    customer = await _context.Customers.FirstOrDefaultAsync(c => c.PhoneNumber == phone);
+                }
+
+                int rewardPointsAdded = 0;
+                if (customer != null)
+                {
+                    rewardPointsAdded = (int)(totalAmount / 10000); // 10.000 VNĐ = 1 điểm tích lũy
+                    if (rewardPointsAdded > 0)
+                    {
+                        customer.RewardPoints += rewardPointsAdded;
+
+                        if (customer.RewardPoints >= 1000)
+                            customer.MembershipRank = "Kim Cương";
+                        else if (customer.RewardPoints >= 500)
+                            customer.MembershipRank = "Vàng";
+                        else if (customer.RewardPoints >= 200)
+                            customer.MembershipRank = "Bạc";
+                        else if (customer.RewardPoints >= 50)
+                            customer.MembershipRank = "Thân Thiết";
+                        else
+                            customer.MembershipRank = "Mới";
+                    }
+                }
+
+                // -------------------------------------------------
+                // 11. Lưu Database
                 // -------------------------------------------------
                 _context.Orders.Add(order);
 
@@ -351,13 +386,13 @@ namespace MiniSupermarket.API.Controllers
 
 
                 // -------------------------------------------------
-                // 11. Commit Transaction
+                // 12. Commit Transaction
                 // -------------------------------------------------
                 await transaction.CommitAsync();
 
 
                 // -------------------------------------------------
-                // 12. Trả kết quả
+                // 13. Trả kết quả
                 // -------------------------------------------------
                 return Ok(new
                 {
@@ -383,6 +418,18 @@ namespace MiniSupermarket.API.Controllers
 
                         changeAmount =
                             order.ChangeAmount,
+
+                        customerId = customer?.CustomerId,
+
+                        customerName = customer?.CustomerName,
+
+                        customerPhone = customer?.PhoneNumber,
+
+                        rewardPointsAdded = rewardPointsAdded,
+
+                        totalRewardPoints = customer?.RewardPoints ?? 0,
+
+                        membershipRank = customer?.MembershipRank ?? "Mới",
 
                         items = order.OrderDetails.Select(d => new
                         {
@@ -412,12 +459,14 @@ namespace MiniSupermarket.API.Controllers
 
 
         // =========================================================
-        // PUT: /api/orders/5/cancel
-        // Hủy đơn hàng
-        // Chỉ Admin được hủy
+        // PUT/DELETE/POST: /api/orders/{id}/cancel
+        // Hủy đơn hàng và tự động hoàn trả tồn kho vào CSDL
+        // Cả Admin và Thu ngân (Cashier) đều được phép thực hiện
         // =========================================================
         [HttpPut("{id}/cancel")]
-        [Authorize(Roles = "Admin")]
+        [HttpDelete("{id}/cancel")]
+        [HttpPost("{id}/cancel")]
+        [Authorize(Roles = "Admin,Cashier")]
         public async Task<IActionResult> CancelOrder(int id)
         {
             await using var transaction =
@@ -503,6 +552,10 @@ namespace MiniSupermarket.API.Controllers
         public string PaymentMethod { get; set; } = "Cash";
 
         public decimal AmountReceived { get; set; }
+
+        public int? CustomerId { get; set; }
+
+        public string? CustomerPhone { get; set; }
 
         public List<CreateOrderItemRequest> Items { get; set; }
             = new List<CreateOrderItemRequest>();

@@ -1,7 +1,7 @@
 /*
  * Họ và tên sinh viên: Nguyễn Quốc Vương
  * Bài tập: Buổi 5 - Tiết 2: API Tra cứu Barcode & Mô hình ngắt kết nối DataTable
- * Mô tả: Controller ADO.NET thuần - Tra cứu mã vạch siêu tốc và demo DataTable ngắt kết nối
+ * Mô tả: Controller ADO.NET thuần - Tra cứu mã vạch siêu tốc và demo DataTable ngắt kết nối (bất đồng bộ async/await)
  */
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
@@ -27,7 +27,7 @@ namespace MiniSupermarket.API.Controllers
         // =========================================================================
         // GET: api/ado-products/barcode/8930000001041
         [HttpGet("barcode/{barcode}")]
-        public IActionResult GetProductByBarcode(string barcode)
+        public async Task<IActionResult> GetProductByBarcode(string barcode)
         {
             // 1. Kiểm tra tính hợp lệ của tham số đầu vào
             if (string.IsNullOrWhiteSpace(barcode))
@@ -38,29 +38,29 @@ namespace MiniSupermarket.API.Controllers
             // 2. Lấy chuỗi kết nối tới SQL Server
             string connectionString = _configuration.GetConnectionString("DefaultConnection")!;
 
-            // 3. Sử dụng khối using để đảm bảo SqlConnection luôn được đóng và giải phóng
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            // 3. Sử dụng khối await using để đảm bảo SqlConnection luôn được đóng và giải phóng bất đồng bộ
+            await using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 // 4. Câu lệnh SELECT có tham số hóa @Barcode chống SQL Injection
                 string query = @"SELECT ProductId, Barcode, ProductName, Price, StockQuantity 
                                  FROM Products 
                                  WHERE Barcode = @Barcode";
 
-                using (SqlCommand command = new SqlCommand(query, connection))
+                await using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     // 5. Gán giá trị an toàn qua SqlParameter
                     command.Parameters.AddWithValue("@Barcode", barcode.Trim());
 
                     try
                     {
-                        // 6. Mở kết nối vật lý tới SQL Server
-                        connection.Open();
+                        // 6. Mở kết nối vật lý tới SQL Server bất đồng bộ
+                        await connection.OpenAsync();
 
-                        // 7. Khởi tạo luồng đọc nhanh Forward-Only SqlDataReader
-                        using (SqlDataReader reader = command.ExecuteReader())
+                        // 7. Khởi tạo luồng đọc nhanh Forward-Only SqlDataReader bất đồng bộ
+                        await using (SqlDataReader reader = await command.ExecuteReaderAsync())
                         {
-                            // 8. Đọc bản ghi: reader.Read() trả về true nếu tìm thấy dòng dữ liệu
-                            if (reader.Read())
+                            // 8. Đọc bản ghi: await reader.ReadAsync() trả về true nếu tìm thấy dòng dữ liệu
+                            if (await reader.ReadAsync())
                             {
                                 var productDto = new ProductLookupDto
                                 {
@@ -82,7 +82,7 @@ namespace MiniSupermarket.API.Controllers
                         return StatusCode(500, new { message = "Lỗi truy vấn SQL: " + ex.Message });
                     }
                 }
-            } // Kết thúc using, connection.Close() tự động được thực thi tại đây
+            }
 
             // 9. Nếu không tìm thấy sản phẩm nào khớp mã vạch -> Trả về 404 Not Found
             return NotFound(new { message = $"Không tìm thấy sản phẩm có mã vạch: {barcode}" });
@@ -93,35 +93,35 @@ namespace MiniSupermarket.API.Controllers
         // =========================================================================
         // GET: api/ado-products/disconnected-cache
         [HttpGet("disconnected-cache")]
-        public IActionResult GetProductsDisconnected()
+        public async Task<IActionResult> GetProductsDisconnected()
         {
             string connectionString = _configuration.GetConnectionString("DefaultConnection")!;
 
             // 1. Khởi tạo bảng ảo DataTable trên RAM
             DataTable productTable = new DataTable("CachedProducts");
 
-            // 2. Mở kết nối và sử dụng SqlDataAdapter để nạp dữ liệu
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            // 2. Mở kết nối và sử dụng SqlDataAdapter để nạp dữ liệu bất đồng bộ
+            await Task.Run(() =>
             {
-                string query = @"SELECT ProductId, Barcode, ProductName, Price, StockQuantity 
-                                 FROM Products 
-                                 ORDER BY ProductId ASC";
-
-                using (SqlCommand command = new SqlCommand(query, connection))
+                using (SqlConnection connection = new SqlConnection(connectionString))
                 {
-                    // 3. SqlDataAdapter làm cầu nối giữa Command và DataTable
-                    using (SqlDataAdapter adapter = new SqlDataAdapter(command))
+                    string query = @"SELECT ProductId, Barcode, ProductName, Price, StockQuantity 
+                                     FROM Products 
+                                     ORDER BY ProductId ASC";
+
+                    using (SqlCommand command = new SqlCommand(query, connection))
                     {
-                        // 4. Phương thức Fill(): Tự động Open connection -> Đọc dữ liệu đổ vào DataTable -> Tự động Close connection
-                        adapter.Fill(productTable);
+                        using (SqlDataAdapter adapter = new SqlDataAdapter(command))
+                        {
+                            adapter.Fill(productTable);
+                        }
                     }
                 }
-            } // Tại đây, kết nối CSDL ĐÃ ĐƯỢC ĐÓNG HOÀN TOÀN!
+            });
 
-            // 5. Thao tác độc lập trên bộ nhớ RAM (Không cần kết nối tới SQL Server nữa)
+            // 3. Thao tác độc lập trên bộ nhớ RAM (Không cần kết nối tới SQL Server nữa)
             var resultList = new List<ProductLookupDto>();
 
-            // Duyệt qua từng dòng (DataRow) trong tập hợp Rows của DataTable
             foreach (DataRow row in productTable.Rows)
             {
                 resultList.Add(new ProductLookupDto
@@ -148,28 +148,28 @@ namespace MiniSupermarket.API.Controllers
         // =========================================================================
         // GET: api/ado-products/filter-stock?minStock=50
         [HttpGet("filter-stock")]
-        public IActionResult GetProductsLowStock([FromQuery] int minStock = 50)
+        public async Task<IActionResult> GetProductsLowStock([FromQuery] int minStock = 50)
         {
             string connectionString = _configuration.GetConnectionString("DefaultConnection")!;
             var lowStockList = new List<ProductLookupDto>();
 
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            await using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 string query = @"SELECT ProductId, Barcode, ProductName, Price, StockQuantity 
                                  FROM Products 
                                  WHERE StockQuantity <= @MinStock 
                                  ORDER BY StockQuantity ASC";
 
-                using (SqlCommand command = new SqlCommand(query, connection))
+                await using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@MinStock", minStock);
 
                     try
                     {
-                        connection.Open();
-                        using (SqlDataReader reader = command.ExecuteReader())
+                        await connection.OpenAsync();
+                        await using (SqlDataReader reader = await command.ExecuteReaderAsync())
                         {
-                            while (reader.Read())
+                            while (await reader.ReadAsync())
                             {
                                 lowStockList.Add(new ProductLookupDto
                                 {
@@ -202,26 +202,29 @@ namespace MiniSupermarket.API.Controllers
         // =========================================================================
         // GET: api/ado-products/category-summary
         [HttpGet("category-summary")]
-        public IActionResult GetCategorySummary()
+        public async Task<IActionResult> GetCategorySummary()
         {
             string connectionString = _configuration.GetConnectionString("DefaultConnection")!;
             DataTable categorySummaryTable = new DataTable("CategorySummary");
 
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            await Task.Run(() =>
             {
-                string query = @"SELECT CategoryId, COUNT(*) AS Total 
-                                 FROM Products 
-                                 GROUP BY CategoryId 
-                                 ORDER BY CategoryId ASC";
-
-                using (SqlCommand command = new SqlCommand(query, connection))
+                using (SqlConnection connection = new SqlConnection(connectionString))
                 {
-                    using (SqlDataAdapter adapter = new SqlDataAdapter(command))
+                    string query = @"SELECT CategoryId, COUNT(*) AS Total 
+                                     FROM Products 
+                                     GROUP BY CategoryId 
+                                     ORDER BY CategoryId ASC";
+
+                    using (SqlCommand command = new SqlCommand(query, connection))
                     {
-                        adapter.Fill(categorySummaryTable);
+                        using (SqlDataAdapter adapter = new SqlDataAdapter(command))
+                        {
+                            adapter.Fill(categorySummaryTable);
+                        }
                     }
                 }
-            }
+            });
 
             var summaryList = new List<CategoryProductSummaryDto>();
             foreach (DataRow row in categorySummaryTable.Rows)

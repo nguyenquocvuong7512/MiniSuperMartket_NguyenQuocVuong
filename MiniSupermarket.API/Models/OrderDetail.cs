@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MiniSupermarket.API.Models
@@ -28,10 +28,12 @@ namespace MiniSupermarket.API.Models
 
         // Đơn giá tại thời điểm bán
         [Column(TypeName = "decimal(18,2)")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Đơn giá phải lớn hơn 0!")]
         public decimal UnitPrice { get; set; }
 
         // Thành tiền
         [Column(TypeName = "decimal(18,2)")]
+        [Range(0, double.MaxValue, ErrorMessage = "Thành tiền không được âm!")]
         public decimal SubTotal { get; set; }
     }
 }

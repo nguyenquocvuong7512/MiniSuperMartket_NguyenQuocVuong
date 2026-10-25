@@ -14,6 +14,10 @@ namespace MiniSupermarket.WinForms
         public FormRoleManagement()
         {
             InitializeComponent();
+            Theme.UITheme.ApplyModernDataGridView(dgvRoles);
+            Theme.UITheme.StyleButton(btnAdd, Theme.UITheme.ButtonVariant.Primary);
+            Theme.UITheme.StyleButton(btnUpdate, Theme.UITheme.ButtonVariant.Secondary);
+            Theme.UITheme.StyleButton(btnDelete, Theme.UITheme.ButtonVariant.Danger);
         }
 
         private async void FormRoleManagement_Load(object sender, EventArgs e)

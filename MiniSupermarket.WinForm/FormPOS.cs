@@ -7,6 +7,8 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using MiniSupermarket.WinForms;
+using MiniSupermarket.WinForms.Services;
 
 namespace MiniSupermarket.WinForms.Forms
 {
@@ -14,6 +16,8 @@ namespace MiniSupermarket.WinForms.Forms
     {
         private readonly HttpClient _client;
         private readonly List<CartItem> _cart = new();
+        private CustomerDto? _currentCustomer = null;
+        private int _lastCompletedOrderId = 0;
 
         public FormPOS()
         {
@@ -26,8 +30,75 @@ namespace MiniSupermarket.WinForms.Forms
 
             cboPaymentMethod.SelectedIndex = 0;
 
+            SetupCustomStyles();
             SetupEvents();
             _ = LoadProductsAsync();
+        }
+
+        private void SetupCustomStyles()
+        {
+            Theme.UITheme.ApplyModernDataGridView(dgvProducts);
+            Theme.UITheme.ApplyModernDataGridView(dgvCart);
+            SetupProductGridColumns();
+
+            Theme.UITheme.StyleButton(btnAdd, Theme.UITheme.ButtonVariant.Primary);
+            Theme.UITheme.StyleButton(btnSearch, Theme.UITheme.ButtonVariant.Secondary);
+            Theme.UITheme.StyleButton(btnCustSearch, Theme.UITheme.ButtonVariant.Secondary);
+            Theme.UITheme.StyleButton(btnPay, Theme.UITheme.ButtonVariant.Primary);
+        }
+
+        private void SetupProductGridColumns()
+        {
+            dgvProducts.AutoGenerateColumns = false;
+            dgvProducts.Columns.Clear();
+
+            dgvProducts.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = "Barcode",
+                HeaderText = "Mã vạch",
+                Width = 125
+            });
+
+            dgvProducts.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = "ProductName",
+                HeaderText = "Tên sản phẩm",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+
+            dgvProducts.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = "Price",
+                HeaderText = "Đơn giá",
+                Width = 95,
+                DefaultCellStyle = new DataGridViewCellStyle
+                {
+                    Format = "N0",
+                    Alignment = DataGridViewContentAlignment.MiddleRight
+                }
+            });
+
+            dgvProducts.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = "StockQuantity",
+                HeaderText = "Tồn",
+                Width = 65,
+                DefaultCellStyle = new DataGridViewCellStyle
+                {
+                    Alignment = DataGridViewContentAlignment.MiddleCenter
+                }
+            });
+
+            dgvProducts.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = "Unit",
+                HeaderText = "ĐVT",
+                Width = 65,
+                DefaultCellStyle = new DataGridViewCellStyle
+                {
+                    Alignment = DataGridViewContentAlignment.MiddleCenter
+                }
+            });
         }
 
         // =========================================================
@@ -46,6 +117,7 @@ namespace MiniSupermarket.WinForms.Forms
             dgvProducts.CellDoubleClick += DgvProducts_CellDoubleClick;
 
             btnRemove.Click += BtnRemove_Click;
+            btnCancelOrder.Click += async (s, e) => await OpenCancelOrderDialogAsync();
 
             btnClear.Click += (s, e) =>
             {
@@ -63,6 +135,20 @@ namespace MiniSupermarket.WinForms.Forms
             };
 
             txtBarcode.KeyDown += TxtBarcode_KeyDown;
+
+            // Khách hàng & Tích điểm
+            btnCustSearch.Click += async (s, e) => await SearchCustomerByPhoneAsync();
+            txtCustPhone.KeyDown += async (s, e) =>
+            {
+                if (e.KeyCode == Keys.Enter)
+                {
+                    e.SuppressKeyPress = true;
+                    await SearchCustomerByPhoneAsync();
+                }
+            };
+            btnCustAdd.Click += (s, e) => OpenQuickAddCustomer();
+            btnCustClear.Click += (s, e) => ResetCustomer();
+            btnSelectGuest.Click += (s, e) => ResetCustomer();
         }
 
         // =========================================================
@@ -318,6 +404,7 @@ namespace MiniSupermarket.WinForms.Forms
             lblTotal.Text = $"{total:N0} đ";
 
             CalculateChange();
+            UpdatePointsCalculation();
         }
 
         // =========================================================
@@ -435,9 +522,14 @@ namespace MiniSupermarket.WinForms.Forms
                 amountReceived = total;
             }
 
+            int pointsToEarn = (int)(total / 10000);
+            string custInfo = _currentCustomer != null
+                ? $"Khách hàng: {_currentCustomer.CustomerName} ({_currentCustomer.PhoneNumber})\nĐiểm hiện có: {_currentCustomer.RewardPoints:N0} | Tích thêm: +{pointsToEarn:N0} điểm\n\n"
+                : "Khách hàng: Khách vãng lai (Không tích điểm)\n\n";
+
             var confirm = MessageBox.Show(
-                $"Tổng tiền: {total:N0} đ\nPhương thức: {paymentMethod}\n\nXác nhận thanh toán?",
-                "Xác nhận",
+                $"{custInfo}Tổng tiền: {total:N0} đ\nPhương thức: {paymentMethod}\n\nXác nhận thanh toán?",
+                "Xác nhận thanh toán",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question);
 
@@ -453,6 +545,8 @@ namespace MiniSupermarket.WinForms.Forms
                 {
                     PaymentMethod = paymentMethod,
                     AmountReceived = amountReceived,
+                    CustomerId = _currentCustomer?.CustomerId,
+                    CustomerPhone = _currentCustomer?.PhoneNumber,
                     Items = _cart.Select(x => new CreateOrderItemRequest
                     {
                         ProductId = x.ProductId,
@@ -475,16 +569,33 @@ namespace MiniSupermarket.WinForms.Forms
                 }
 
                 decimal change = result.Data?.ChangeAmount ?? 0;
+                string pointsMsg = "";
+                if (result.Data != null && result.Data.RewardPointsAdded > 0)
+                {
+                    pointsMsg = $"\n--- TÍCH ĐIỂM HỘI VIÊN ---\n" +
+                                $"Khách hàng: {result.Data.CustomerName}\n" +
+                                $"Điểm cộng thêm: +{result.Data.RewardPointsAdded:N0} điểm\n" +
+                                $"Tổng điểm tích lũy: {result.Data.TotalRewardPoints:N0} điểm\n" +
+                                $"Hạng thẻ: {result.Data.MembershipRank}\n";
+                }
 
                 MessageBox.Show(
-                    $"THANH TOÁN THÀNH CÔNG!\n\nMã đơn: #{result.Data?.OrderId}\nTổng tiền: {total:N0} đ\nTiền khách đưa: {amountReceived:N0} đ\nTiền thừa: {change:N0} đ",
-                    "Thành công",
+                    $"THANH TOÁN THÀNH CÔNG!\n\n" +
+                    $"Mã đơn: #{result.Data?.OrderId}\n" +
+                    $"Tổng tiền: {total:N0} đ\n" +
+                    $"Tiền khách đưa: {amountReceived:N0} đ\n" +
+                    $"Tiền thừa: {change:N0} đ\n" +
+                    pointsMsg,
+                    "Thanh toán thành công",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
+
+                _lastCompletedOrderId = result.Data?.OrderId ?? 0;
 
                 _cart.Clear();
                 txtAmountReceived.Clear();
                 RefreshCart();
+                ResetCustomer();
 
                 await LoadProductsAsync();
             }
@@ -502,6 +613,162 @@ namespace MiniSupermarket.WinForms.Forms
             }
         }
 
+        private async Task OpenCancelOrderDialogAsync()
+        {
+            using var dialog = new FormCancelOrder(_lastCompletedOrderId);
+            if (dialog.ShowDialog(this) == DialogResult.OK)
+            {
+                if (_lastCompletedOrderId == dialog.CancelledOrderId)
+                {
+                    _lastCompletedOrderId = 0;
+                }
+
+                // Cập nhật lại tồn kho sản phẩm hiển thị trên quầy
+                await LoadProductsAsync();
+            }
+        }
+
+        // =========================================================
+        // NGHIỆP VỤ KHÁCH HÀNG & TÍCH ĐIỂM (LOYALTY POINTS)
+        // =========================================================
+
+        private async Task SearchCustomerByPhoneAsync()
+        {
+            string phone = txtCustPhone.Text.Trim();
+
+            if (string.IsNullOrWhiteSpace(phone))
+            {
+                MessageBox.Show(
+                    "Vui lòng nhập số điện thoại để tra cứu hội viên.",
+                    "Thông báo",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                txtCustPhone.Focus();
+                return;
+            }
+
+            try
+            {
+                AddAuthorizationHeader();
+
+                // 1. Thử gọi API tra cứu chính xác theo SĐT
+                var response = await _client.GetAsync($"customers/by-phone/{Uri.EscapeDataString(phone)}");
+
+                CustomerDto? customer = null;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    customer = await response.Content.ReadFromJsonAsync<CustomerDto>();
+                }
+                else
+                {
+                    // Fallback sang endpoint search nếu chưa có
+                    var searchResponse = await _client.GetAsync($"customers/search?keyword={Uri.EscapeDataString(phone)}");
+                    if (searchResponse.IsSuccessStatusCode)
+                    {
+                        var list = await searchResponse.Content.ReadFromJsonAsync<List<CustomerDto>>();
+                        customer = list?.FirstOrDefault(c => c.PhoneNumber == phone || c.PhoneNumber.Replace(" ", "") == phone.Replace(" ", ""));
+                    }
+                }
+
+                if (customer != null)
+                {
+                    SetCustomer(customer);
+                }
+                else
+                {
+                    var ask = MessageBox.Show(
+                        $"Không tìm thấy khách hàng có số điện thoại: '{phone}'.\n\nBạn có muốn đăng ký tài khoản hội viên mới ngay không?",
+                        "Khách hàng mới",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Question);
+
+                    if (ask == DialogResult.Yes)
+                    {
+                        OpenQuickAddCustomer(phone);
+                    }
+                    else
+                    {
+                        ResetCustomer();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Lỗi khi tra cứu khách hàng:\n" + ex.Message,
+                    "Lỗi",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+        }
+
+        private void SetCustomer(CustomerDto customer)
+        {
+            _currentCustomer = customer;
+            txtCustPhone.Text = customer.PhoneNumber;
+            lblCustName.Text = customer.CustomerName;
+            lblCustRank.Text = string.IsNullOrWhiteSpace(customer.MembershipRank) ? "Mới" : customer.MembershipRank;
+            lblCustPoints.Text = $"{customer.RewardPoints:N0} điểm";
+
+            lblCustStatus.Text = $"Đã nhận diện: {customer.CustomerName} ({customer.PhoneNumber}) - Điểm sẽ được cộng khi thanh toán.";
+            lblCustStatus.ForeColor = Color.FromArgb(0, 100, 0);
+
+            UpdatePointsCalculation();
+        }
+
+        private void ResetCustomer()
+        {
+            _currentCustomer = null;
+            txtCustPhone.Clear();
+            lblCustName.Text = "Khách vãng lai";
+            lblCustRank.Text = "-";
+            lblCustPoints.Text = "0 điểm";
+            lblCustStatus.Text = "Khách vãng lai (Không tích điểm). Nhập SĐT để tích điểm.";
+            lblCustStatus.ForeColor = Color.Gray;
+
+            UpdatePointsCalculation();
+        }
+
+        private void OpenQuickAddCustomer(string initialPhone = "")
+        {
+            string phoneToUse = string.IsNullOrWhiteSpace(initialPhone) ? txtCustPhone.Text.Trim() : initialPhone;
+            using var formAdd = new FormQuickAddCustomer(phoneToUse);
+            if (formAdd.ShowDialog(this) == DialogResult.OK && formAdd.CreatedCustomer != null)
+            {
+                SetCustomer(formAdd.CreatedCustomer);
+            }
+        }
+
+        private void UpdatePointsCalculation()
+        {
+            decimal total = _cart.Sum(x => x.SubTotal);
+            int pointsToEarn = (int)(total / 10000); // 10.000 VNĐ = 1 điểm
+
+            if (_currentCustomer != null)
+            {
+                lblCustEarn.Text = $"+{pointsToEarn:N0} điểm (Tỷ lệ: 10.000đ = 1 điểm)";
+                lblCustEarn.ForeColor = Color.Crimson;
+
+                lblPointsSummary.Text = $"+{pointsToEarn:N0} điểm";
+                lblPointsSummary.ForeColor = Color.Crimson;
+
+                lblCustomerSummary.Text = $"Khách hàng: {_currentCustomer.CustomerName} ({_currentCustomer.PhoneNumber})";
+                lblCustomerSummary.ForeColor = Color.FromArgb(20, 60, 130);
+            }
+            else
+            {
+                lblCustEarn.Text = "+0 điểm (Khách vãng lai)";
+                lblCustEarn.ForeColor = Color.Gray;
+
+                lblPointsSummary.Text = "+0 điểm";
+                lblPointsSummary.ForeColor = Color.Gray;
+
+                lblCustomerSummary.Text = "Khách hàng: Khách vãng lai";
+                lblCustomerSummary.ForeColor = Color.DimGray;
+            }
+        }
+
         // =========================================================
         // AUTHORIZATION
         // =========================================================
@@ -510,6 +777,11 @@ namespace MiniSupermarket.WinForms.Forms
         {
             _client.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("Bearer", SessionManager.JwtToken);
+        }
+
+        private void cboPaymentMethod_SelectedIndexChanged_1(object sender, EventArgs e)
+        {
+
         }
     }
 
@@ -541,6 +813,8 @@ namespace MiniSupermarket.WinForms.Forms
     {
         public string PaymentMethod { get; set; } = "Cash";
         public decimal AmountReceived { get; set; }
+        public int? CustomerId { get; set; }
+        public string? CustomerPhone { get; set; }
         public List<CreateOrderItemRequest> Items { get; set; } = new();
     }
 
@@ -563,5 +837,11 @@ namespace MiniSupermarket.WinForms.Forms
         public decimal TotalAmount { get; set; }
         public decimal AmountReceived { get; set; }
         public decimal ChangeAmount { get; set; }
+        public int? CustomerId { get; set; }
+        public string? CustomerName { get; set; }
+        public string? CustomerPhone { get; set; }
+        public int RewardPointsAdded { get; set; }
+        public int TotalRewardPoints { get; set; }
+        public string MembershipRank { get; set; } = string.Empty;
     }
 }

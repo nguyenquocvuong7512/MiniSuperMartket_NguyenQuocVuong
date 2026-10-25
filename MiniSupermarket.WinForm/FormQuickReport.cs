@@ -12,13 +12,44 @@ namespace MiniSupermarket.WinForms
 {
     public partial class FormQuickReport : Form
     {
+        private List<OrderReportDto> _cachedFilteredOrders = new();
+
         public FormQuickReport()
         {
             InitializeComponent();
+            Theme.UITheme.ApplyModernDataGridView(dgvOrders);
+            Theme.UITheme.StyleButton(btnRunReport, Theme.UITheme.ButtonVariant.Primary);
+            Theme.UITheme.StyleButton(btnCancelOrder, Theme.UITheme.ButtonVariant.Danger);
+            Theme.UITheme.StyleButton(btnViewOrderDetail, Theme.UITheme.ButtonVariant.Secondary);
+            Theme.UITheme.StyleButton(btnRefresh, Theme.UITheme.ButtonVariant.Neutral);
             SetupGridColumns();
 
             btnRunReport.Click += async (s, e) => await LoadReportDataAsync();
+            btnRefresh.Click += async (s, e) => await LoadReportDataAsync();
+            btnCancelOrder.Click += async (s, e) => await OpenCancelOrderDialogAsync();
+            btnViewOrderDetail.Click += (s, e) => ShowSelectedOrderDetail();
+            dgvOrders.CellDoubleClick += (s, e) => ShowSelectedOrderDetail();
+            dgvOrders.RowPrePaint += DgvOrders_RowPrePaint;
+
             this.Load += async (s, e) => await LoadReportDataAsync();
+        }
+
+        private void DgvOrders_RowPrePaint(object? sender, DataGridViewRowPrePaintEventArgs e)
+        {
+            if (e.RowIndex >= 0 && e.RowIndex < dgvOrders.Rows.Count)
+            {
+                var row = dgvOrders.Rows[e.RowIndex];
+                var statusCell = row.Cells["colStatus"] ?? (row.Cells.Count > 6 ? row.Cells[6] : null);
+                if (statusCell?.Value != null)
+                {
+                    string status = statusCell.Value.ToString() ?? "";
+                    if (status.Contains("hủy", StringComparison.OrdinalIgnoreCase) || status.Contains("cancel", StringComparison.OrdinalIgnoreCase))
+                    {
+                        row.DefaultCellStyle.ForeColor = Color.FromArgb(148, 163, 184); // Xám nhạt
+                        row.DefaultCellStyle.SelectionForeColor = Color.FromArgb(239, 68, 68); // Đỏ khi chọn
+                    }
+                }
+            }
         }
 
         private void SetupGridColumns()
@@ -28,6 +59,7 @@ namespace MiniSupermarket.WinForms
 
             dgvOrders.Columns.Add(new DataGridViewTextBoxColumn
             {
+                Name = "colOrderId",
                 DataPropertyName = "OrderId",
                 HeaderText = "Mã HĐ",
                 Width = 90
@@ -35,6 +67,7 @@ namespace MiniSupermarket.WinForms
 
             dgvOrders.Columns.Add(new DataGridViewTextBoxColumn
             {
+                Name = "colTime",
                 DataPropertyName = "OrderTimeStr",
                 HeaderText = "Thời Gian",
                 Width = 140
@@ -42,27 +75,31 @@ namespace MiniSupermarket.WinForms
 
             dgvOrders.Columns.Add(new DataGridViewTextBoxColumn
             {
+                Name = "colEmployee",
                 DataPropertyName = "Employee",
                 HeaderText = "Thu Ngân",
-                Width = 160
+                Width = 150
             });
 
             dgvOrders.Columns.Add(new DataGridViewTextBoxColumn
             {
+                Name = "colMethod",
                 DataPropertyName = "PaymentMethod",
                 HeaderText = "Hình Thức",
-                Width = 120
+                Width = 110
             });
 
             dgvOrders.Columns.Add(new DataGridViewTextBoxColumn
             {
+                Name = "colTotal",
                 DataPropertyName = "TotalAmountStr",
                 HeaderText = "Tổng Tiền",
-                Width = 140
+                Width = 130
             });
 
             dgvOrders.Columns.Add(new DataGridViewTextBoxColumn
             {
+                Name = "colItems",
                 DataPropertyName = "ItemsSummary",
                 HeaderText = "Chi Tiết Mặt Hàng",
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
@@ -70,10 +107,77 @@ namespace MiniSupermarket.WinForms
 
             dgvOrders.Columns.Add(new DataGridViewTextBoxColumn
             {
+                Name = "colStatus",
                 DataPropertyName = "Status",
                 HeaderText = "Trạng Thái",
-                Width = 110
+                Width = 120
             });
+        }
+
+        private async Task OpenCancelOrderDialogAsync()
+        {
+            int selectedOrderId = 0;
+            if (dgvOrders.CurrentRow != null && dgvOrders.CurrentRow.DataBoundItem != null)
+            {
+                var item = dgvOrders.CurrentRow.DataBoundItem;
+                var propId = item.GetType().GetProperty("RawOrderId");
+                if (propId != null)
+                {
+                    selectedOrderId = (int)propId.GetValue(item)!;
+                }
+            }
+
+            using var dialog = new Forms.FormCancelOrder(selectedOrderId);
+            if (dialog.ShowDialog(this) == DialogResult.OK)
+            {
+                await LoadReportDataAsync();
+            }
+        }
+
+        private void ShowSelectedOrderDetail()
+        {
+            if (dgvOrders.CurrentRow == null || dgvOrders.CurrentRow.DataBoundItem == null)
+            {
+                MessageBox.Show("Vui lòng chọn 1 đơn hàng trên bảng để xem chi tiết!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            var item = dgvOrders.CurrentRow.DataBoundItem;
+            var propId = item.GetType().GetProperty("RawOrderId");
+            int orderId = propId != null ? (int)propId.GetValue(item)! : 0;
+
+            var order = _cachedFilteredOrders.FirstOrDefault(o => o.OrderId == orderId);
+            if (order == null)
+            {
+                MessageBox.Show("Không tìm thấy thông tin đơn hàng chi tiết!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine($"==========================================");
+            sb.AppendLine($"           CHI TIẾT HÓA ĐƠN #{order.OrderId}");
+            sb.AppendLine($"==========================================");
+            sb.AppendLine($"• Thời gian: {order.OrderDate:dd/MM/yyyy HH:mm:ss}");
+            sb.AppendLine($"• Thu ngân: {order.Employee}");
+            sb.AppendLine($"• Phương thức: {order.PaymentMethod}");
+            sb.AppendLine($"• Trạng thái: {(string.Equals(order.Status, "Cancelled", StringComparison.OrdinalIgnoreCase) ? "❌ ĐÃ HỦY" : "✅ Hoàn thành")}");
+            sb.AppendLine($"------------------------------------------");
+            sb.AppendLine($"DANH SÁCH MÓN HÀNG:");
+            int idx = 1;
+            foreach (var p in order.Items)
+            {
+                sb.AppendLine($" {idx++}. {p.ProductName}");
+                sb.AppendLine($"    SL: {p.Quantity}  x  {p.UnitPrice:N0} đ  =>  {p.SubTotal:N0} đ");
+            }
+            sb.AppendLine($"------------------------------------------");
+            sb.AppendLine($"TỔNG TIỀN PHẢI THU: {order.TotalAmount:N0} đ");
+            if (order.AmountReceived > 0)
+            {
+                sb.AppendLine($"Tiền khách đưa: {order.AmountReceived:N0} đ | Tiền thừa: {order.ChangeAmount:N0} đ");
+            }
+            sb.AppendLine($"==========================================");
+
+            MessageBox.Show(sb.ToString(), $"Chi tiết đơn #{order.OrderId}", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private async Task LoadReportDataAsync()
@@ -124,6 +228,8 @@ namespace MiniSupermarket.WinForms
                     .OrderByDescending(o => o.OrderDate)
                     .ToList();
 
+                _cachedFilteredOrders = filtered;
+
                 // 1. Thống kê tổng số đơn
                 lblTotalOrders.Text = $"{filtered.Count:N0} đơn";
 
@@ -133,8 +239,9 @@ namespace MiniSupermarket.WinForms
                     .Sum(o => o.TotalAmount);
                 lblTotalRevenue.Text = $"{totalRev:N0} đ";
 
-                // 3. Tìm mặt hàng bán chạy nhất trong ngày
+                // 3. Tìm mặt hàng bán chạy nhất trong ngày (không tính đơn hủy)
                 var bestSellerItem = filtered
+                    .Where(o => !string.Equals(o.Status, "Cancelled", StringComparison.OrdinalIgnoreCase))
                     .SelectMany(o => o.Items)
                     .GroupBy(i => i.ProductName)
                     .Select(g => new
@@ -157,13 +264,17 @@ namespace MiniSupermarket.WinForms
                 // 4. Hiển thị bảng chi tiết
                 var displayList = filtered.Select(o => new
                 {
+                    RawOrderId = o.OrderId,
+                    RawStatus = o.Status,
                     OrderId = $"#{o.OrderId}",
                     OrderTimeStr = o.OrderDate.ToString("dd/MM/yyyy HH:mm"),
                     Employee = o.Employee,
                     PaymentMethod = o.PaymentMethod,
                     TotalAmountStr = $"{o.TotalAmount:N0} đ",
                     ItemsSummary = string.Join(", ", o.Items.Select(i => $"{i.ProductName} (x{i.Quantity})")),
-                    Status = o.Status == "Completed" ? "Hoàn thành" : o.Status
+                    Status = string.Equals(o.Status, "Cancelled", StringComparison.OrdinalIgnoreCase)
+                        ? "❌ Đã hủy"
+                        : (o.Status == "Completed" ? "Hoàn thành" : o.Status)
                 }).ToList();
 
                 dgvOrders.DataSource = displayList;

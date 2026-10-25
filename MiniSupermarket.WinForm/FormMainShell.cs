@@ -22,6 +22,12 @@ namespace MiniSupermarket.WinForms
             btnUserManage.Click += btnUserManage_Click;
             btnLogout.Click += btnLogout_Click;
 
+            timerClock.Tick += (s, e) =>
+            {
+                lblClock.Text = DateTime.Now.ToString("⏰ dd/MM/yyyy HH:mm:ss");
+            };
+            lblClock.Text = DateTime.Now.ToString("⏰ dd/MM/yyyy HH:mm:ss");
+
             this.Load += FormMainShell_Load;
             this.Resize += FormMainShell_Resize;
         }
@@ -29,25 +35,51 @@ namespace MiniSupermarket.WinForms
         private void FormMainShell_Load(object? sender, EventArgs e)
         {
             string role = SessionManager.CurrentRole;
+            string username = string.IsNullOrEmpty(SessionManager.CurrentUsername) ? "admin01" : SessionManager.CurrentUsername;
 
-            lblUserInfo.Text = $"Nhân viên: {SessionManager.CurrentUsername} | Vai trò: [{role}]";
-            UpdateUserInfoPosition();
+            lblUserInfo.Text = $"👤 {username}  [{role.ToUpper()}]";
+            lblUserFullName.Text = username;
+            lblUserRoleBadge.Text = role.ToUpper();
 
+            // Tùy biến màu thẻ vai trò
+            switch (role.Trim().ToUpper())
+            {
+                case "ADMIN":
+                    lblUserRoleBadge.BackColor = Color.FromArgb(124, 58, 237); // Purple
+                    break;
+                case "CASHIER":
+                    lblUserRoleBadge.BackColor = Color.FromArgb(5, 150, 105);  // Emerald
+                    break;
+                case "WAREHOUSE":
+                    lblUserRoleBadge.BackColor = Color.FromArgb(217, 119, 6);  // Amber
+                    break;
+                default:
+                    lblUserRoleBadge.BackColor = Color.FromArgb(71, 85, 105);
+                    break;
+            }
+
+            if (!string.IsNullOrEmpty(username))
+            {
+                lblAvatar.Text = username.Substring(0, 1).ToUpper();
+            }
+
+            // Tự động căn chỉnh nhãn ORGANIC cạnh logo để không bao giờ bị đè chữ
+            if (lblLogo != null && lblLogoTag != null)
+            {
+                lblLogoTag.Location = new Point(lblLogo.Right + 4, lblLogo.Top + 4);
+            }
+
+            // Header positioning is automatically managed by flowHeaderRight (DockStyle.Right)
             ApplyRolePermissions(role);
             OpenDefaultScreenByRole(role);
         }
 
         private void FormMainShell_Resize(object? sender, EventArgs e)
         {
-            UpdateUserInfoPosition();
         }
 
         private void UpdateUserInfoPosition()
         {
-            if (panelTopHeader != null && lblUserInfo != null)
-            {
-                lblUserInfo.Location = new Point(panelTopHeader.Width - lblUserInfo.PreferredWidth - 20, 20);
-            }
         }
 
         // =====================================================
@@ -63,23 +95,33 @@ namespace MiniSupermarket.WinForms
             btnReports.Visible = false;
             btnUserManage.Visible = false;
 
+            lblNavSales.Visible = false;
+            lblNavStore.Visible = false;
+            lblNavAdmin.Visible = false;
+
             switch (role.Trim().ToUpper())
             {
                 case "ADMIN":
+                    lblNavSales.Visible = true;
                     btnPOS.Visible = true;
+                    lblNavStore.Visible = true;
                     btnCategory.Visible = true;
                     btnProduct.Visible = true;
                     btnCustomer.Visible = true;
+                    lblNavAdmin.Visible = true;
                     btnReports.Visible = true;
                     btnUserManage.Visible = true;
                     break;
 
                 case "CASHIER":
+                    lblNavSales.Visible = true;
                     btnPOS.Visible = true;
+                    lblNavStore.Visible = true;
                     btnCustomer.Visible = true;
                     break;
 
                 case "WAREHOUSE":
+                    lblNavStore.Visible = true;
                     btnCategory.Visible = true;
                     btnProduct.Visible = true;
                     break;
@@ -172,11 +214,13 @@ namespace MiniSupermarket.WinForms
             {
                 if (ctrl is Button btn && btn != btnLogout)
                 {
-                    btn.BackColor = Color.FromArgb(24, 30, 48);
+                    btn.BackColor = Color.FromArgb(15, 23, 42);
+                    btn.ForeColor = Color.FromArgb(203, 213, 225);
                 }
             }
 
-            activeButton.BackColor = Color.FromArgb(41, 100, 180);
+            activeButton.BackColor = Color.FromArgb(5, 150, 105);
+            activeButton.ForeColor = Color.White;
         }
 
         // =====================================================

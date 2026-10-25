@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MiniSupermarket.API.Models
@@ -19,8 +19,10 @@ namespace MiniSupermarket.API.Models
         public string ProductName { get; set; } = string.Empty;
 
         [Column(TypeName = "decimal(18,2)")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Giá bán sản phẩm phải lớn hơn 0!")]
         public decimal Price { get; set; }
 
+        [Range(0, int.MaxValue, ErrorMessage = "Số lượng tồn kho không được âm!")]
         public int StockQuantity { get; set; }
 
         [StringLength(50)]

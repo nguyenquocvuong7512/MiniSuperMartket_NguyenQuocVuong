@@ -1,7 +1,7 @@
 /*
  * Họ và tên sinh viên: Nguyễn Quốc Vương
  * Bài tập: Buổi 5 - Tiết 3: Tối ưu truy vấn với Stored Procedure & Báo cáo doanh thu ca bán lẻ
- * Mô tả: Controller ADO.NET thực thi Stored Procedure xuất báo cáo ca bán dựa trên dữ liệu bảng Orders và Users
+ * Mô tả: Controller ADO.NET thực thi Stored Procedure xuất báo cáo ca bán dựa trên dữ liệu bảng Orders và Users (bất đồng bộ async/await)
  */
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
@@ -26,26 +26,25 @@ namespace MiniSupermarket.API.Controllers
         // Chức năng: Thống kê doanh thu theo từng thu ngân
         // =========================================================================
         [HttpGet("revenue-by-cashier")]
-        public IActionResult GetRevenueByCashier()
+        public async Task<IActionResult> GetRevenueByCashier()
         {
             var reportList = new List<CashierRevenueDto>();
             string connectionString = _configuration.GetConnectionString("DefaultConnection")!;
 
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            await using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                connection.Open();
+                await connection.OpenAsync();
 
-                // Thử gọi Stored Procedure trước; nếu chưa tạo thủ tục trên SQL Server thì chạy truy vấn SQL ADO.NET trực tiếp
                 bool useProcedure = true;
-                using (SqlCommand command = new SqlCommand("sp_GetRevenueByCashier", connection))
+                await using (SqlCommand command = new SqlCommand("sp_GetRevenueByCashier", connection))
                 {
                     command.CommandType = CommandType.StoredProcedure;
 
                     try
                     {
-                        using (SqlDataReader reader = command.ExecuteReader())
+                        await using (SqlDataReader reader = await command.ExecuteReaderAsync())
                         {
-                            ReadCashierRevenueData(reader, reportList);
+                            await ReadCashierRevenueDataAsync(reader, reportList);
                         }
                     }
                     catch (SqlException ex) when (ex.Number == 2812) // 2812: Không tìm thấy Stored Procedure
@@ -76,11 +75,11 @@ namespace MiniSupermarket.API.Controllers
                         GROUP BY u.Username
                         ORDER BY TotalRevenue DESC";
 
-                    using (SqlCommand fallbackCmd = new SqlCommand(fallbackSql, connection))
+                    await using (SqlCommand fallbackCmd = new SqlCommand(fallbackSql, connection))
                     {
-                        using (SqlDataReader reader = fallbackCmd.ExecuteReader())
+                        await using (SqlDataReader reader = await fallbackCmd.ExecuteReaderAsync())
                         {
-                            ReadCashierRevenueData(reader, reportList);
+                            await ReadCashierRevenueDataAsync(reader, reportList);
                         }
                     }
                 }
@@ -101,17 +100,17 @@ namespace MiniSupermarket.API.Controllers
         // GET: api/reports/revenue-by-date-range?fromDate=2026-10-01&toDate=2026-10-31
         // =========================================================================
         [HttpGet("revenue-by-date-range")]
-        public IActionResult GetRevenueByDateRange([FromQuery] DateTime fromDate, [FromQuery] DateTime toDate)
+        public async Task<IActionResult> GetRevenueByDateRange([FromQuery] DateTime fromDate, [FromQuery] DateTime toDate)
         {
             var reportList = new List<CashierRevenueDto>();
             string connectionString = _configuration.GetConnectionString("DefaultConnection")!;
 
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            await using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                connection.Open();
+                await connection.OpenAsync();
                 bool useProcedure = true;
 
-                using (SqlCommand command = new SqlCommand("sp_GetRevenueByDateRange", connection))
+                await using (SqlCommand command = new SqlCommand("sp_GetRevenueByDateRange", connection))
                 {
                     command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@FromDate", fromDate);
@@ -119,9 +118,9 @@ namespace MiniSupermarket.API.Controllers
 
                     try
                     {
-                        using (SqlDataReader reader = command.ExecuteReader())
+                        await using (SqlDataReader reader = await command.ExecuteReaderAsync())
                         {
-                            ReadCashierRevenueData(reader, reportList);
+                            await ReadCashierRevenueDataAsync(reader, reportList);
                         }
                     }
                     catch (SqlException ex) when (ex.Number == 2812)
@@ -152,13 +151,13 @@ namespace MiniSupermarket.API.Controllers
                         GROUP BY u.Username
                         ORDER BY TotalRevenue DESC";
 
-                    using (SqlCommand fallbackCmd = new SqlCommand(fallbackSql, connection))
+                    await using (SqlCommand fallbackCmd = new SqlCommand(fallbackSql, connection))
                     {
                         fallbackCmd.Parameters.AddWithValue("@FromDate", fromDate);
                         fallbackCmd.Parameters.AddWithValue("@ToDate", toDate);
-                        using (SqlDataReader reader = fallbackCmd.ExecuteReader())
+                        await using (SqlDataReader reader = await fallbackCmd.ExecuteReaderAsync())
                         {
-                            ReadCashierRevenueData(reader, reportList);
+                            await ReadCashierRevenueDataAsync(reader, reportList);
                         }
                     }
                 }
@@ -180,25 +179,25 @@ namespace MiniSupermarket.API.Controllers
         // GET: api/reports/top-selling
         // =========================================================================
         [HttpGet("top-selling")]
-        public IActionResult GetTop5SellingProducts()
+        public async Task<IActionResult> GetTop5SellingProducts()
         {
             var topList = new List<TopSellingProductDto>();
             string connectionString = _configuration.GetConnectionString("DefaultConnection")!;
 
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            await using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                connection.Open();
+                await connection.OpenAsync();
                 bool useProcedure = true;
 
-                using (SqlCommand command = new SqlCommand("sp_GetTop5SellingProducts", connection))
+                await using (SqlCommand command = new SqlCommand("sp_GetTop5SellingProducts", connection))
                 {
                     command.CommandType = CommandType.StoredProcedure;
 
                     try
                     {
-                        using (SqlDataReader reader = command.ExecuteReader())
+                        await using (SqlDataReader reader = await command.ExecuteReaderAsync())
                         {
-                            ReadTopSellingData(reader, topList);
+                            await ReadTopSellingDataAsync(reader, topList);
                         }
                     }
                     catch (SqlException ex) when (ex.Number == 2812)
@@ -229,11 +228,11 @@ namespace MiniSupermarket.API.Controllers
                         GROUP BY p.ProductId, p.Barcode, p.ProductName
                         ORDER BY TotalQuantitySold DESC";
 
-                    using (SqlCommand fallbackCmd = new SqlCommand(fallbackSql, connection))
+                    await using (SqlCommand fallbackCmd = new SqlCommand(fallbackSql, connection))
                     {
-                        using (SqlDataReader reader = fallbackCmd.ExecuteReader())
+                        await using (SqlDataReader reader = await fallbackCmd.ExecuteReaderAsync())
                         {
-                            ReadTopSellingData(reader, topList);
+                            await ReadTopSellingDataAsync(reader, topList);
                         }
                     }
                 }
@@ -247,9 +246,9 @@ namespace MiniSupermarket.API.Controllers
             });
         }
 
-        private static void ReadCashierRevenueData(SqlDataReader reader, List<CashierRevenueDto> list)
+        private static async Task ReadCashierRevenueDataAsync(SqlDataReader reader, List<CashierRevenueDto> list)
         {
-            while (reader.Read())
+            while (await reader.ReadAsync())
             {
                 list.Add(new CashierRevenueDto
                 {
@@ -263,9 +262,9 @@ namespace MiniSupermarket.API.Controllers
             }
         }
 
-        private static void ReadTopSellingData(SqlDataReader reader, List<TopSellingProductDto> list)
+        private static async Task ReadTopSellingDataAsync(SqlDataReader reader, List<TopSellingProductDto> list)
         {
-            while (reader.Read())
+            while (await reader.ReadAsync())
             {
                 list.Add(new TopSellingProductDto
                 {

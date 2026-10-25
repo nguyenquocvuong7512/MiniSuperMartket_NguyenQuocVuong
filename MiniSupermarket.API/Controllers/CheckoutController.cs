@@ -2,7 +2,7 @@
  * Họ và tên sinh viên: Nguyễn Quốc Vương
  * Bài tập: Buổi 5 - Tiết 5: Hiện thực hóa API thanh toán POS bọc trong SqlTransaction & Kịch bản kiểm thử
  * Mô tả: API Thanh toán POS đa bảng và Hủy đơn hàng được bảo vệ trọn vẹn bởi SqlTransaction (ACID),
- *       sử dụng cấu trúc dữ liệu chuẩn của dự án trong /Data (SupermarketDbContext).
+ *       sử dụng cấu trúc dữ liệu chuẩn của dự án trong /Data (SupermarketDbContext) kết hợp async/await.
  */
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
@@ -26,7 +26,7 @@ namespace MiniSupermarket.API.Controllers
         // Chức năng: Thanh toán hóa đơn, trừ tồn kho và tích điểm trong 1 Transaction
         // =========================================================================
         [HttpPost]
-        public IActionResult ProcessCheckout([FromBody] CheckoutRequestDto request)
+        public async Task<IActionResult> ProcessCheckout([FromBody] CheckoutRequestDto request)
         {
             // 1. Kiểm tra tính hợp lệ của giỏ hàng
             if (request.Items == null || request.Items.Count == 0)
@@ -41,12 +41,12 @@ namespace MiniSupermarket.API.Controllers
 
             string connectionString = _configuration.GetConnectionString("DefaultConnection")!;
 
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            await using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                connection.Open();
+                await connection.OpenAsync();
 
                 // 2. KHỞI TẠO TRANSACTION (Bắt đầu phiên giao dịch khép kín bảo vệ ACID)
-                SqlTransaction transaction = connection.BeginTransaction();
+                SqlTransaction transaction = (SqlTransaction)await connection.BeginTransactionAsync();
 
                 try
                 {
@@ -54,13 +54,28 @@ namespace MiniSupermarket.API.Controllers
                     string findUserSql = "SELECT TOP 1 Id FROM Users WHERE Username = @Username";
                     int userId = 3; // Mặc định là cashier01 (Id = 3) nếu không tìm thấy
 
-                    using (SqlCommand cmdUser = new SqlCommand(findUserSql, connection, transaction))
+                    await using (SqlCommand cmdUser = new SqlCommand(findUserSql, connection, transaction))
                     {
                         cmdUser.Parameters.AddWithValue("@Username", request.CashierUsername.Trim());
-                        object? objUserId = cmdUser.ExecuteScalar();
+                        object? objUserId = await cmdUser.ExecuteScalarAsync();
                         if (objUserId != null && objUserId != DBNull.Value)
                         {
                             userId = Convert.ToInt32(objUserId);
+                        }
+                    }
+
+                    // 2.1b. Nếu chưa có CustomerId nhưng có CustomerPhone, tra cứu CustomerId
+                    if (request.CustomerId <= 0 && !string.IsNullOrWhiteSpace(request.CustomerPhone))
+                    {
+                        string findCustSql = "SELECT TOP 1 CustomerId FROM Customers WHERE PhoneNumber = @Phone";
+                        await using (SqlCommand cmdCust = new SqlCommand(findCustSql, connection, transaction))
+                        {
+                            cmdCust.Parameters.AddWithValue("@Phone", request.CustomerPhone.Trim());
+                            object? objCustId = await cmdCust.ExecuteScalarAsync();
+                            if (objCustId != null && objCustId != DBNull.Value)
+                            {
+                                request.CustomerId = Convert.ToInt32(objCustId);
+                            }
                         }
                     }
 
@@ -79,14 +94,15 @@ namespace MiniSupermarket.API.Controllers
                         VALUES (@UserId, GETDATE(), @TotalAmount, 'Completed', @PaymentMethod, @AmountReceived, 0)";
 
                     int orderId = 0;
-                    using (SqlCommand cmdOrder = new SqlCommand(insertOrderSql, connection, transaction))
+                    await using (SqlCommand cmdOrder = new SqlCommand(insertOrderSql, connection, transaction))
                     {
                         cmdOrder.Parameters.AddWithValue("@UserId", userId);
                         cmdOrder.Parameters.AddWithValue("@TotalAmount", finalAmount);
                         cmdOrder.Parameters.AddWithValue("@PaymentMethod", string.IsNullOrWhiteSpace(request.PaymentMethod) ? "Cash" : request.PaymentMethod);
                         cmdOrder.Parameters.AddWithValue("@AmountReceived", finalAmount);
 
-                        orderId = (int)cmdOrder.ExecuteScalar();
+                        object? objOrderId = await cmdOrder.ExecuteScalarAsync();
+                        orderId = Convert.ToInt32(objOrderId);
                     }
 
                     // =====================================================================
@@ -99,13 +115,13 @@ namespace MiniSupermarket.API.Controllers
                         int currentStock = 0;
                         string productName = string.Empty;
 
-                        using (SqlCommand cmdCheck = new SqlCommand(checkStockSql, connection, transaction))
+                        await using (SqlCommand cmdCheck = new SqlCommand(checkStockSql, connection, transaction))
                         {
                             cmdCheck.Parameters.AddWithValue("@ProductId", item.ProductId);
 
-                            using (SqlDataReader reader = cmdCheck.ExecuteReader())
+                            await using (SqlDataReader reader = await cmdCheck.ExecuteReaderAsync())
                             {
-                                if (!reader.Read())
+                                if (!await reader.ReadAsync())
                                 {
                                     throw new InvalidOperationException($"Không tìm thấy sản phẩm có ID: {item.ProductId}");
                                 }
@@ -127,14 +143,14 @@ namespace MiniSupermarket.API.Controllers
                             INSERT INTO OrderDetails (OrderId, ProductId, Quantity, UnitPrice, SubTotal)
                             VALUES (@OrderId, @ProductId, @Quantity, @UnitPrice, @SubTotal)";
 
-                        using (SqlCommand cmdDetail = new SqlCommand(insertDetailSql, connection, transaction))
+                        await using (SqlCommand cmdDetail = new SqlCommand(insertDetailSql, connection, transaction))
                         {
                             cmdDetail.Parameters.AddWithValue("@OrderId", orderId);
                             cmdDetail.Parameters.AddWithValue("@ProductId", item.ProductId);
                             cmdDetail.Parameters.AddWithValue("@Quantity", item.Quantity);
                             cmdDetail.Parameters.AddWithValue("@UnitPrice", item.UnitPrice);
                             cmdDetail.Parameters.AddWithValue("@SubTotal", item.Quantity * item.UnitPrice);
-                            cmdDetail.ExecuteNonQuery();
+                            await cmdDetail.ExecuteNonQueryAsync();
                         }
 
                         // 3.4. Khấu trừ số lượng tồn kho trong bảng Products
@@ -143,11 +159,11 @@ namespace MiniSupermarket.API.Controllers
                             SET StockQuantity = StockQuantity - @Qty 
                             WHERE ProductId = @ProductId";
 
-                        using (SqlCommand cmdStock = new SqlCommand(updateStockSql, connection, transaction))
+                        await using (SqlCommand cmdStock = new SqlCommand(updateStockSql, connection, transaction))
                         {
                             cmdStock.Parameters.AddWithValue("@Qty", item.Quantity);
                             cmdStock.Parameters.AddWithValue("@ProductId", item.ProductId);
-                            cmdStock.ExecuteNonQuery();
+                            await cmdStock.ExecuteNonQueryAsync();
                         }
                     }
 
@@ -158,21 +174,28 @@ namespace MiniSupermarket.API.Controllers
                     {
                         string updatePointsSql = @"
                             UPDATE Customers 
-                            SET RewardPoints = RewardPoints + @Points 
+                            SET RewardPoints = RewardPoints + @Points,
+                                MembershipRank = CASE 
+                                    WHEN RewardPoints + @Points >= 1000 THEN N'Kim Cương'
+                                    WHEN RewardPoints + @Points >= 500 THEN N'Vàng'
+                                    WHEN RewardPoints + @Points >= 200 THEN N'Bạc'
+                                    WHEN RewardPoints + @Points >= 50 THEN N'Thân Thiết'
+                                    ELSE N'Mới'
+                                END
                             WHERE CustomerId = @CustomerId";
 
-                        using (SqlCommand cmdCustomer = new SqlCommand(updatePointsSql, connection, transaction))
+                        await using (SqlCommand cmdCustomer = new SqlCommand(updatePointsSql, connection, transaction))
                         {
                             cmdCustomer.Parameters.AddWithValue("@Points", rewardPoints);
                             cmdCustomer.Parameters.AddWithValue("@CustomerId", request.CustomerId);
-                            cmdCustomer.ExecuteNonQuery();
+                            await cmdCustomer.ExecuteNonQueryAsync();
                         }
                     }
 
                     // =====================================================================
                     // BƯỚC 5: XÁC NHẬN LƯU VĨNH VIỄN TOÀN BỘ THAO TÁC (COMMIT)
                     // =====================================================================
-                    transaction.Commit();
+                    await transaction.CommitAsync();
 
                     return Ok(new
                     {
@@ -192,7 +215,7 @@ namespace MiniSupermarket.API.Controllers
                     // =====================================================================
                     try
                     {
-                        transaction.Rollback();
+                        await transaction.RollbackAsync();
                     }
                     catch (Exception rollbackEx)
                     {
@@ -218,14 +241,16 @@ namespace MiniSupermarket.API.Controllers
         // DELETE: api/checkout/cancel/{orderId}
         // =========================================================================
         [HttpDelete("cancel/{orderId}")]
-        public IActionResult CancelOrder(int orderId)
+        [HttpPost("cancel/{orderId}")]
+        [HttpPut("cancel/{orderId}")]
+        public async Task<IActionResult> CancelOrder(int orderId)
         {
             string connectionString = _configuration.GetConnectionString("DefaultConnection")!;
 
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            await using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                connection.Open();
-                SqlTransaction transaction = connection.BeginTransaction();
+                await connection.OpenAsync();
+                SqlTransaction transaction = (SqlTransaction)await connection.BeginTransactionAsync();
 
                 try
                 {
@@ -233,10 +258,10 @@ namespace MiniSupermarket.API.Controllers
                     string getOrderSql = "SELECT TotalAmount FROM Orders WHERE OrderId = @OrderId";
                     decimal totalAmount = 0;
 
-                    using (SqlCommand cmdGet = new SqlCommand(getOrderSql, connection, transaction))
+                    await using (SqlCommand cmdGet = new SqlCommand(getOrderSql, connection, transaction))
                     {
                         cmdGet.Parameters.AddWithValue("@OrderId", orderId);
-                        object? objAmount = cmdGet.ExecuteScalar();
+                        object? objAmount = await cmdGet.ExecuteScalarAsync();
                         if (objAmount == null || objAmount == DBNull.Value)
                         {
                             throw new InvalidOperationException($"Không tìm thấy hóa đơn ID = {orderId} để hủy!");
@@ -248,12 +273,12 @@ namespace MiniSupermarket.API.Controllers
                     var itemsToRestore = new List<(int ProductId, int Quantity)>();
                     string getDetailsSql = "SELECT ProductId, Quantity FROM OrderDetails WHERE OrderId = @OrderId";
 
-                    using (SqlCommand cmdDetails = new SqlCommand(getDetailsSql, connection, transaction))
+                    await using (SqlCommand cmdDetails = new SqlCommand(getDetailsSql, connection, transaction))
                     {
                         cmdDetails.Parameters.AddWithValue("@OrderId", orderId);
-                        using (SqlDataReader reader = cmdDetails.ExecuteReader())
+                        await using (SqlDataReader reader = await cmdDetails.ExecuteReaderAsync())
                         {
-                            while (reader.Read())
+                            while (await reader.ReadAsync())
                             {
                                 itemsToRestore.Add((
                                     Convert.ToInt32(reader["ProductId"]), 
@@ -271,11 +296,11 @@ namespace MiniSupermarket.API.Controllers
                             SET StockQuantity = StockQuantity + @Qty 
                             WHERE ProductId = @ProductId";
 
-                        using (SqlCommand cmdRestore = new SqlCommand(restoreStockSql, connection, transaction))
+                        await using (SqlCommand cmdRestore = new SqlCommand(restoreStockSql, connection, transaction))
                         {
                             cmdRestore.Parameters.AddWithValue("@Qty", item.Quantity);
                             cmdRestore.Parameters.AddWithValue("@ProductId", item.ProductId);
-                            cmdRestore.ExecuteNonQuery();
+                            await cmdRestore.ExecuteNonQueryAsync();
                         }
                     }
 
@@ -291,31 +316,31 @@ namespace MiniSupermarket.API.Controllers
                             END 
                             WHERE CustomerId = 1"; // Hoặc CustomerId tương ứng nếu lưu quan hệ
 
-                        using (SqlCommand cmdDeduct = new SqlCommand(deductPointsSql, connection, transaction))
+                        await using (SqlCommand cmdDeduct = new SqlCommand(deductPointsSql, connection, transaction))
                         {
                             cmdDeduct.Parameters.AddWithValue("@Pts", pointsToDeduct);
-                            cmdDeduct.ExecuteNonQuery();
+                            await cmdDeduct.ExecuteNonQueryAsync();
                         }
                     }
 
                     // 5. Xóa chi tiết hóa đơn trước (tránh vi phạm ràng buộc khóa ngoại)
                     string deleteDetailsSql = "DELETE FROM OrderDetails WHERE OrderId = @OrderId";
-                    using (SqlCommand cmdDelDetails = new SqlCommand(deleteDetailsSql, connection, transaction))
+                    await using (SqlCommand cmdDelDetails = new SqlCommand(deleteDetailsSql, connection, transaction))
                     {
                         cmdDelDetails.Parameters.AddWithValue("@OrderId", orderId);
-                        cmdDelDetails.ExecuteNonQuery();
+                        await cmdDelDetails.ExecuteNonQueryAsync();
                     }
 
                     // 6. Xóa hóa đơn trong bảng Orders
                     string deleteOrderSql = "DELETE FROM Orders WHERE OrderId = @OrderId";
-                    using (SqlCommand cmdDelOrder = new SqlCommand(deleteOrderSql, connection, transaction))
+                    await using (SqlCommand cmdDelOrder = new SqlCommand(deleteOrderSql, connection, transaction))
                     {
                         cmdDelOrder.Parameters.AddWithValue("@OrderId", orderId);
-                        cmdDelOrder.ExecuteNonQuery();
+                        await cmdDelOrder.ExecuteNonQueryAsync();
                     }
 
                     // 7. Xác nhận lưu vĩnh viễn (Commit)
-                    transaction.Commit();
+                    await transaction.CommitAsync();
 
                     return Ok(new
                     {
@@ -327,7 +352,7 @@ namespace MiniSupermarket.API.Controllers
                 {
                     try
                     {
-                        transaction.Rollback();
+                        await transaction.RollbackAsync();
                     }
                     catch { }
 
