@@ -71,6 +71,22 @@ namespace MiniSupermarket.WinForms
             Theme.UITheme.StyleButton(btnLoad, Theme.UITheme.ButtonVariant.Neutral);
             Theme.UITheme.StyleButton(btnPrev, Theme.UITheme.ButtonVariant.Neutral);
             Theme.UITheme.StyleButton(btnNext, Theme.UITheme.ButtonVariant.Neutral);
+
+            // Nút Xuất Excel/CSV (Tiêu chí 48)
+            SetupExportButton();
+        }
+
+        private Button btnExportExcel = new();
+
+        private void SetupExportButton()
+        {
+            btnExportExcel.Text = "📊 Xuất Excel/CSV";
+            btnExportExcel.Size = new Size(130, 30);
+            btnExportExcel.Location = new Point(btnLoad.Right + 8, btnLoad.Top);
+            btnExportExcel.Cursor = Cursors.Hand;
+            Theme.UITheme.StyleButton(btnExportExcel, Theme.UITheme.ButtonVariant.Primary);
+            btnExportExcel.Click += btnExportExcel_Click;
+            panelTop.Controls.Add(btnExportExcel);
         }
 
         private void RegisterEvents()
@@ -95,6 +111,9 @@ namespace MiniSupermarket.WinForms
 
             // Sự kiện DataGridView
             dgvProducts.CellClick += dgvProducts_CellClick;
+
+            // Tiêu chí 43: Bắt sự kiện CellFormatting để cảnh báo hàng sắp hết kho (<= 10)
+            dgvProducts.CellFormatting += dgvProducts_CellFormatting;
         }
 
         // =====================================================
@@ -553,6 +572,91 @@ namespace MiniSupermarket.WinForms
             }
 
             return true;
+        }
+
+        // =====================================================
+        // TIÊU CHÍ 43: CẢNH BÁO HÀNG SẮP HẾT KHO (LOW-STOCK ALERT)
+        // Nghiệp vụ: Các sản phẩm có tồn kho <= 10 tự động tô màu đỏ/cam
+        // Kỹ thuật: Bắt sự kiện CellFormatting đổi e.CellStyle.BackColor
+        // =====================================================
+        private void dgvProducts_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.RowIndex >= dgvProducts.Rows.Count) return;
+
+            // Kiểm tra cột StockQuantity
+            if (dgvProducts.Columns[e.ColumnIndex].Name == "StockQuantity" && e.Value != null)
+            {
+                if (int.TryParse(e.Value.ToString(), out int qty))
+                {
+                if (e.CellStyle != null)
+                {
+                    if (qty <= 10)
+                    {
+                        // Tiêu chí 43: Nếu tồn kho <= 10 thì đổi màu nền Color.LightCoral
+                        e.CellStyle.BackColor = Color.LightCoral;
+                        e.CellStyle.ForeColor = Color.White;
+                        e.CellStyle.Font = new Font(dgvProducts.Font, FontStyle.Bold);
+                        e.CellStyle.SelectionBackColor = Color.Crimson;
+                        e.CellStyle.SelectionForeColor = Color.White;
+                    }
+                    else if (qty <= 25)
+                    {
+                        e.CellStyle.BackColor = Color.FromArgb(254, 243, 199); // Vàng cam cảnh báo
+                        e.CellStyle.ForeColor = Color.FromArgb(180, 83, 9);
+                        e.CellStyle.Font = new Font(dgvProducts.Font, FontStyle.Bold);
+                    }
+                }
+                }
+            }
+        }
+
+        // =====================================================
+        // TIÊU CHÍ 48: XUẤT DANH MỤC SẢN PHẨM RA EXCEL / CSV
+        // =====================================================
+        private async void btnExportExcel_Click(object? sender, EventArgs e)
+        {
+            try
+            {
+                // Lấy toàn bộ danh sách sản phẩm từ API
+                var products = await ApiClientService.Client.GetFromJsonAsync<List<ProductItemViewDto>>("products");
+                if (products == null || products.Count == 0)
+                {
+                    MessageBox.Show("Không có dữ liệu sản phẩm để xuất!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                using var sfd = new SaveFileDialog
+                {
+                    Filter = "CSV (Excel Compatible) (*.csv)|*.csv|All Files (*.*)|*.*",
+                    FileName = $"DanhSachSanPham_{DateTime.Now:yyyyMMdd_HHmmss}.csv",
+                    Title = "Xuất danh mục sản phẩm ra Excel / CSV"
+                };
+
+                if (sfd.ShowDialog() == DialogResult.OK)
+                {
+                    var sb = new System.Text.StringBuilder();
+                    // Tiêu đề cột
+                    sb.AppendLine("Mã SP,Mã vạch,Tên sản phẩm,Đơn giá (VNĐ),Tồn kho,Đơn vị,Nhóm hàng,Cảnh báo tồn kho");
+
+                    foreach (var p in products)
+                    {
+                        string alert = p.StockQuantity <= 10 ? "SẮP HẾT HÀNG (<= 10)" : (p.StockQuantity <= 25 ? "Cảnh báo" : "Bình thường");
+                        string nameEscaped = $"\"{p.ProductName.Replace("\"", "\"\"")}\"";
+                        string catEscaped = $"\"{p.CategoryName.Replace("\"", "\"\"")}\"";
+                        sb.AppendLine($"{p.ProductId},\"{p.Barcode}\",{nameEscaped},{p.Price},{p.StockQuantity},\"{p.Unit}\",{catEscaped},\"{alert}\"");
+                    }
+
+                    // Lưu file với encoding UTF-8 có BOM để Microsoft Excel đọc font tiếng Việt chính xác
+                    await System.IO.File.WriteAllTextAsync(sfd.FileName, sb.ToString(), System.Text.Encoding.UTF8);
+
+                    MessageBox.Show($"Đã xuất thành công {products.Count} sản phẩm ra file:\n{sfd.FileName}",
+                        "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi khi xuất tệp: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void panelInputs_Paint(object sender, PaintEventArgs e)

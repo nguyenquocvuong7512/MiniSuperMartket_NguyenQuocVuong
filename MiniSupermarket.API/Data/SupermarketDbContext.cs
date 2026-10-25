@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using MiniSupermarket.API.Models;
 
 namespace MiniSupermarket.API.Data
@@ -65,7 +65,7 @@ namespace MiniSupermarket.API.Data
                 new Product { ProductId = 301, Barcode = "8930000003014", ProductName = "Ổi lê hữu cơ chín cây", CategoryId = 3, Price = 45000, StockQuantity = 60, Unit = "Kg" },
                 new Product { ProductId = 401, Barcode = "8930000004011", ProductName = "Nấm đùi gà tươi Organic", CategoryId = 4, Price = 42000, StockQuantity = 50, Unit = "Gói 250g" },
                 new Product { ProductId = 501, Barcode = "8930000005018", ProductName = "Thịt ba chỉ heo thảo mộc", CategoryId = 5, Price = 165000, StockQuantity = 40, Unit = "Khay 500g" },
-                new Product { ProductId = 601, Barcode = "8930000006015", ProductName = "Cá lăng sinh thái sông Đà", CategoryId = 6, Price = 195000, StockQuantity = 30, Unit = "Kg" },
+                new Product { ProductId = 601, Barcode = "8930000006015", ProductName = "Cá lăng sinh thái sông Đà", CategoryId = 6, Price = 195000, StockQuantity = 6, Unit = "Kg" },
                 new Product { ProductId = 701, Barcode = "8930000007012", ProductName = "Trứng gà ta thảo mộc tự nhiên", CategoryId = 7, Price = 48000, StockQuantity = 120, Unit = "Hộp 10 quả" },
                 new Product { ProductId = 801, Barcode = "8930000008019", ProductName = "Sữa bò tươi thanh trùng Organic", CategoryId = 8, Price = 52000, StockQuantity = 45, Unit = "Chai 900ml" },
                 new Product { ProductId = 901, Barcode = "8930000009016", ProductName = "Gạo ST25 hữu cơ ruộng rươi", CategoryId = 9, Price = 125000, StockQuantity = 70, Unit = "Túi 2kg" },
@@ -74,7 +74,7 @@ namespace MiniSupermarket.API.Data
                 new Product { ProductId = 1201, Barcode = "8930000012017", ProductName = "Dầu mè vàng ép lạnh thủ công", CategoryId = 12, Price = 110000, StockQuantity = 40, Unit = "Chai 250ml" },
                 new Product { ProductId = 1301, Barcode = "8930000013014", ProductName = "Trà hoa cúc sấy lạnh tự nhiên", CategoryId = 13, Price = 85000, StockQuantity = 55, Unit = "Hũ 80g" },
                 new Product { ProductId = 1401, Barcode = "8930000014011", ProductName = "Dưa cải củ lên men tự nhiên", CategoryId = 14, Price = 32000, StockQuantity = 60, Unit = "Hũ 450g" },
-                new Product { ProductId = 1501, Barcode = "8930000015018", ProductName = "Combo Rau Củ Xanh Dinh Dưỡng Tuần", CategoryId = 15, Price = 250000, StockQuantity = 20, Unit = "Set 5kg" }
+                new Product { ProductId = 1501, Barcode = "8930000015018", ProductName = "Combo Rau Củ Xanh Dinh Dưỡng Tuần", CategoryId = 15, Price = 250000, StockQuantity = 8, Unit = "Set 5kg" }
             );
 
             // === 15 KHÁCH HÀNG ===

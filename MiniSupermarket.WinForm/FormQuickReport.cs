@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
 
 namespace MiniSupermarket.WinForms
 {
@@ -22,12 +25,19 @@ namespace MiniSupermarket.WinForms
             Theme.UITheme.StyleButton(btnCancelOrder, Theme.UITheme.ButtonVariant.Danger);
             Theme.UITheme.StyleButton(btnViewOrderDetail, Theme.UITheme.ButtonVariant.Secondary);
             Theme.UITheme.StyleButton(btnRefresh, Theme.UITheme.ButtonVariant.Neutral);
+            Theme.UITheme.StyleButton(btnExportReport, Theme.UITheme.ButtonVariant.Success);
+
+            // Khởi tạo khoảng thời gian mặc định: 7 ngày gần nhất
+            dtpReportDate.Value = DateTime.Today.AddDays(-6);
+            dtpToDate.Value = DateTime.Today;
+
             SetupGridColumns();
 
             btnRunReport.Click += async (s, e) => await LoadReportDataAsync();
             btnRefresh.Click += async (s, e) => await LoadReportDataAsync();
             btnCancelOrder.Click += async (s, e) => await OpenCancelOrderDialogAsync();
             btnViewOrderDetail.Click += (s, e) => ShowSelectedOrderDetail();
+            btnExportReport.Click += (s, e) => ExportReportToCsv();
             dgvOrders.CellDoubleClick += (s, e) => ShowSelectedOrderDetail();
             dgvOrders.RowPrePaint += DgvOrders_RowPrePaint;
 
@@ -153,7 +163,7 @@ namespace MiniSupermarket.WinForms
                 return;
             }
 
-            var sb = new System.Text.StringBuilder();
+            var sb = new StringBuilder();
             sb.AppendLine($"==========================================");
             sb.AppendLine($"           CHI TIẾT HÓA ĐƠN #{order.OrderId}");
             sb.AppendLine($"==========================================");
@@ -180,9 +190,11 @@ namespace MiniSupermarket.WinForms
             MessageBox.Show(sb.ToString(), $"Chi tiết đơn #{order.OrderId}", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
+        // =========================================================
+        // TẢI DỮ LIỆU BÁO CÁO & DASHBOARD
+        // =========================================================
         private async Task LoadReportDataAsync()
         {
-            // Kiểm tra phân quyền cấp Action: Chỉ Admin mới được xem
             if (SessionManager.CurrentRole.Trim().ToUpper() != "ADMIN")
             {
                 MessageBox.Show(
@@ -199,90 +211,57 @@ namespace MiniSupermarket.WinForms
                 btnRunReport.Enabled = false;
                 btnRunReport.Text = "Đang tải...";
 
+                // 1. Tiêu chí 44: Thẻ tổng kết Dashboard (Dashboard KPI Summary Cards)
+                await LoadDashboardSummaryAsync();
+
+                // 2. Tiêu chí 45: Biểu đồ cột Doanh thu theo thời gian (Column Chart - Group By Ngày)
+                await LoadDailyRevenueChartAsync();
+
+                // 3. Tải danh sách đơn hàng chi tiết theo khoảng ngày chọn
+                DateTime fromDate = dtpReportDate.Value.Date;
+                DateTime toDate = dtpToDate.Value.Date.AddDays(1).AddTicks(-1);
+
                 var response = await ApiClientService.Client.GetAsync("orders");
-                if (!response.IsSuccessStatusCode)
+                if (response.IsSuccessStatusCode)
                 {
-                    MessageBox.Show(
-                        "Không thể tải dữ liệu đơn hàng từ máy chủ!",
-                        "Lỗi",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Error
-                    );
-                    return;
-                }
+                    var jsonStr = await response.Content.ReadAsStringAsync();
+                    using var doc = JsonDocument.Parse(jsonStr);
 
-                var jsonStr = await response.Content.ReadAsStringAsync();
-                using var doc = JsonDocument.Parse(jsonStr);
-
-                if (!doc.RootElement.TryGetProperty("data", out var dataElem))
-                {
-                    return;
-                }
-
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                var allOrders = JsonSerializer.Deserialize<List<OrderReportDto>>(dataElem.GetRawText(), options) ?? new List<OrderReportDto>();
-
-                DateTime selectedDate = dtpReportDate.Value.Date;
-                var filtered = allOrders
-                    .Where(o => o.OrderDate.Date == selectedDate)
-                    .OrderByDescending(o => o.OrderDate)
-                    .ToList();
-
-                _cachedFilteredOrders = filtered;
-
-                // 1. Thống kê tổng số đơn
-                lblTotalOrders.Text = $"{filtered.Count:N0} đơn";
-
-                // 2. Thống kê tổng doanh thu (chỉ tính đơn hợp lệ, không tính Cancelled nếu có)
-                decimal totalRev = filtered
-                    .Where(o => !string.Equals(o.Status, "Cancelled", StringComparison.OrdinalIgnoreCase))
-                    .Sum(o => o.TotalAmount);
-                lblTotalRevenue.Text = $"{totalRev:N0} đ";
-
-                // 3. Tìm mặt hàng bán chạy nhất trong ngày (không tính đơn hủy)
-                var bestSellerItem = filtered
-                    .Where(o => !string.Equals(o.Status, "Cancelled", StringComparison.OrdinalIgnoreCase))
-                    .SelectMany(o => o.Items)
-                    .GroupBy(i => i.ProductName)
-                    .Select(g => new
+                    if (doc.RootElement.TryGetProperty("data", out var dataElem))
                     {
-                        ProductName = g.Key,
-                        TotalQty = g.Sum(x => x.Quantity)
-                    })
-                    .OrderByDescending(x => x.TotalQty)
-                    .FirstOrDefault();
+                        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                        var allOrders = JsonSerializer.Deserialize<List<OrderReportDto>>(dataElem.GetRawText(), options) ?? new List<OrderReportDto>();
 
-                if (bestSellerItem != null)
-                {
-                    lblBestSeller.Text = $"{bestSellerItem.ProductName} ({bestSellerItem.TotalQty:N0} cái)";
+                        var filtered = allOrders
+                            .Where(o => o.OrderDate >= fromDate && o.OrderDate <= toDate)
+                            .OrderByDescending(o => o.OrderDate)
+                            .ToList();
+
+                        _cachedFilteredOrders = filtered;
+
+                        var displayList = filtered.Select(o => new
+                        {
+                            RawOrderId = o.OrderId,
+                            RawStatus = o.Status,
+                            OrderId = $"#{o.OrderId}",
+                            OrderTimeStr = o.OrderDate.ToString("dd/MM/yyyy HH:mm"),
+                            Employee = o.Employee,
+                            PaymentMethod = o.PaymentMethod,
+                            TotalAmountStr = $"{o.TotalAmount:N0} đ",
+                            ItemsSummary = string.Join(", ", o.Items.Select(i => $"{i.ProductName} (x{i.Quantity})")),
+                            Status = string.Equals(o.Status, "Cancelled", StringComparison.OrdinalIgnoreCase)
+                                ? "❌ Đã hủy"
+                                : (o.Status == "Completed" ? "Hoàn thành" : o.Status)
+                        }).ToList();
+
+                        dgvOrders.DataSource = displayList;
+                    }
                 }
-                else
-                {
-                    lblBestSeller.Text = "Chưa có giao dịch";
-                }
-
-                // 4. Hiển thị bảng chi tiết
-                var displayList = filtered.Select(o => new
-                {
-                    RawOrderId = o.OrderId,
-                    RawStatus = o.Status,
-                    OrderId = $"#{o.OrderId}",
-                    OrderTimeStr = o.OrderDate.ToString("dd/MM/yyyy HH:mm"),
-                    Employee = o.Employee,
-                    PaymentMethod = o.PaymentMethod,
-                    TotalAmountStr = $"{o.TotalAmount:N0} đ",
-                    ItemsSummary = string.Join(", ", o.Items.Select(i => $"{i.ProductName} (x{i.Quantity})")),
-                    Status = string.Equals(o.Status, "Cancelled", StringComparison.OrdinalIgnoreCase)
-                        ? "❌ Đã hủy"
-                        : (o.Status == "Completed" ? "Hoàn thành" : o.Status)
-                }).ToList();
-
-                dgvOrders.DataSource = displayList;
             }
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    "Lỗi tải báo cáo: " + ex.Message,
+                    "Lỗi tải dữ liệu báo cáo: " + ex.Message,
                     "Lỗi hệ thống",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error
@@ -292,6 +271,149 @@ namespace MiniSupermarket.WinForms
             {
                 btnRunReport.Enabled = true;
                 btnRunReport.Text = "📊 Xem Báo Cáo";
+            }
+        }
+
+        // =========================================================
+        // TIÊU CHÍ 44: TẢI 4 THẺ TỔNG KẾT DASHBOARD (SUMMARY CARDS)
+        // =========================================================
+        private async Task LoadDashboardSummaryAsync()
+        {
+            try
+            {
+                var response = await ApiClientService.Client.GetAsync("reports/dashboard-summary");
+                if (response.IsSuccessStatusCode)
+                {
+                    var jsonStr = await response.Content.ReadAsStringAsync();
+                    using var doc = JsonDocument.Parse(jsonStr);
+
+                    if (doc.RootElement.TryGetProperty("data", out var dataElem))
+                    {
+                        decimal todayRevenue = dataElem.TryGetProperty("todayRevenue", out var pRev) ? pRev.GetDecimal() : 0;
+                        int totalOrders = dataElem.TryGetProperty("totalOrders", out var pOrd) ? pOrd.GetInt32() : 0;
+                        int totalCustomers = dataElem.TryGetProperty("totalCustomers", out var pCust) ? pCust.GetInt32() : 0;
+                        int lowStockCount = 0;
+                        if (dataElem.TryGetProperty("lowStockProductsCount", out var pStockCount))
+                            lowStockCount = pStockCount.GetInt32();
+                        else if (dataElem.TryGetProperty("lowStockCount", out var pStockAlt))
+                            lowStockCount = pStockAlt.GetInt32();
+
+                        lblTotalRevenue.Text = $"{todayRevenue:N0} đ";
+                        lblTotalOrders.Text = $"{totalOrders:N0} đơn";
+                        lblTotalCustomers.Text = $"{totalCustomers:N0} khách";
+                        lblLowStock.Text = $"{lowStockCount:N0} sp yếu";
+                    }
+                }
+            }
+            catch
+            {
+                // Fallback nếu lỗi kết nối
+            }
+        }
+
+        // =========================================================
+        // TIÊU CHÍ 45: TẢI VÀ VẼ BIỂU ĐỒ CỘT DOANH THU THEO NGÀY
+        // =========================================================
+        private async Task LoadDailyRevenueChartAsync()
+        {
+            try
+            {
+                DateTime from = dtpReportDate.Value.Date;
+                DateTime to = dtpToDate.Value.Date;
+
+                string url = $"reports/daily-revenue?fromDate={from:yyyy-MM-dd}&toDate={to:yyyy-MM-dd}";
+                var response = await ApiClientService.Client.GetAsync(url);
+
+                if (!response.IsSuccessStatusCode)
+                    return;
+
+                var jsonStr = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(jsonStr);
+
+                if (doc.RootElement.TryGetProperty("data", out var dataElem))
+                {
+                    chartRevenue.Series["DoanhThu"].Points.Clear();
+
+                    foreach (var item in dataElem.EnumerateArray())
+                    {
+                        DateTime date = item.GetProperty("date").GetDateTime();
+                        decimal revenue = item.GetProperty("totalRevenue").GetDecimal();
+                        int orderCount = item.GetProperty("orderCount").GetInt32();
+
+                        string label = date.ToString("dd/MM");
+                        int pointIndex = chartRevenue.Series["DoanhThu"].Points.AddXY(label, (double)revenue);
+                        chartRevenue.Series["DoanhThu"].Points[pointIndex].ToolTip = $"{date:dd/MM/yyyy}: {revenue:N0} đ ({orderCount} đơn)";
+                    }
+                }
+            }
+            catch
+            {
+                // Bỏ qua lỗi chart nếu chưa có dữ liệu
+            }
+        }
+
+        // =========================================================
+        // TIÊU CHÍ 48: XUẤT BÁO CÁO HÓA ĐƠN RA CSV/EXCEL (UTF-8 WITH BOM)
+        // =========================================================
+        private void ExportReportToCsv()
+        {
+            if (_cachedFilteredOrders == null || _cachedFilteredOrders.Count == 0)
+            {
+                MessageBox.Show(
+                    "Không có dữ liệu hóa đơn nào để xuất báo cáo!",
+                    "Thông báo",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+                return;
+            }
+
+            using var sfd = new SaveFileDialog
+            {
+                Title = "Xuất Báo Cáo Hóa Đơn Ra Excel/CSV",
+                Filter = "Tệp CSV (Excel hỗ trợ) (*.csv)|*.csv",
+                FileName = $"BaoCao_HoaDon_{DateTime.Now:yyyyMMdd_HHmm}.csv"
+            };
+
+            if (sfd.ShowDialog(this) != DialogResult.OK)
+                return;
+
+            try
+            {
+                var sb = new StringBuilder();
+
+                // Tiêu đề cột
+                sb.AppendLine("Mã Đơn,Thời Gian,Thu Ngân,Phương Thức,Tổng Tiền (VNĐ),Tiền Khách Đưa (VNĐ),Tiền Thối (VNĐ),Trạng Thái,Chi Tiết Mặt Hàng");
+
+                foreach (var o in _cachedFilteredOrders)
+                {
+                    string itemsStr = string.Join(" | ", o.Items.Select(i => $"{i.ProductName} (x{i.Quantity})"));
+                    string escapedItems = $"\"{itemsStr.Replace("\"", "\"\"")}\"";
+                    string escapedEmployee = $"\"{o.Employee.Replace("\"", "\"\"")}\"";
+                    string status = string.Equals(o.Status, "Cancelled", StringComparison.OrdinalIgnoreCase) ? "Đã hủy" : "Hoàn thành";
+
+                    sb.AppendLine($"#{o.OrderId},{o.OrderDate:dd/MM/yyyy HH:mm},{escapedEmployee},{o.PaymentMethod},{o.TotalAmount},{o.AmountReceived},{o.ChangeAmount},{status},{escapedItems}");
+                }
+
+                // Ghi file với UTF-8 kèm BOM để Microsoft Excel tự động hiển thị đúng tiếng Việt có dấu
+                var utf8WithBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: true);
+                File.WriteAllText(sfd.FileName, sb.ToString(), utf8WithBom);
+
+                MessageBox.Show(
+                    $"Xuất báo cáo thành công!\n\nĐã lưu tại:\n{sfd.FileName}\n\n(Tệp được mã hóa UTF-8 with BOM hiển thị sắc nét tiếng Việt trên Excel)",
+                    "Xuất Báo Cáo Thành Công",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Lỗi khi xuất file Excel/CSV: " + ex.Message,
+                    "Lỗi",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
             }
         }
     }

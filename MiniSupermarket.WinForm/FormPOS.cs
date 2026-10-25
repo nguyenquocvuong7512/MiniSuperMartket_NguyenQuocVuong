@@ -32,7 +32,58 @@ namespace MiniSupermarket.WinForms.Forms
 
             SetupCustomStyles();
             SetupEvents();
+            
+            panelTopBar.Resize += (s, e) => LayoutTopBar();
+            this.Load += (s, e) => LayoutTopBar();
+            LayoutTopBar();
+
             _ = LoadProductsAsync();
+        }
+
+        private void LayoutTopBar()
+        {
+            if (panelTopBar == null) return;
+
+            lblBarcode.Visible = false;
+
+            int centerY = panelTopBar.ClientSize.Height / 2;
+            int currentX = 14;
+
+            // 1. Badge Quét mã vạch
+            lblBarcodeBadge.Location = new Point(currentX, Math.Max(0, centerY - lblBarcodeBadge.Height / 2));
+            currentX += lblBarcodeBadge.Width + 14;
+
+            // 2. Ô nhập Barcode
+            txtBarcode.Width = 240;
+            txtBarcode.Location = new Point(currentX, Math.Max(0, centerY - txtBarcode.Height / 2));
+            currentX += txtBarcode.Width + 8;
+
+            // 3. Nút Thêm
+            btnAdd.Width = 85;
+            btnAdd.Location = new Point(currentX, Math.Max(0, centerY - btnAdd.Height / 2));
+            currentX += btnAdd.Width + 24;
+
+            // 4. Nhãn Tìm SP
+            lblSearch.Location = new Point(currentX, Math.Max(0, centerY - lblSearch.Height / 2));
+            currentX += lblSearch.Width + 8;
+
+            // 5. Ô nhập Tìm SP
+            txtSearch.Width = 200;
+            txtSearch.Location = new Point(currentX, Math.Max(0, centerY - txtSearch.Height / 2));
+            currentX += txtSearch.Width + 8;
+
+            // 6. Nút Tìm
+            btnSearch.Width = 65;
+            btnSearch.Location = new Point(currentX, Math.Max(0, centerY - btnSearch.Height / 2));
+            currentX += btnSearch.Width + 18;
+
+            // 7. Nhãn SL
+            lblQuantity.Location = new Point(currentX, Math.Max(0, centerY - lblQuantity.Height / 2));
+            currentX += lblQuantity.Width + 6;
+
+            // 8. Ô nhập số lượng
+            nudQuantity.Width = 60;
+            nudQuantity.Location = new Point(currentX, Math.Max(0, centerY - nudQuantity.Height / 2));
         }
 
         private void SetupCustomStyles()
@@ -149,6 +200,7 @@ namespace MiniSupermarket.WinForms.Forms
             btnCustAdd.Click += (s, e) => OpenQuickAddCustomer();
             btnCustClear.Click += (s, e) => ResetCustomer();
             btnSelectGuest.Click += (s, e) => ResetCustomer();
+            nudRedeemPoints.ValueChanged += (s, e) => OnRedeemPointsChanged();
         }
 
         // =========================================================
@@ -390,6 +442,17 @@ namespace MiniSupermarket.WinForms.Forms
         // REFRESH CART
         // =========================================================
 
+        private void OnRedeemPointsChanged()
+        {
+            decimal rawTotal = _cart.Sum(x => x.SubTotal);
+            int points = (int)nudRedeemPoints.Value;
+            decimal discount = points * 1000m;
+            lblRedeemDiscount.Text = $"(-{discount:N0} đ | 1đ = 1k)";
+            decimal payable = Math.Max(0, rawTotal - discount);
+            lblTotal.Text = $"{payable:N0} đ";
+            CalculateChange();
+        }
+
         private void RefreshCart()
         {
             foreach (var item in _cart)
@@ -400,8 +463,27 @@ namespace MiniSupermarket.WinForms.Forms
             dgvCart.DataSource = null;
             dgvCart.DataSource = _cart.ToList();
 
-            decimal total = _cart.Sum(x => x.SubTotal);
-            lblTotal.Text = $"{total:N0} đ";
+            decimal rawTotal = _cart.Sum(x => x.SubTotal);
+
+            // Cập nhật số điểm tối đa có thể quy đổi (1 điểm = 1.000 VNĐ, không quá tổng tiền)
+            if (_currentCustomer != null && _currentCustomer.RewardPoints > 0 && rawTotal > 0)
+            {
+                nudRedeemPoints.Enabled = true;
+                int maxRedeemable = Math.Min(_currentCustomer.RewardPoints, (int)(rawTotal / 1000m));
+                nudRedeemPoints.Maximum = Math.Max(0, maxRedeemable);
+            }
+            else
+            {
+                nudRedeemPoints.Value = 0;
+                nudRedeemPoints.Enabled = false;
+                nudRedeemPoints.Maximum = 0;
+            }
+
+            int points = (int)nudRedeemPoints.Value;
+            decimal discount = points * 1000m;
+            decimal payable = Math.Max(0, rawTotal - discount);
+            lblTotal.Text = $"{payable:N0} đ";
+            lblRedeemDiscount.Text = $"(-{discount:N0} đ | 1đ = 1k)";
 
             CalculateChange();
             UpdatePointsCalculation();
@@ -448,7 +530,9 @@ namespace MiniSupermarket.WinForms.Forms
 
         private void CalculateChange()
         {
-            decimal total = _cart.Sum(x => x.SubTotal);
+            decimal rawTotal = _cart.Sum(x => x.SubTotal);
+            int points = (int)nudRedeemPoints.Value;
+            decimal payable = Math.Max(0, rawTotal - points * 1000m);
 
             if (cboPaymentMethod?.SelectedItem?.ToString() != "Cash")
             {
@@ -458,7 +542,7 @@ namespace MiniSupermarket.WinForms.Forms
 
             if (decimal.TryParse(txtAmountReceived?.Text, out decimal received))
             {
-                decimal change = received - total;
+                decimal change = received - payable;
 
                 if (change < 0)
                     change = 0;
@@ -472,7 +556,7 @@ namespace MiniSupermarket.WinForms.Forms
         }
 
         // =========================================================
-        // THANH TOÁN
+        // THANH TOÁN (TIÊU CHÍ 47: HỖ TRỢ ĐỔI ĐIỂM THƯỞNG TRỪ TIỀN)
         // =========================================================
 
         private async Task ProcessPaymentAsync()
@@ -488,7 +572,11 @@ namespace MiniSupermarket.WinForms.Forms
                 return;
             }
 
-            decimal total = _cart.Sum(x => x.SubTotal);
+            decimal rawTotal = _cart.Sum(x => x.SubTotal);
+            int pointsToRedeem = (int)nudRedeemPoints.Value;
+            decimal discount = pointsToRedeem * 1000m;
+            decimal payable = Math.Max(0, rawTotal - discount);
+
             string paymentMethod = cboPaymentMethod.SelectedItem?.ToString() ?? "Cash";
             decimal amountReceived = 0;
 
@@ -506,10 +594,10 @@ namespace MiniSupermarket.WinForms.Forms
                     return;
                 }
 
-                if (amountReceived < total)
+                if (amountReceived < payable)
                 {
                     MessageBox.Show(
-                        $"Tiền khách đưa chưa đủ.\n\nTổng tiền: {total:N0} đ",
+                        $"Tiền khách đưa chưa đủ.\n\nCần thanh toán: {payable:N0} đ" + (discount > 0 ? $" (Đã giảm {discount:N0} đ từ {pointsToRedeem:N0} điểm)" : ""),
                         "Thông báo",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
@@ -519,17 +607,21 @@ namespace MiniSupermarket.WinForms.Forms
             }
             else
             {
-                amountReceived = total;
+                amountReceived = payable;
             }
 
-            int pointsToEarn = (int)(total / 10000);
+            int pointsToEarn = (int)(rawTotal / 10000);
             string custInfo = _currentCustomer != null
-                ? $"Khách hàng: {_currentCustomer.CustomerName} ({_currentCustomer.PhoneNumber})\nĐiểm hiện có: {_currentCustomer.RewardPoints:N0} | Tích thêm: +{pointsToEarn:N0} điểm\n\n"
+                ? $"Khách hàng: {_currentCustomer.CustomerName} ({_currentCustomer.PhoneNumber})\nĐiểm hiện có: {_currentCustomer.RewardPoints:N0} | Đổi trừ tiền: {pointsToRedeem:N0} điểm (-{discount:N0} đ)\nTích thêm sau thanh toán: +{pointsToEarn:N0} điểm\n\n"
                 : "Khách hàng: Khách vãng lai (Không tích điểm)\n\n";
 
+            string paySummary = pointsToRedeem > 0
+                ? $"Tổng tiền hàng: {rawTotal:N0} đ\nKhấu trừ điểm: -{discount:N0} đ ({pointsToRedeem:N0} điểm)\nSỐ TIỀN CẦN THANH TOÁN: {payable:N0} đ"
+                : $"Tổng thanh toán: {payable:N0} đ";
+
             var confirm = MessageBox.Show(
-                $"{custInfo}Tổng tiền: {total:N0} đ\nPhương thức: {paymentMethod}\n\nXác nhận thanh toán?",
-                "Xác nhận thanh toán",
+                $"{custInfo}{paySummary}\nPhương thức: {paymentMethod}\n\nXác nhận thanh toán hóa đơn?",
+                "Xác nhận thanh toán POS",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question);
 
@@ -547,6 +639,7 @@ namespace MiniSupermarket.WinForms.Forms
                     AmountReceived = amountReceived,
                     CustomerId = _currentCustomer?.CustomerId,
                     CustomerPhone = _currentCustomer?.PhoneNumber,
+                    PointsToRedeem = pointsToRedeem,
                     Items = _cart.Select(x => new CreateOrderItemRequest
                     {
                         ProductId = x.ProductId,
@@ -570,21 +663,22 @@ namespace MiniSupermarket.WinForms.Forms
 
                 decimal change = result.Data?.ChangeAmount ?? 0;
                 string pointsMsg = "";
-                if (result.Data != null && result.Data.RewardPointsAdded > 0)
+                if (result.Data != null && (result.Data.RewardPointsAdded > 0 || pointsToRedeem > 0))
                 {
-                    pointsMsg = $"\n--- TÍCH ĐIỂM HỘI VIÊN ---\n" +
+                    pointsMsg = $"\n--- TÍCH / ĐỔI ĐIỂM HỘI VIÊN ---\n" +
                                 $"Khách hàng: {result.Data.CustomerName}\n" +
-                                $"Điểm cộng thêm: +{result.Data.RewardPointsAdded:N0} điểm\n" +
-                                $"Tổng điểm tích lũy: {result.Data.TotalRewardPoints:N0} điểm\n" +
+                                (pointsToRedeem > 0 ? $"Điểm đã khấu trừ: -{pointsToRedeem:N0} điểm (-{discount:N0} đ)\n" : "") +
+                                $"Điểm tích lũy thêm: +{result.Data.RewardPointsAdded:N0} điểm\n" +
+                                $"Tổng điểm hiện tại: {result.Data.TotalRewardPoints:N0} điểm\n" +
                                 $"Hạng thẻ: {result.Data.MembershipRank}\n";
                 }
 
                 MessageBox.Show(
                     $"THANH TOÁN THÀNH CÔNG!\n\n" +
-                    $"Mã đơn: #{result.Data?.OrderId}\n" +
-                    $"Tổng tiền: {total:N0} đ\n" +
+                    $"Mã hóa đơn: #{result.Data?.OrderId}\n" +
+                    $"Tổng tiền thu: {payable:N0} đ" + (discount > 0 ? $" (Đã giảm trừ điểm: {discount:N0} đ)" : "") + "\n" +
                     $"Tiền khách đưa: {amountReceived:N0} đ\n" +
-                    $"Tiền thừa: {change:N0} đ\n" +
+                    $"Tiền thối lại: {change:N0} đ\n" +
                     pointsMsg,
                     "Thanh toán thành công",
                     MessageBoxButtons.OK,
@@ -594,6 +688,7 @@ namespace MiniSupermarket.WinForms.Forms
 
                 _cart.Clear();
                 txtAmountReceived.Clear();
+                nudRedeemPoints.Value = 0;
                 RefreshCart();
                 ResetCustomer();
 
@@ -711,8 +806,22 @@ namespace MiniSupermarket.WinForms.Forms
             lblCustRank.Text = string.IsNullOrWhiteSpace(customer.MembershipRank) ? "Mới" : customer.MembershipRank;
             lblCustPoints.Text = $"{customer.RewardPoints:N0} điểm";
 
-            lblCustStatus.Text = $"Đã nhận diện: {customer.CustomerName} ({customer.PhoneNumber}) - Điểm sẽ được cộng khi thanh toán.";
+            lblCustStatus.Text = $"Đã nhận diện: {customer.CustomerName} ({customer.PhoneNumber}) - Điểm hiện có: {customer.RewardPoints:N0}.";
             lblCustStatus.ForeColor = Color.FromArgb(0, 100, 0);
+
+            decimal rawTotal = _cart.Sum(x => x.SubTotal);
+            if (customer.RewardPoints > 0 && rawTotal > 0)
+            {
+                nudRedeemPoints.Enabled = true;
+                int maxRedeemable = Math.Min(customer.RewardPoints, (int)(rawTotal / 1000m));
+                nudRedeemPoints.Maximum = Math.Max(0, maxRedeemable);
+            }
+            else
+            {
+                nudRedeemPoints.Value = 0;
+                nudRedeemPoints.Enabled = false;
+                nudRedeemPoints.Maximum = 0;
+            }
 
             UpdatePointsCalculation();
         }
@@ -726,6 +835,14 @@ namespace MiniSupermarket.WinForms.Forms
             lblCustPoints.Text = "0 điểm";
             lblCustStatus.Text = "Khách vãng lai (Không tích điểm). Nhập SĐT để tích điểm.";
             lblCustStatus.ForeColor = Color.Gray;
+
+            nudRedeemPoints.Value = 0;
+            nudRedeemPoints.Enabled = false;
+            nudRedeemPoints.Maximum = 0;
+            lblRedeemDiscount.Text = "(-0 đ | 1đ = 1k)";
+
+            decimal rawTotal = _cart.Sum(x => x.SubTotal);
+            lblTotal.Text = $"{rawTotal:N0} đ";
 
             UpdatePointsCalculation();
         }
@@ -815,6 +932,7 @@ namespace MiniSupermarket.WinForms.Forms
         public decimal AmountReceived { get; set; }
         public int? CustomerId { get; set; }
         public string? CustomerPhone { get; set; }
+        public int PointsToRedeem { get; set; } = 0;
         public List<CreateOrderItemRequest> Items { get; set; } = new();
     }
 

@@ -282,68 +282,7 @@ namespace MiniSupermarket.API.Controllers
 
 
                 // -------------------------------------------------
-                // 6. Kiểm tra tiền khách đưa
-                // -------------------------------------------------
-                if (request.PaymentMethod == "Cash" &&
-                    request.AmountReceived < totalAmount)
-                {
-                    return BadRequest(new
-                    {
-                        success = false,
-                        message =
-                            $"Tiền khách đưa không đủ! " +
-                            $"Cần thanh toán {totalAmount:N0} VNĐ."
-                    });
-                }
-
-
-                // -------------------------------------------------
-                // 7. Tính tiền thừa
-                // -------------------------------------------------
-                decimal changeAmount = 0;
-
-                if (request.PaymentMethod == "Cash")
-                {
-                    changeAmount =
-                        request.AmountReceived - totalAmount;
-                }
-
-
-                // -------------------------------------------------
-                // 8. Tạo Order
-                // -------------------------------------------------
-                var order = new Order
-                {
-                    UserId = currentUser.Id,
-
-                    OrderDate = DateTime.Now,
-
-                    TotalAmount = totalAmount,
-
-                    Status = "Completed",
-
-                    PaymentMethod = request.PaymentMethod,
-
-                    AmountReceived =
-                        request.PaymentMethod == "Cash"
-                            ? request.AmountReceived
-                            : totalAmount,
-
-                    ChangeAmount = changeAmount
-                };
-
-
-                // -------------------------------------------------
-                // 9. Gắn OrderDetail vào Order
-                // -------------------------------------------------
-                foreach (var detail in orderDetails)
-                {
-                    order.OrderDetails.Add(detail);
-                }
-
-
-                // -------------------------------------------------
-                // 10. Tích điểm cho khách hàng (nếu có thông tin)
+                // 6. Kiểm tra & Tra cứu Khách hàng để xử lý điểm thưởng (Tiêu chí 47)
                 // -------------------------------------------------
                 Customer? customer = null;
                 if (request.CustomerId.HasValue && request.CustomerId.Value > 0)
@@ -356,25 +295,97 @@ namespace MiniSupermarket.API.Controllers
                     customer = await _context.Customers.FirstOrDefaultAsync(c => c.PhoneNumber == phone);
                 }
 
+                // Tiêu chí 47: Đổi điểm thưởng trừ tiền hóa đơn (1 điểm = 1.000 VNĐ)
+                int pointsToRedeem = Math.Max(0, request.PointsToRedeem);
+                decimal discountFromPoints = 0;
+                if (pointsToRedeem > 0)
+                {
+                    if (customer == null)
+                    {
+                        return BadRequest(new
+                        {
+                            success = false,
+                            message = "Chỉ khách hàng thành viên mới có thể sử dụng điểm thưởng để trừ tiền!"
+                        });
+                    }
+
+                    if (customer.RewardPoints < pointsToRedeem)
+                    {
+                        return BadRequest(new
+                        {
+                            success = false,
+                            message = $"Khách hàng không đủ điểm thưởng! Hiện có: {customer.RewardPoints:N0} điểm, yêu cầu đổi: {pointsToRedeem:N0} điểm."
+                        });
+                    }
+
+                    discountFromPoints = pointsToRedeem * 1000m;
+                    customer.RewardPoints -= pointsToRedeem;
+                }
+
+                decimal finalPayableAmount = Math.Max(0, totalAmount - discountFromPoints);
+
+                // -------------------------------------------------
+                // 7. Kiểm tra tiền khách đưa và tính tiền thừa
+                // -------------------------------------------------
+                if (request.PaymentMethod == "Cash" && request.AmountReceived < finalPayableAmount)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = $"Tiền khách đưa không đủ! Cần thanh toán {finalPayableAmount:N0} VNĐ."
+                    });
+                }
+
+                decimal changeAmount = 0;
+                if (request.PaymentMethod == "Cash")
+                {
+                    changeAmount = request.AmountReceived - finalPayableAmount;
+                }
+
+                // -------------------------------------------------
+                // 8. Tạo Order
+                // -------------------------------------------------
+                var order = new Order
+                {
+                    UserId = currentUser.Id,
+                    OrderDate = DateTime.Now,
+                    TotalAmount = finalPayableAmount,
+                    Status = "Completed",
+                    PaymentMethod = request.PaymentMethod,
+                    AmountReceived = request.PaymentMethod == "Cash" ? request.AmountReceived : finalPayableAmount,
+                    ChangeAmount = changeAmount
+                };
+
+                // -------------------------------------------------
+                // 9. Gắn OrderDetail vào Order
+                // -------------------------------------------------
+                foreach (var detail in orderDetails)
+                {
+                    order.OrderDetails.Add(detail);
+                }
+
+                // -------------------------------------------------
+                // 10. Tích điểm mới cho khách hàng theo tổng tiền đơn hàng
+                // -------------------------------------------------
                 int rewardPointsAdded = 0;
                 if (customer != null)
                 {
-                    rewardPointsAdded = (int)(totalAmount / 10000); // 10.000 VNĐ = 1 điểm tích lũy
+                    rewardPointsAdded = (int)(totalAmount / 10000); // 10.000 VNĐ = 1 điểm tích lũy dựa theo tổng giá trị mua hàng
                     if (rewardPointsAdded > 0)
                     {
                         customer.RewardPoints += rewardPointsAdded;
-
-                        if (customer.RewardPoints >= 1000)
-                            customer.MembershipRank = "Kim Cương";
-                        else if (customer.RewardPoints >= 500)
-                            customer.MembershipRank = "Vàng";
-                        else if (customer.RewardPoints >= 200)
-                            customer.MembershipRank = "Bạc";
-                        else if (customer.RewardPoints >= 50)
-                            customer.MembershipRank = "Thân Thiết";
-                        else
-                            customer.MembershipRank = "Mới";
                     }
+
+                    if (customer.RewardPoints >= 1000)
+                        customer.MembershipRank = "Kim Cương";
+                    else if (customer.RewardPoints >= 500)
+                        customer.MembershipRank = "Vàng";
+                    else if (customer.RewardPoints >= 200)
+                        customer.MembershipRank = "Bạc";
+                    else if (customer.RewardPoints >= 50)
+                        customer.MembershipRank = "Thân Thiết";
+                    else
+                        customer.MembershipRank = "Mới";
                 }
 
                 // -------------------------------------------------
@@ -556,6 +567,9 @@ namespace MiniSupermarket.API.Controllers
         public int? CustomerId { get; set; }
 
         public string? CustomerPhone { get; set; }
+
+        // Tiêu chí 47: Điểm thưởng muốn đổi trừ tiền hóa đơn (1 điểm = 1.000 VNĐ)
+        public int PointsToRedeem { get; set; } = 0;
 
         public List<CreateOrderItemRequest> Items { get; set; }
             = new List<CreateOrderItemRequest>();

@@ -47,6 +47,9 @@ namespace MiniSupermarket.WinForms.Forms
             panelPaymentWrap = new Panel();
             btnPay = new Button();
             lblCustomerSummary = new Label();
+            lblRedeemPointsTitle = new Label();
+            nudRedeemPoints = new NumericUpDown();
+            lblRedeemDiscount = new Label();
             lblPointsSummary = new Label();
             lblPointsSummaryTitle = new Label();
             lblChange = new Label();
@@ -82,6 +85,7 @@ namespace MiniSupermarket.WinForms.Forms
             lblCustPhone = new Label();
             panelTopBar.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)nudQuantity).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)nudRedeemPoints).BeginInit();
             panelBody.SuspendLayout();
             panelRight.SuspendLayout();
             panelCartWrap.SuspendLayout();
@@ -120,12 +124,12 @@ namespace MiniSupermarket.WinForms.Forms
             // 
             lblBarcodeBadge.AutoSize = true;
             lblBarcodeBadge.BackColor = Color.FromArgb(236, 253, 245);
-            lblBarcodeBadge.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
+            lblBarcodeBadge.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblBarcodeBadge.ForeColor = Color.FromArgb(5, 150, 105);
-            lblBarcodeBadge.Location = new Point(12, 23);
+            lblBarcodeBadge.Location = new Point(14, 18);
             lblBarcodeBadge.Name = "lblBarcodeBadge";
-            lblBarcodeBadge.Padding = new Padding(5, 3, 5, 3);
-            lblBarcodeBadge.Size = new Size(149, 25);
+            lblBarcodeBadge.Padding = new Padding(6, 4, 6, 4);
+            lblBarcodeBadge.Size = new Size(130, 28);
             lblBarcodeBadge.TabIndex = 0;
             lblBarcodeBadge.Text = "⚡ QUÉT MÃ VẠCH";
             // 
@@ -142,22 +146,20 @@ namespace MiniSupermarket.WinForms.Forms
             // lblBarcode
             // 
             lblBarcode.AutoSize = true;
-            lblBarcode.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            lblBarcode.ForeColor = Color.FromArgb(15, 23, 42);
-            lblBarcode.Location = new Point(126, 23);
+            lblBarcode.Location = new Point(0, 0);
             lblBarcode.Name = "lblBarcode";
-            lblBarcode.Size = new Size(78, 21);
+            lblBarcode.Size = new Size(0, 20);
             lblBarcode.TabIndex = 1;
-            lblBarcode.Text = "Mã vạch:";
+            lblBarcode.Visible = false;
             // 
             // txtBarcode
             // 
             txtBarcode.BorderStyle = BorderStyle.FixedSingle;
-            txtBarcode.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
-            txtBarcode.Location = new Point(195, 18);
+            txtBarcode.Font = new Font("Segoe UI", 10.5F, FontStyle.Bold);
+            txtBarcode.Location = new Point(160, 16);
             txtBarcode.Name = "txtBarcode";
             txtBarcode.PlaceholderText = "Quét mã hoặc nhập barcode rồi bấm Enter...";
-            txtBarcode.Size = new Size(260, 32);
+            txtBarcode.Size = new Size(255, 31);
             txtBarcode.TabIndex = 2;
             // 
             // btnAdd
@@ -168,11 +170,11 @@ namespace MiniSupermarket.WinForms.Forms
             btnAdd.FlatStyle = FlatStyle.Flat;
             btnAdd.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnAdd.ForeColor = Color.White;
-            btnAdd.Location = new Point(462, 17);
+            btnAdd.Location = new Point(425, 16);
             btnAdd.Name = "btnAdd";
-            btnAdd.Size = new Size(120, 29);
+            btnAdd.Size = new Size(95, 31);
             btnAdd.TabIndex = 3;
-            btnAdd.Text = "+ Thêm món";
+            btnAdd.Text = "+ Thêm";
             btnAdd.UseVisualStyleBackColor = false;
             // 
             // lblSearch
@@ -180,9 +182,9 @@ namespace MiniSupermarket.WinForms.Forms
             lblSearch.AutoSize = true;
             lblSearch.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblSearch.ForeColor = Color.FromArgb(71, 85, 105);
-            lblSearch.Location = new Point(610, 23);
+            lblSearch.Location = new Point(540, 21);
             lblSearch.Name = "lblSearch";
-            lblSearch.Size = new Size(93, 21);
+            lblSearch.Size = new Size(82, 21);
             lblSearch.TabIndex = 4;
             lblSearch.Text = "🔍 Tìm SP:";
             // 
@@ -190,10 +192,10 @@ namespace MiniSupermarket.WinForms.Forms
             // 
             txtSearch.BorderStyle = BorderStyle.FixedSingle;
             txtSearch.Font = new Font("Segoe UI", 10F);
-            txtSearch.Location = new Point(684, 19);
+            txtSearch.Location = new Point(628, 16);
             txtSearch.Name = "txtSearch";
             txtSearch.PlaceholderText = "Tìm theo tên sản phẩm...";
-            txtSearch.Size = new Size(190, 30);
+            txtSearch.Size = new Size(200, 30);
             txtSearch.TabIndex = 5;
             // 
             // btnSearch
@@ -204,9 +206,9 @@ namespace MiniSupermarket.WinForms.Forms
             btnSearch.FlatStyle = FlatStyle.Flat;
             btnSearch.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnSearch.ForeColor = Color.White;
-            btnSearch.Location = new Point(880, 18);
+            btnSearch.Location = new Point(838, 16);
             btnSearch.Name = "btnSearch";
-            btnSearch.Size = new Size(68, 27);
+            btnSearch.Size = new Size(65, 30);
             btnSearch.TabIndex = 6;
             btnSearch.Text = "Tìm";
             btnSearch.UseVisualStyleBackColor = false;
@@ -216,7 +218,7 @@ namespace MiniSupermarket.WinForms.Forms
             lblQuantity.AutoSize = true;
             lblQuantity.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblQuantity.ForeColor = Color.FromArgb(71, 85, 105);
-            lblQuantity.Location = new Point(970, 23);
+            lblQuantity.Location = new Point(920, 21);
             lblQuantity.Name = "lblQuantity";
             lblQuantity.Size = new Size(31, 21);
             lblQuantity.TabIndex = 7;
@@ -225,11 +227,11 @@ namespace MiniSupermarket.WinForms.Forms
             // nudQuantity
             // 
             nudQuantity.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            nudQuantity.Location = new Point(1004, 20);
+            nudQuantity.Location = new Point(955, 16);
             nudQuantity.Maximum = new decimal(new int[] { 999, 0, 0, 0 });
             nudQuantity.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             nudQuantity.Name = "nudQuantity";
-            nudQuantity.Size = new Size(65, 30);
+            nudQuantity.Size = new Size(60, 30);
             nudQuantity.TabIndex = 8;
             nudQuantity.TextAlign = HorizontalAlignment.Center;
             nudQuantity.Value = new decimal(new int[] { 1, 0, 0, 0 });
@@ -414,6 +416,9 @@ namespace MiniSupermarket.WinForms.Forms
             panelPaymentWrap.Controls.Add(lblCustomerSummary);
             panelPaymentWrap.Controls.Add(lblPointsSummary);
             panelPaymentWrap.Controls.Add(lblPointsSummaryTitle);
+            panelPaymentWrap.Controls.Add(lblRedeemDiscount);
+            panelPaymentWrap.Controls.Add(nudRedeemPoints);
+            panelPaymentWrap.Controls.Add(lblRedeemPointsTitle);
             panelPaymentWrap.Controls.Add(lblChange);
             panelPaymentWrap.Controls.Add(lblChangeTitle);
             panelPaymentWrap.Controls.Add(txtAmountReceived);
@@ -423,10 +428,10 @@ namespace MiniSupermarket.WinForms.Forms
             panelPaymentWrap.Controls.Add(panelTotalBanner);
             panelPaymentWrap.Controls.Add(lblPayment);
             panelPaymentWrap.Dock = DockStyle.Bottom;
-            panelPaymentWrap.Location = new Point(10, 324);
+            panelPaymentWrap.Location = new Point(10, 290);
             panelPaymentWrap.Name = "panelPaymentWrap";
             panelPaymentWrap.Padding = new Padding(15, 12, 15, 12);
-            panelPaymentWrap.Size = new Size(616, 300);
+            panelPaymentWrap.Size = new Size(616, 334);
             panelPaymentWrap.TabIndex = 1;
             // 
             // btnPay
@@ -438,7 +443,7 @@ namespace MiniSupermarket.WinForms.Forms
             btnPay.FlatStyle = FlatStyle.Flat;
             btnPay.Font = new Font("Segoe UI", 13.5F, FontStyle.Bold);
             btnPay.ForeColor = Color.White;
-            btnPay.Location = new Point(15, 236);
+            btnPay.Location = new Point(15, 270);
             btnPay.Name = "btnPay";
             btnPay.Size = new Size(586, 52);
             btnPay.TabIndex = 11;
@@ -450,11 +455,43 @@ namespace MiniSupermarket.WinForms.Forms
             lblCustomerSummary.AutoSize = true;
             lblCustomerSummary.Font = new Font("Segoe UI", 9F);
             lblCustomerSummary.ForeColor = Color.FromArgb(71, 85, 105);
-            lblCustomerSummary.Location = new Point(18, 208);
+            lblCustomerSummary.Location = new Point(18, 238);
             lblCustomerSummary.Name = "lblCustomerSummary";
             lblCustomerSummary.Size = new Size(189, 20);
             lblCustomerSummary.TabIndex = 10;
             lblCustomerSummary.Text = "Khách hàng: Khách vãng lai";
+            // 
+            // lblRedeemPointsTitle
+            // 
+            lblRedeemPointsTitle.AutoSize = true;
+            lblRedeemPointsTitle.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            lblRedeemPointsTitle.ForeColor = Color.FromArgb(15, 23, 42);
+            lblRedeemPointsTitle.Location = new Point(18, 206);
+            lblRedeemPointsTitle.Name = "lblRedeemPointsTitle";
+            lblRedeemPointsTitle.Size = new Size(130, 21);
+            lblRedeemPointsTitle.TabIndex = 12;
+            lblRedeemPointsTitle.Text = "Đổi điểm trừ tiền:";
+            // 
+            // nudRedeemPoints
+            // 
+            nudRedeemPoints.BorderStyle = BorderStyle.FixedSingle;
+            nudRedeemPoints.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            nudRedeemPoints.Location = new Point(148, 203);
+            nudRedeemPoints.Maximum = new decimal(new int[] { 100000, 0, 0, 0 });
+            nudRedeemPoints.Name = "nudRedeemPoints";
+            nudRedeemPoints.Size = new Size(95, 30);
+            nudRedeemPoints.TabIndex = 13;
+            // 
+            // lblRedeemDiscount
+            // 
+            lblRedeemDiscount.AutoSize = true;
+            lblRedeemDiscount.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            lblRedeemDiscount.ForeColor = Color.FromArgb(220, 38, 38);
+            lblRedeemDiscount.Location = new Point(250, 206);
+            lblRedeemDiscount.Name = "lblRedeemDiscount";
+            lblRedeemDiscount.Size = new Size(160, 21);
+            lblRedeemDiscount.TabIndex = 14;
+            lblRedeemDiscount.Text = "(-0 đ | 1đ = 1.000đ)";
             // 
             // lblPointsSummary
             // 
@@ -891,6 +928,7 @@ namespace MiniSupermarket.WinForms.Forms
             panelCartHeader.PerformLayout();
             panelPaymentWrap.ResumeLayout(false);
             panelPaymentWrap.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)nudRedeemPoints).EndInit();
             panelTotalBanner.ResumeLayout(false);
             panelLeft.ResumeLayout(false);
             panelProductsWrap.ResumeLayout(false);
@@ -963,6 +1001,9 @@ namespace MiniSupermarket.WinForms.Forms
         private System.Windows.Forms.Label lblChange;
         private System.Windows.Forms.Label lblPointsSummaryTitle;
         private System.Windows.Forms.Label lblPointsSummary;
+        private System.Windows.Forms.Label lblRedeemPointsTitle;
+        private System.Windows.Forms.NumericUpDown nudRedeemPoints;
+        private System.Windows.Forms.Label lblRedeemDiscount;
         private System.Windows.Forms.Label lblCustomerSummary;
         private System.Windows.Forms.Button btnPay;
     }

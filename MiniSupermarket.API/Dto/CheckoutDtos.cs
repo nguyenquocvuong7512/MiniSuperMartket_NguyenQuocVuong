@@ -27,6 +27,9 @@ namespace MiniSupermarket.API.Dto
         // Phương thức thanh toán (Cash / Transfer)
         public string PaymentMethod { get; set; } = "Cash";
 
+        // Số điểm tích lũy muốn đổi trừ tiền hóa đơn (Tiêu chí 47: 1 điểm = 1.000 VNĐ)
+        public int PointsToRedeem { get; set; } = 0;
+
         // Danh sách các món hàng cần thanh toán
         public List<CartItemCheckoutDto> Items { get; set; } = new();
     }

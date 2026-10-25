@@ -5,6 +5,8 @@
  */
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using MiniSupermarket.API.Data;
 using MiniSupermarket.API.Dto;
 using System.Data;
 
@@ -15,10 +17,12 @@ namespace MiniSupermarket.API.Controllers
     public class ReportsController : ControllerBase
     {
         private readonly IConfiguration _configuration;
+        private readonly SupermarketDbContext _context;
 
-        public ReportsController(IConfiguration configuration)
+        public ReportsController(IConfiguration configuration, SupermarketDbContext context)
         {
             _configuration = configuration;
+            _context = context;
         }
 
         // =========================================================================
@@ -243,6 +247,134 @@ namespace MiniSupermarket.API.Controllers
                 success = true,
                 totalProducts = topList.Count,
                 data = topList
+            });
+        }
+
+        // =========================================================================
+        // TIÊU CHÍ 44: DASHBOARD 4 THẺ CHỈ SỐ TỔNG QUAN (KPI SUMMARY CARDS)
+        // GET: api/reports/dashboard-summary
+        // =========================================================================
+        [HttpGet("dashboard-summary")]
+        public async Task<IActionResult> GetDashboardSummary()
+        {
+            var today = DateTime.Today;
+
+            // 1. Doanh thu hôm nay (nếu ngày hiện tại chưa có đơn, tính từ đơn mới nhất hoặc hôm nay)
+            decimal todayRevenue = await _context.Orders
+                .Where(o => o.OrderDate.Date == today && o.Status == "Completed")
+                .SumAsync(o => (decimal?)o.TotalAmount) ?? 0;
+
+            int todayOrdersCount = await _context.Orders
+                .CountAsync(o => o.OrderDate.Date == today);
+
+            // 2. Tổng số hóa đơn đã xuất
+            int totalOrders = await _context.Orders.CountAsync();
+
+            // 3. Số lượng khách hàng thành viên
+            int totalCustomers = await _context.Customers.CountAsync();
+
+            // 4. Số mặt hàng sắp hết hàng (tồn kho <= 10 theo đúng tiêu chuẩn Tiêu chí 43 & 44)
+            int lowStockCount = await _context.Products
+                .CountAsync(p => p.StockQuantity <= 10);
+
+            // Tổng doanh thu toàn hệ thống
+            decimal grandTotalRevenue = await _context.Orders
+                .Where(o => o.Status == "Completed")
+                .SumAsync(o => (decimal?)o.TotalAmount) ?? 0;
+
+            var summary = new DashboardSummaryDto
+            {
+                TodayRevenue = todayRevenue,
+                TodayOrdersCount = todayOrdersCount,
+                TotalOrders = totalOrders,
+                TotalCustomers = totalCustomers,
+                LowStockProductsCount = lowStockCount,
+                GrandTotalRevenue = grandTotalRevenue,
+                GeneratedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+            };
+
+            return Ok(new
+            {
+                success = true,
+                data = summary
+            });
+        }
+
+        // =========================================================================
+        // TIÊU CHÍ 45: BIỂU ĐỒ CỘT DOANH THU THEO NGÀY (BAR CHART)
+        // GET: api/reports/daily-revenue?fromDate=2026-10-01&toDate=2026-10-31
+        // =========================================================================
+        [HttpGet("daily-revenue")]
+        public async Task<IActionResult> GetDailyRevenue([FromQuery] DateTime? fromDate, [FromQuery] DateTime? toDate)
+        {
+            DateTime start = fromDate ?? DateTime.Today.AddDays(-30);
+            DateTime end = toDate ?? DateTime.Today.AddDays(1);
+
+            // Truy vấn gom nhóm theo ngày
+            var dailyData = await _context.Orders
+                .Where(o => o.OrderDate >= start && o.OrderDate <= end && o.Status == "Completed")
+                .GroupBy(o => o.OrderDate.Date)
+                .Select(g => new
+                {
+                    Date = g.Key,
+                    Revenue = g.Sum(o => o.TotalAmount),
+                    OrderCount = g.Count()
+                })
+                .OrderBy(x => x.Date)
+                .ToListAsync();
+
+            var result = dailyData.Select(x => new DailyRevenueDto
+            {
+                Date = x.Date.ToString("yyyy-MM-dd"),
+                Revenue = x.Revenue,
+                OrderCount = x.OrderCount
+            }).ToList();
+
+            return Ok(new
+            {
+                success = true,
+                fromDate = start.ToString("yyyy-MM-dd"),
+                toDate = end.ToString("yyyy-MM-dd"),
+                totalDays = result.Count,
+                grandTotalRevenue = result.Sum(x => x.Revenue),
+                data = result
+            });
+        }
+
+        // =========================================================================
+        // TIÊU CHÍ 46: THỐNG KÊ TOP 5 SẢN PHẨM BÁN CHẠY NHẤT BẰNG LINQ
+        // GET: api/reports/top-selling-linq
+        // =========================================================================
+        [HttpGet("top-selling-linq")]
+        public async Task<IActionResult> GetTop5SellingProductsLinq()
+        {
+            var topProducts = await _context.OrderDetails
+                .Include(od => od.Product)
+                .Where(od => od.Product != null)
+                .GroupBy(od => new
+                {
+                    od.ProductId,
+                    Barcode = od.Product!.Barcode,
+                    ProductName = od.Product.ProductName
+                })
+                .Select(g => new TopSellingProductDto
+                {
+                    ProductId = g.Key.ProductId,
+                    Barcode = g.Key.Barcode,
+                    ProductName = g.Key.ProductName,
+                    TotalQuantitySold = g.Sum(x => x.Quantity),
+                    TotalSalesAmount = g.Sum(x => x.SubTotal)
+                })
+                .OrderByDescending(x => x.TotalQuantitySold)
+                .Take(5)
+                .ToListAsync();
+
+            return Ok(new
+            {
+                success = true,
+                method = "LINQ EF Core (GroupBy -> OrderByDescending -> Take(5))",
+                totalProducts = topProducts.Count,
+                data = topProducts
             });
         }
 
