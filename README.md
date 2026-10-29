@@ -1,151 +1,225 @@
 # 🛒 HỆ THỐNG QUẢN LÝ SIÊU THỊ MINI (MINISUPERMARKET SYSTEM)
 
-**Môn học:** Lập trình Ứng dụng .NET Core  
-**Mã môn học:** 229162  
-**Buổi thực hành:** Buổi 4 – Thiết kế kiến trúc giao diện WinForms Shell và điều hướng phân quyền  
-**Sinh viên:** Nguyễn Quốc Vương  
-**Mã sinh viên:** 2124110272  
-**Lớp học phần:** CCQ2411D  
+**Môn học:** Lập trình Ứng dụng .NET Core (Mã môn: 229162)  
+**Buổi thực hành:** Buổi 4 – Thiết kế kiến trúc giao diện WinForms Shell và điều hướng phân quyền người dùng.
 
 ---
 
-## 1. 📝 Giới thiệu buổi thực hành
+## 🏗️ 1. Mô hình kiến trúc hệ thống (Client – Server)
 
-Buổi thực hành 4 tập trung xây dựng kiến trúc giao diện WinForms Shell theo mô hình Single-Form Architecture, thiết kế Sidebar và Main Workspace, đồng thời triển khai cơ chế điều hướng và phân quyền người dùng theo ba vai trò: Admin, Cashier và Warehouse.
+Dự án được xây dựng theo mô hình Client – Server, gồm hai thành phần chính:
 
-## 2. 🖥️ Xây dựng giao diện WinForms Shell
+- **MiniSupermarket.API (Backend):** Ứng dụng ASP.NET Core Web API chịu trách nhiệm xử lý nghiệp vụ, quản lý dữ liệu và cung cấp API cho ứng dụng Client.
+- **MiniSupermarket.WinForm (Frontend Client):** Ứng dụng Windows Forms cung cấp giao diện quản lý siêu thị, hỗ trợ điều hướng giữa các màn hình nghiệp vụ và tổ chức giao diện theo vai trò người dùng.
 
-### 2.1. FormMainShell.cs
+Trong buổi thực hành 4, trọng tâm là xây dựng kiến trúc giao diện trung tâm `FormMainShell`, tổ chức thanh điều hướng Sidebar, vùng hiển thị nội dung và cơ chế phân quyền giao diện theo ba vai trò: Admin, Cashier và Warehouse.
 
-Thiết kế giao diện chính của hệ thống với các thành phần:
+## 🛠️ 2. Công nghệ sử dụng
 
-- **`panelSidebar`**: Thanh điều hướng bên trái, có chiều rộng 230px, màu xanh đen, chứa logo và các nút chức năng.
-- **`panelTopHeader`**: Thanh tiêu đề phía trên, cao 60px, nền trắng, hiển thị tiêu đề màn hình và thông tin người dùng đăng nhập.
-- **`panelMainContent`**: Vùng nội dung trung tâm, sử dụng `Dock = Fill` để hiển thị các Form con.
-- **`lblTitle`**: Hiển thị tiêu đề màn hình hiện tại.
-- **`lblUserInfo`**: Hiển thị thông tin tài khoản đăng nhập.
+- **Ngôn ngữ lập trình:** C#
+- **Nền tảng:** .NET 8.0
+- **Backend:** ASP.NET Core Web API
+- **Frontend:** Windows Forms
+- **Giao tiếp Client – Server:** HTTP API
+- **Thành phần giao diện:** Form, Panel, Button, Label, DataGridView
+- **Kỹ thuật điều hướng:** Nhúng Form con vào Panel trung tâm
+- **Kỹ thuật phân quyền:** Role-Based Access Control (RBAC)
 
-Các nút chức năng trên Sidebar:
+## 📂 3. Cấu trúc Solution
 
-- `btnPOS`: Bán hàng POS.
-- `btnCategory`: Quản lý danh mục.
-- `btnProduct`: Quản lý sản phẩm.
-- `btnCustomer`: Quản lý khách hàng.
-- `btnReports`: Báo cáo doanh thu.
-- `btnUserManage`: Quản lý tài khoản.
-- `btnLogout`: Đăng xuất.
+Cấu trúc dưới đây được tổng hợp từ các thư mục và tệp hiển thị trong Solution Explorer.
 
-## 3. 🔄 Nhúng động Form con
+```text
+MiniSupermarket.API/
+│
+├── Controllers/
+│   ├── CustomerController.cs
+│   ├── OrdersController.cs
+│   ├── ProductsController.cs
+│   ├── RolesController.cs
+│   ├── UsersController.cs
+│   └── WeatherForecastController.cs
+│
+├── Data/
+│
+├── Migrations/
+│
+├── Models/
+│
+├── appsettings.json
+├── MiniSupermarket.API.http
+├── Program.cs
+└── WeatherForecast.cs
+│
+└── MiniSupermarket.WinForm/
+    │
+    ├── Dependencies/
+    ├── Form1.cs
+    ├── FormCategoryManagement.cs
+    ├── FormCustomerManagement.cs
+    ├── FormLogin.cs
+    ├── FormMainShell.cs
+    ├── FormPOS.cs
+    ├── FormProductManagement.cs
+    ├── FormQuickReport.cs
+    ├── FormRoleManagement.cs
+    ├── FormUserManagement.cs
+    ├── Program.cs
+    └── SessionManager.cs
+```
 
-### 3.1. Hàm OpenChildForm
+**Chức năng các thành phần chính:**
 
-Xây dựng cơ chế nhúng các Form nghiệp vụ vào `panelMainContent` thay vì mở nhiều cửa sổ riêng biệt.
+### Backend – MiniSupermarket.API
 
-Các bước thực hiện:
-
-1. Thiết lập `TopLevel = false` cho Form con.
-2. Thiết lập `FormBorderStyle = None` để loại bỏ viền cửa sổ.
-3. Thiết lập `Dock = Fill` để Form con vừa khít vùng nội dung.
-4. Đóng và dọn dẹp Form con cũ trước khi hiển thị Form mới.
-5. Đưa Form mới lên phía trước bằng `BringToFront`.
-6. Cập nhật tiêu đề màn hình trên `lblTitle`.
-7. Sử dụng `HighlightActiveButton` để làm nổi bật nút điều hướng đang được chọn.
-
-**Kết quả:** Giao diện chuyển đổi giữa các chức năng trong cùng một cửa sổ chính, hạn chế việc mở nhiều cửa sổ và tạo trải nghiệm sử dụng thống nhất.
-
-## 4. 🛡️ Phân quyền người dùng (RBAC)
-
-### 4.1. Hàm ApplyRolePermissions
-
-Triển khai cơ chế phân quyền hiển thị chức năng dựa trên vai trò của tài khoản đăng nhập.
-
-| Vai trò | Quyền truy cập |
+| Thành phần | Chức năng |
 |---|---|
-| Admin | Toàn quyền truy cập các chức năng quản lý |
-| Cashier | Bán hàng POS và quản lý khách hàng |
-| Warehouse | Quản lý danh mục và sản phẩm |
+| `Controllers/` | Chứa các Controller xử lý những nhóm chức năng của API. |
+| `CustomerController.cs` | Xử lý các yêu cầu liên quan đến khách hàng. |
+| `OrdersController.cs` | Xử lý các yêu cầu liên quan đến đơn hàng. |
+| `ProductsController.cs` | Xử lý các yêu cầu liên quan đến sản phẩm. |
+| `RolesController.cs` | Xử lý các yêu cầu liên quan đến vai trò. |
+| `UsersController.cs` | Xử lý các yêu cầu liên quan đến tài khoản người dùng. |
+| `Data/` | Chứa các thành phần làm việc với dữ liệu. |
+| `Migrations/` | Chứa các tệp Migration của Entity Framework Core. |
+| `Models/` | Chứa các lớp mô hình dữ liệu. |
+| `Program.cs` | Điểm khởi chạy và cấu hình ứng dụng API. |
+| `appsettings.json` | Chứa các cấu hình của ứng dụng. |
 
-### 4.2. Hàm OpenDefaultScreenByRole
+### Frontend – MiniSupermarket.WinForm
 
-Sau khi đăng nhập thành công, hệ thống tự động mở màn hình làm việc mặc định tương ứng với vai trò người dùng.
+| Tệp | Chức năng |
+|---|---|
+| `FormMainShell.cs` | Giao diện khung chính, tổ chức Sidebar, Header và vùng hiển thị nội dung. |
+| `FormLogin.cs` | Giao diện đăng nhập người dùng. |
+| `SessionManager.cs` | Quản lý thông tin phiên đăng nhập và vai trò người dùng. |
+| `FormCategoryManagement.cs` | Giao diện quản lý danh mục nhóm hàng. |
+| `FormProductManagement.cs` | Giao diện quản lý sản phẩm. |
+| `FormCustomerManagement.cs` | Giao diện quản lý khách hàng. |
+| `FormPOS.cs` | Giao diện quầy bán hàng POS. |
+| `FormQuickReport.cs` | Giao diện báo cáo nhanh. |
+| `FormUserManagement.cs` | Giao diện quản lý tài khoản người dùng. |
+| `FormRoleManagement.cs` | Giao diện quản lý vai trò. |
+| `Form1.cs` | Form Windows Forms bổ sung trong dự án. |
+| `Program.cs` | Điểm khởi chạy ứng dụng Windows Forms. |
 
-- **Admin:** Mở màn hình Quản lý danh mục.
-- **Cashier:** Mở màn hình Bán hàng POS.
-- **Warehouse:** Mở màn hình Quản lý sản phẩm.
+*Lưu ý: Cây thư mục thể hiện các thành phần nhìn thấy trong Solution Explorer; không đại diện cho toàn bộ tệp bên trong từng thư mục.*
 
-### 4.3. Phân quyền ở cấp độ thao tác
+## 🖥️ 4. Nội dung thực hành
 
-Bên cạnh việc ẩn hoặc hiện các nút trên Sidebar, hệ thống bổ sung kiểm tra quyền trực tiếp tại các sự kiện xử lý chức năng.
+### 4.1. Thiết kế giao diện khung chính FormMainShell
 
-Ví dụ: Chỉ tài khoản Admin mới được phép truy cập chức năng Báo cáo doanh thu.
+Xây dựng giao diện điều khiển trung tâm theo kiến trúc Single-Form, gồm ba khu vực:
 
-Cách tiếp cận này giúp hạn chế việc truy cập trái phép vào các chức năng không thuộc quyền hạn của người dùng.
+- **Sidebar:** Thanh điều hướng bên trái, chứa logo MiniMart POS và các nút chức năng.
+- **Top Header:** Thanh tiêu đề, hiển thị tên màn hình và thông tin người dùng.
+- **Main Content:** Vùng nội dung trung tâm dùng để hiển thị các màn hình nghiệp vụ.
 
-## 5. 🧩 Xây dựng các Form nghiệp vụ
+Các chức năng điều hướng chính gồm:
 
-### 5.1. FormPOS.cs – Màn hình bán hàng
+- Bán hàng (POS).
+- Quản lý danh mục.
+- Quản lý sản phẩm.
+- Quản lý khách hàng.
+- Báo cáo doanh thu.
+- Quản trị tài khoản.
+- Đăng xuất.
 
-Các chức năng chính:
+### 4.2. Nhúng Form con vào vùng nội dung trung tâm
 
-- Nhập hoặc quét mã vạch sản phẩm thông qua `txtBarcode`.
-- Quản lý danh sách sản phẩm trong giỏ hàng bằng `dgvCart`.
-- Tính tổng tiền đơn hàng.
-- Tính tiền khách đưa và tiền thừa.
-- Thực hiện thanh toán đơn hàng thông qua API.
+Tổ chức các màn hình nghiệp vụ trong `panelMainContent`, hạn chế việc mở nhiều cửa sổ độc lập.
 
-### 5.2. FormProductManagement.cs – Quản lý sản phẩm
+Các thuộc tính quan trọng khi nhúng Form con:
 
-Các chức năng chính:
+- `TopLevel = false`: Chuyển Form con thành thành phần có thể nhúng vào Form cha.
+- `FormBorderStyle = None`: Loại bỏ đường viền cửa sổ.
+- `Dock = Fill`: Cho Form con lấp đầy vùng nội dung.
+- `Controls.Clear()`: Xóa các điều khiển cũ trong vùng hiển thị trước khi nạp màn hình mới.
+- `BringToFront()` và `Show()`: Đưa Form con lên trước và hiển thị giao diện.
 
-- Hiển thị danh sách sản phẩm.
-- Tìm kiếm sản phẩm.
-- Thêm, sửa và xóa thông tin sản phẩm.
-- Đồng bộ thông tin danh mục với dữ liệu từ API.
+### 4.3. Điều hướng và làm nổi bật chức năng đang chọn
 
-### 5.3. FormUserManagement.cs – Quản trị tài khoản
+Khi người dùng chọn một chức năng trên Sidebar:
 
-Chức năng dành riêng cho Admin, bao gồm:
+- Mở Form nghiệp vụ tương ứng trong vùng nội dung trung tâm.
+- Cập nhật tiêu đề màn hình trên Header.
+- Đổi màu nút chức năng đang được chọn để người dùng dễ nhận biết.
+- Đóng Form con đang hoạt động trước khi chuyển sang Form khác.
 
-- Thêm mới tài khoản người dùng.
-- Quản lý thông tin tài khoản.
-- Phân quyền người dùng theo các vai trò Admin, Cashier và Warehouse.
+### 4.4. Phân quyền giao diện theo vai trò người dùng
 
-## 6. 🧪 Kiểm thử và xác minh phân quyền
+Sử dụng cơ chế Role-Based Access Control (RBAC) để điều chỉnh các chức năng hiển thị theo vai trò đăng nhập.
 
-### 6.1. Tài khoản kiểm thử
+| Vai trò | Chức năng được phép truy cập |
+|---|---|
+| **Admin** | Bán hàng POS, quản lý danh mục, sản phẩm, khách hàng, báo cáo doanh thu và tài khoản người dùng. |
+| **Cashier** | Bán hàng POS và quản lý khách hàng. |
+| **Warehouse** | Quản lý danh mục và sản phẩm, phục vụ công việc kho hàng. |
 
-| Tài khoản | Mật khẩu | Vai trò | Màn hình mặc định |
-|---|---|---|---|
-| `admin01` | `123456` | Admin | Quản lý danh mục |
-| `cashier01` | `123456` | Cashier | Bán hàng POS |
-| `ware01` | `123456` | Warehouse | Quản lý sản phẩm |
+Cơ chế phân quyền giao diện sử dụng thuộc tính `Visible` của các nút chức năng để ẩn hoặc hiện menu theo vai trò.
 
-### 6.2. Kết quả kiểm thử phân quyền
+Đối với vai trò không hợp lệ, ứng dụng hiển thị cảnh báo và đóng giao diện khung chính.
 
-- [x] **Admin:** Sidebar hiển thị đầy đủ các chức năng quản lý.
-- [x] **Cashier:** Sidebar chỉ hiển thị Bán hàng POS và Quản lý khách hàng.
-- [x] **Warehouse:** Sidebar chỉ hiển thị Quản lý danh mục và Quản lý sản phẩm.
-- [x] Hệ thống tự động mở màn hình mặc định theo vai trò.
-- [x] Các Form con được nhúng vừa khít trong `panelMainContent`.
-- [x] Chuyển đổi giữa các Form không tạo thêm cửa sổ chính.
-- [x] Nút điều hướng đang hoạt động được đổi màu để phân biệt với các nút còn lại.
+### 4.5. Hiển thị thông tin phiên đăng nhập
 
-## 7. ✅ Kết quả đạt được
+Sử dụng `SessionManager` để truy xuất thông tin phiên đăng nhập, bao gồm:
 
-Sau buổi thực hành 4, hệ thống đã triển khai các nội dung chính:
+- Tên tài khoản đang đăng nhập.
+- Vai trò hiện tại của người dùng.
+- Thông tin phiên phục vụ điều hướng và phân quyền giao diện.
 
-- Xây dựng kiến trúc giao diện WinForms Shell theo mô hình Single-Form Architecture.
-- Thiết kế Sidebar, Header và vùng làm việc trung tâm.
-- Triển khai cơ chế nhúng động Form con.
-- Xây dựng chức năng điều hướng giữa các màn hình nghiệp vụ.
-- Áp dụng phân quyền giao diện theo ba vai trò Admin, Cashier và Warehouse.
-- Tự động điều hướng đến màn hình mặc định sau khi đăng nhập.
-- Bổ sung kiểm tra quyền truy cập tại cấp độ thao tác.
-- Kiểm thử giao diện và xác minh kết quả phân quyền bằng các tài khoản mẫu.
+Thông tin người dùng được hiển thị trên Header của `FormMainShell`.
 
-## 8. 👨‍💻 Thông tin sinh viên
+### 4.6. Xử lý chức năng đăng xuất
+
+Tổ chức chức năng đăng xuất trên Sidebar:
+
+- Hiển thị hộp thoại xác nhận đăng xuất.
+- Xóa thông tin phiên đăng nhập hiện tại.
+- Ẩn giao diện khung chính.
+- Mở lại màn hình đăng nhập.
+- Đóng giao diện khung chính sau khi hoàn tất quá trình chuyển màn hình.
+
+## 🚀 5. Hướng dẫn chạy và kiểm thử
+
+### Bước 1: Khởi chạy Backend
+
+1. Mở Solution bằng Visual Studio.
+2. Chọn `MiniSupermarket.API` làm Startup Project.
+3. Nhấn `F5` để chạy ứng dụng API.
+4. Kiểm tra địa chỉ và cổng API đang hoạt động.
+
+### Bước 2: Khởi chạy WinForms Client
+
+1. Đảm bảo địa chỉ API được cấu hình chính xác trong ứng dụng WinForms.
+2. Chọn `MiniSupermarket.WinForm` làm Startup Project.
+3. Nhấn `F5` để chạy ứng dụng.
+4. Đăng nhập bằng tài khoản phù hợp với vai trò cần kiểm thử.
+
+### Bước 3: Kiểm thử phân quyền giao diện
+
+Có thể sử dụng bộ tài khoản mẫu trong tài liệu thực hành để kiểm tra:
+
+| Tài khoản mẫu | Vai trò | Kết quả mong đợi |
+|---|---|---|
+| `admin01` | Admin | Hiển thị đầy đủ các chức năng. |
+| `cashier01` | Cashier | Chỉ hiển thị Bán hàng POS và Khách hàng. |
+| `ware01` | Warehouse | Chỉ hiển thị Quản lý danh mục và Quản lý sản phẩm. |
+
+Mật khẩu mẫu theo tài liệu thực hành: `123456`.
+
+*Các tài khoản trên là dữ liệu kiểm thử được cung cấp trong tài liệu; cần bảo đảm chúng đã được tạo trong hệ thống trước khi đăng nhập.*
+
+### Bước 4: Kiểm thử điều hướng
+
+- Chọn từng nút trên Sidebar.
+- Kiểm tra Form nghiệp vụ được hiển thị trong vùng nội dung trung tâm.
+- Kiểm tra tiêu đề Header thay đổi tương ứng.
+- Kiểm tra màu nút chức năng đang được chọn.
+- Kiểm tra chức năng đăng xuất và quay lại màn hình đăng nhập.
+
+## 👨‍💻 6. Thông tin sinh viên
 
 - **Họ và tên:** Nguyễn Quốc Vương
 - **Mã sinh viên:** 2124110272
 - **Lớp học phần:** CCQ2411D
-- **Môn học:** Lập trình Ứng dụng .NET Core (229162)
