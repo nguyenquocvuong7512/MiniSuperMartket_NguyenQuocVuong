@@ -27,6 +27,10 @@ namespace MiniSupermarket.WinForms
             CategoryId = new DataGridViewTextBoxColumn();
             CategoryName = new DataGridViewTextBoxColumn();
             Description = new DataGridViewTextBoxColumn();
+            panelPaging = new Panel();
+            lblPaging = new Label();
+            btnNext = new Button();
+            btnPrev = new Button();
             panelInfo = new Panel();
             lblInfoTitle = new Label();
             btnDelete = new Button();
@@ -44,6 +48,7 @@ namespace MiniSupermarket.WinForms
             panelTop.SuspendLayout();
             panelBody.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvCategories).BeginInit();
+            panelPaging.SuspendLayout();
             panelInfo.SuspendLayout();
             statusStrip1.SuspendLayout();
             SuspendLayout();
@@ -118,6 +123,7 @@ namespace MiniSupermarket.WinForms
             // panelBody
             // 
             panelBody.Controls.Add(dgvCategories);
+            panelBody.Controls.Add(panelPaging);
             panelBody.Controls.Add(panelInfo);
             panelBody.Dock = DockStyle.Fill;
             panelBody.Location = new Point(12, 72);
@@ -141,7 +147,7 @@ namespace MiniSupermarket.WinForms
             dgvCategories.Name = "dgvCategories";
             dgvCategories.ReadOnly = true;
             dgvCategories.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvCategories.Size = new Size(816, 572);
+            dgvCategories.Size = new Size(816, 527);
             dgvCategories.TabIndex = 0;
             dgvCategories.CellClick += dgvCategories_CellClick;
             dgvCategories.CellContentClick += dgvCategories_CellContentClick;
@@ -169,6 +175,62 @@ namespace MiniSupermarket.WinForms
             Description.HeaderText = "Mô Tả Chi Tiết";
             Description.Name = "Description";
             Description.ReadOnly = true;
+            // 
+            // panelPaging
+            // 
+            panelPaging.BackColor = Color.White;
+            panelPaging.Controls.Add(lblPaging);
+            panelPaging.Controls.Add(btnNext);
+            panelPaging.Controls.Add(btnPrev);
+            panelPaging.Dock = DockStyle.Bottom;
+            panelPaging.Location = new Point(0, 537);
+            panelPaging.Name = "panelPaging";
+            panelPaging.Padding = new Padding(12, 8, 12, 8);
+            panelPaging.Size = new Size(816, 45);
+            panelPaging.TabIndex = 2;
+            // 
+            // lblPaging
+            // 
+            lblPaging.Anchor = AnchorStyles.Top;
+            lblPaging.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            lblPaging.ForeColor = Color.FromArgb(71, 85, 105);
+            lblPaging.Location = new Point(238, 12);
+            lblPaging.Name = "lblPaging";
+            lblPaging.Size = new Size(340, 23);
+            lblPaging.TabIndex = 1;
+            lblPaging.Text = "Trang 1 / 1 (Tổng số: 0 danh mục)";
+            lblPaging.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // btnNext
+            // 
+            btnNext.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnNext.BackColor = Color.FromArgb(241, 245, 249);
+            btnNext.Cursor = Cursors.Hand;
+            btnNext.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
+            btnNext.FlatStyle = FlatStyle.Flat;
+            btnNext.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnNext.ForeColor = Color.FromArgb(71, 85, 105);
+            btnNext.Location = new Point(676, 8);
+            btnNext.Name = "btnNext";
+            btnNext.Size = new Size(125, 29);
+            btnNext.TabIndex = 2;
+            btnNext.Text = "Trang sau >>";
+            btnNext.UseVisualStyleBackColor = false;
+            // 
+            // btnPrev
+            // 
+            btnPrev.BackColor = Color.FromArgb(241, 245, 249);
+            btnPrev.Cursor = Cursors.Hand;
+            btnPrev.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
+            btnPrev.FlatStyle = FlatStyle.Flat;
+            btnPrev.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnPrev.ForeColor = Color.FromArgb(71, 85, 105);
+            btnPrev.Location = new Point(12, 8);
+            btnPrev.Name = "btnPrev";
+            btnPrev.Size = new Size(125, 29);
+            btnPrev.TabIndex = 0;
+            btnPrev.Text = "<< Trang trước";
+            btnPrev.UseVisualStyleBackColor = false;
             // 
             // panelInfo
             // 
@@ -198,22 +260,22 @@ namespace MiniSupermarket.WinForms
             lblInfoTitle.Location = new Point(18, 16);
             lblInfoTitle.Name = "lblInfoTitle";
             lblInfoTitle.Size = new Size(236, 21);
-            lblInfoTitle.TabIndex = 9;
-            lblInfoTitle.Text = "📁 THÔNG TIN NHÓM HÀNG";
+            lblInfoTitle.TabIndex = 0;
+            lblInfoTitle.Text = "📦 THÔNG TIN NHÓM HÀNG";
             // 
             // btnDelete
             // 
-            btnDelete.BackColor = Color.FromArgb(220, 38, 38);
+            btnDelete.BackColor = Color.FromArgb(239, 68, 68);
             btnDelete.Cursor = Cursors.Hand;
             btnDelete.FlatAppearance.BorderSize = 0;
             btnDelete.FlatStyle = FlatStyle.Flat;
-            btnDelete.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnDelete.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnDelete.ForeColor = Color.White;
-            btnDelete.Location = new Point(230, 420);
+            btnDelete.Location = new Point(245, 280);
             btnDelete.Name = "btnDelete";
-            btnDelete.Size = new Size(98, 40);
-            btnDelete.TabIndex = 8;
-            btnDelete.Text = "🗑 Xóa";
+            btnDelete.Size = new Size(90, 34);
+            btnDelete.TabIndex = 9;
+            btnDelete.Text = "🗑️ Xóa";
             btnDelete.UseVisualStyleBackColor = false;
             btnDelete.Click += btnDelete_Click;
             // 
@@ -223,13 +285,13 @@ namespace MiniSupermarket.WinForms
             btnUpdate.Cursor = Cursors.Hand;
             btnUpdate.FlatAppearance.BorderSize = 0;
             btnUpdate.FlatStyle = FlatStyle.Flat;
-            btnUpdate.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnUpdate.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnUpdate.ForeColor = Color.White;
-            btnUpdate.Location = new Point(125, 420);
+            btnUpdate.Location = new Point(135, 280);
             btnUpdate.Name = "btnUpdate";
-            btnUpdate.Size = new Size(98, 40);
-            btnUpdate.TabIndex = 7;
-            btnUpdate.Text = "✏️ Sửa";
+            btnUpdate.Size = new Size(95, 34);
+            btnUpdate.TabIndex = 8;
+            btnUpdate.Text = "✏️ Cập nhật";
             btnUpdate.UseVisualStyleBackColor = false;
             btnUpdate.Click += btnUpdate_Click;
             // 
@@ -239,13 +301,13 @@ namespace MiniSupermarket.WinForms
             btnAdd.Cursor = Cursors.Hand;
             btnAdd.FlatAppearance.BorderSize = 0;
             btnAdd.FlatStyle = FlatStyle.Flat;
-            btnAdd.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnAdd.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnAdd.ForeColor = Color.White;
-            btnAdd.Location = new Point(20, 420);
+            btnAdd.Location = new Point(25, 280);
             btnAdd.Name = "btnAdd";
-            btnAdd.Size = new Size(98, 40);
-            btnAdd.TabIndex = 6;
-            btnAdd.Text = "➕ Thêm";
+            btnAdd.Size = new Size(95, 34);
+            btnAdd.TabIndex = 7;
+            btnAdd.Text = "➕ Thêm mới";
             btnAdd.UseVisualStyleBackColor = false;
             btnAdd.Click += btnAdd_Click;
             // 
@@ -253,74 +315,74 @@ namespace MiniSupermarket.WinForms
             // 
             txtDescription.BorderStyle = BorderStyle.FixedSingle;
             txtDescription.Font = new Font("Segoe UI", 10F);
-            txtDescription.Location = new Point(20, 205);
+            txtDescription.Location = new Point(25, 195);
             txtDescription.Multiline = true;
             txtDescription.Name = "txtDescription";
-            txtDescription.PlaceholderText = "Nhập mô tả chi tiết nhóm hàng...";
             txtDescription.ScrollBars = ScrollBars.Vertical;
-            txtDescription.Size = new Size(308, 185);
-            txtDescription.TabIndex = 5;
+            txtDescription.Size = new Size(310, 65);
+            txtDescription.TabIndex = 6;
             // 
             // lblDescription
             // 
             lblDescription.AutoSize = true;
             lblDescription.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblDescription.ForeColor = Color.FromArgb(71, 85, 105);
-            lblDescription.Location = new Point(18, 183);
+            lblDescription.Location = new Point(25, 175);
             lblDescription.Name = "lblDescription";
             lblDescription.Size = new Size(43, 15);
-            lblDescription.TabIndex = 4;
-            lblDescription.Text = "Mô Tả:";
+            lblDescription.TabIndex = 5;
+            lblDescription.Text = "Mô tả:";
             // 
             // txtCategoryName
             // 
             txtCategoryName.BorderStyle = BorderStyle.FixedSingle;
             txtCategoryName.Font = new Font("Segoe UI", 10F);
-            txtCategoryName.Location = new Point(20, 137);
+            txtCategoryName.Location = new Point(25, 135);
             txtCategoryName.Name = "txtCategoryName";
-            txtCategoryName.PlaceholderText = "Ví dụ: Rau củ hữu cơ, Trái cây sinh thái...";
-            txtCategoryName.Size = new Size(308, 25);
-            txtCategoryName.TabIndex = 3;
+            txtCategoryName.Size = new Size(310, 25);
+            txtCategoryName.TabIndex = 4;
             // 
             // lblCategoryName
             // 
             lblCategoryName.AutoSize = true;
             lblCategoryName.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblCategoryName.ForeColor = Color.FromArgb(71, 85, 105);
-            lblCategoryName.Location = new Point(18, 115);
+            lblCategoryName.Location = new Point(25, 115);
             lblCategoryName.Name = "lblCategoryName";
-            lblCategoryName.Size = new Size(96, 15);
-            lblCategoryName.TabIndex = 2;
-            lblCategoryName.Text = "Tên Nhóm hàng:";
+            lblCategoryName.Size = new Size(95, 15);
+            lblCategoryName.TabIndex = 3;
+            lblCategoryName.Text = "Tên nhóm hàng:";
             // 
             // txtId
             // 
-            txtId.BackColor = Color.FromArgb(241, 245, 249);
+            txtId.BackColor = Color.FromArgb(248, 250, 252);
             txtId.BorderStyle = BorderStyle.FixedSingle;
             txtId.Font = new Font("Segoe UI", 10F);
-            txtId.Location = new Point(20, 72);
+            txtId.Location = new Point(25, 75);
             txtId.Name = "txtId";
             txtId.ReadOnly = true;
-            txtId.Size = new Size(308, 25);
-            txtId.TabIndex = 1;
+            txtId.Size = new Size(310, 25);
+            txtId.TabIndex = 2;
             // 
             // lblId
             // 
             lblId.AutoSize = true;
             lblId.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblId.ForeColor = Color.FromArgb(71, 85, 105);
-            lblId.Location = new Point(18, 50);
+            lblId.Location = new Point(25, 55);
             lblId.Name = "lblId";
             lblId.Size = new Size(46, 15);
-            lblId.TabIndex = 0;
+            lblId.TabIndex = 1;
             lblId.Text = "Mã ID:";
             // 
             // statusStrip1
             // 
-            statusStrip1.BackColor = Color.FromArgb(241, 245, 249);
+            statusStrip1.BackColor = Color.White;
+            statusStrip1.Font = new Font("Segoe UI", 9F);
             statusStrip1.Items.AddRange(new ToolStripItem[] { lblReady, lblApiUrl });
             statusStrip1.Location = new Point(12, 654);
             statusStrip1.Name = "statusStrip1";
+            statusStrip1.RenderMode = ToolStripRenderMode.ManagerRenderMode;
             statusStrip1.Size = new Size(1176, 22);
             statusStrip1.TabIndex = 2;
             statusStrip1.Text = "statusStrip1";
@@ -338,8 +400,8 @@ namespace MiniSupermarket.WinForms
             lblApiUrl.Font = new Font("Segoe UI", 8.5F);
             lblApiUrl.ForeColor = Color.FromArgb(148, 163, 184);
             lblApiUrl.Name = "lblApiUrl";
-            lblApiUrl.Size = new Size(130, 17);
-            lblApiUrl.Text = "API: /api/categories";
+            lblApiUrl.Size = new Size(165, 17);
+            lblApiUrl.Text = "API: /api/categories/paged";
             // 
             // FormCategoryManagement
             // 
@@ -360,6 +422,7 @@ namespace MiniSupermarket.WinForms
             panelTop.PerformLayout();
             panelBody.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dgvCategories).EndInit();
+            panelPaging.ResumeLayout(false);
             panelInfo.ResumeLayout(false);
             panelInfo.PerformLayout();
             statusStrip1.ResumeLayout(false);
@@ -380,6 +443,10 @@ namespace MiniSupermarket.WinForms
         private DataGridViewTextBoxColumn CategoryId;
         private DataGridViewTextBoxColumn CategoryName;
         private DataGridViewTextBoxColumn Description;
+        private Panel panelPaging;
+        private Button btnPrev;
+        private Label lblPaging;
+        private Button btnNext;
         private Panel panelInfo;
         private Label lblInfoTitle;
         private Label lblId;

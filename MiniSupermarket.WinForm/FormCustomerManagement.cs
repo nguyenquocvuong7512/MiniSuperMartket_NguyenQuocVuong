@@ -1,15 +1,21 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using MiniSupermarket.WinForms.Services;
 
 namespace MiniSupermarket.WinForms
 {
     public partial class FormCustomerManagement : Form
     {
+        private int _currentPage = 1;
+        private readonly int _pageSize = 5;
+        private int _totalPages = 1;
+
         public FormCustomerManagement()
         {
             InitializeComponent();
@@ -19,6 +25,19 @@ namespace MiniSupermarket.WinForms
             Theme.UITheme.StyleButton(btnDelete, Theme.UITheme.ButtonVariant.Danger);
             Theme.UITheme.StyleButton(btnSearch, Theme.UITheme.ButtonVariant.Secondary);
             Theme.UITheme.StyleButton(btnLoad, Theme.UITheme.ButtonVariant.Neutral);
+            Theme.UITheme.StyleButton(btnPrev, Theme.UITheme.ButtonVariant.Neutral);
+            Theme.UITheme.StyleButton(btnNext, Theme.UITheme.ButtonVariant.Neutral);
+
+            btnPrev.Click += btnPrev_Click;
+            btnNext.Click += btnNext_Click;
+            txtKeyword.KeyDown += (s, e) =>
+            {
+                if (e.KeyCode == Keys.Enter)
+                {
+                    e.SuppressKeyPress = true;
+                    btnSearch.PerformClick();
+                }
+            };
         }
 
         private HttpClient GetAuthenticatedClient()
@@ -44,35 +63,63 @@ namespace MiniSupermarket.WinForms
 
             if (!string.IsNullOrEmpty(SessionManager.CurrentRole))
             {
-                lblReady.Text = $"Sẵn sàng | Quyền: {SessionManager.CurrentRole} | Phân hệ Khách hàng (EF Core)";
+                lblReady.Text = $"Sẵn sàng | Quyền: {SessionManager.CurrentRole} | Phân hệ Khách hàng";
             }
 
-            await LoadDataAsync();
+            await LoadCustomersPagedAsync();
         }
 
-        private async Task LoadDataAsync()
+        private async Task LoadCustomersPagedAsync()
         {
             try
             {
+                string keyword = txtKeyword.Text.Trim();
                 using var client = GetAuthenticatedClient();
-                var response = await client.GetAsync("customers");
-                if (response.IsSuccessStatusCode)
+                string url = $"customers/paged?keyword={Uri.EscapeDataString(keyword)}&pageNumber={_currentPage}&pageSize={_pageSize}";
+
+                var result = await client.GetFromJsonAsync<PagedViewResult<CustomerDto>>(url);
+                if (result != null)
                 {
-                    var customers = await response.Content.ReadFromJsonAsync<List<CustomerDto>>();
-                    dgvCustomers.DataSource = customers;
-                }
-                else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                {
-                    MessageBox.Show("Phiên làm việc hết hạn hoặc chưa đăng nhập!", "Lỗi xác thực", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-                else
-                {
-                    MessageBox.Show("Không thể tải danh sách khách hàng từ máy chủ!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    _currentPage = result.CurrentPage;
+                    _totalPages = result.TotalPages == 0 ? 1 : result.TotalPages;
+
+                    dgvCustomers.DataSource = null;
+                    dgvCustomers.DataSource = result.Items;
+
+                    lblPaging.Text = $"Trang {_currentPage} / {_totalPages} (Tổng: {result.TotalItems} khách hàng)";
+                    btnPrev.Enabled = _currentPage > 1;
+                    btnNext.Enabled = _currentPage < _totalPages;
+
+                    lblReady.Text = $"Đã tải trang {_currentPage}/{_totalPages} (Tổng: {result.TotalItems} khách hàng) | Hiển thị: {_pageSize} mục/trang";
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi kết nối API: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Lỗi lấy dữ liệu khách hàng: " + ex.Message, "Lỗi kết nối",
+                                MessageBoxButtons.OK, MessageBoxIcon.Error);
+                if (ex.Message.Contains("401") || ex.Message.Contains("chưa đăng nhập"))
+                {
+                    new FormLogin().Show();
+                    this.Close();
+                }
+            }
+        }
+
+        private async void btnPrev_Click(object? sender, EventArgs e)
+        {
+            if (_currentPage > 1)
+            {
+                _currentPage--;
+                await LoadCustomersPagedAsync();
+            }
+        }
+
+        private async void btnNext_Click(object? sender, EventArgs e)
+        {
+            if (_currentPage < _totalPages)
+            {
+                _currentPage++;
+                await LoadCustomersPagedAsync();
             }
         }
 
@@ -113,7 +160,7 @@ namespace MiniSupermarket.WinForms
             int points = 0;
             int.TryParse(txtRewardPoints.Text.Trim(), out points);
 
-            var newCustomer = new CustomerDto
+            var newCustomer = new
             {
                 CustomerName = name,
                 PhoneNumber = phone,
@@ -128,14 +175,14 @@ namespace MiniSupermarket.WinForms
                 var response = await client.PostAsJsonAsync("customers", newCustomer);
                 if (response.IsSuccessStatusCode)
                 {
-                    MessageBox.Show("Thêm mới khách hàng thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    await LoadDataAsync();
+                    MessageBox.Show("Thêm khách hàng thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    await LoadCustomersPagedAsync();
                     ClearInputs();
                 }
                 else
                 {
-                    var err = await response.Content.ReadAsStringAsync();
-                    MessageBox.Show($"Thêm khách hàng thất bại: {err}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    string err = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show($"Thêm thất bại: {err}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
             catch (Exception ex)
@@ -148,7 +195,7 @@ namespace MiniSupermarket.WinForms
         {
             if (string.IsNullOrEmpty(txtCustomerId.Text))
             {
-                MessageBox.Show("Vui lòng chọn khách hàng từ danh sách để cập nhật!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Vui lòng chọn khách hàng cần sửa!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -156,22 +203,16 @@ namespace MiniSupermarket.WinForms
             string name = txtCustomerName.Text.Trim();
             string phone = txtPhoneNumber.Text.Trim();
 
-            if (string.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(phone))
             {
-                MessageBox.Show("Tên khách hàng không được để trống!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            if (string.IsNullOrEmpty(phone))
-            {
-                MessageBox.Show("Số điện thoại không được để trống!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Tên và số điện thoại không được để trống!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             int points = 0;
             int.TryParse(txtRewardPoints.Text.Trim(), out points);
 
-            var updatedCustomer = new CustomerDto
+            var updateCustomer = new
             {
                 CustomerId = id,
                 CustomerName = name,
@@ -184,11 +225,11 @@ namespace MiniSupermarket.WinForms
             try
             {
                 using var client = GetAuthenticatedClient();
-                var response = await client.PutAsJsonAsync($"customers/{id}", updatedCustomer);
+                var response = await client.PutAsJsonAsync($"customers/{id}", updateCustomer);
                 if (response.IsSuccessStatusCode)
                 {
                     MessageBox.Show("Cập nhật thông tin khách hàng thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    await LoadDataAsync();
+                    await LoadCustomersPagedAsync();
                     ClearInputs();
                 }
                 else
@@ -221,7 +262,7 @@ namespace MiniSupermarket.WinForms
                     if (response.IsSuccessStatusCode)
                     {
                         MessageBox.Show("Xóa khách hàng thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        await LoadDataAsync();
+                        await LoadCustomersPagedAsync();
                         ClearInputs();
                     }
                     else
@@ -238,37 +279,15 @@ namespace MiniSupermarket.WinForms
 
         private async void btnSearch_Click(object sender, EventArgs e)
         {
-            string keyword = txtKeyword.Text.Trim();
-            if (string.IsNullOrEmpty(keyword))
-            {
-                await LoadDataAsync();
-                return;
-            }
-
-            try
-            {
-                using var client = GetAuthenticatedClient();
-                var response = await client.GetAsync($"customers/search?keyword={Uri.EscapeDataString(keyword)}");
-                if (response.IsSuccessStatusCode)
-                {
-                    var result = await response.Content.ReadFromJsonAsync<List<CustomerDto>>();
-                    dgvCustomers.DataSource = result;
-                }
-                else
-                {
-                    MessageBox.Show("Không tìm thấy khách hàng phù hợp!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Lỗi kết nối: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            _currentPage = 1;
+            await LoadCustomersPagedAsync();
         }
 
         private async void btnLoad_Click(object sender, EventArgs e)
         {
             txtKeyword.Clear();
-            await LoadDataAsync();
+            _currentPage = 1;
+            await LoadCustomersPagedAsync();
             ClearInputs();
         }
 
@@ -285,15 +304,7 @@ namespace MiniSupermarket.WinForms
             }
         }
 
-        private void dgvCustomers_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-
-        }
-
-        private void grpInfo_Enter(object sender, EventArgs e)
-        {
-
-        }
+        private void dgvCustomers_CellContentClick(object sender, DataGridViewCellEventArgs e) { }
     }
 
     public class CustomerDto

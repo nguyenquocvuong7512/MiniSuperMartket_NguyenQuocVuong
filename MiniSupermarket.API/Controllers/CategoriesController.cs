@@ -20,6 +20,54 @@ namespace MiniSupermarket.API.Controllers
             _context = context;
         }
 
+        // GET: api/categories/paged?keyword=...&pageNumber=1&pageSize=5
+        [HttpGet("paged")]
+        public async Task<IActionResult> GetPagedCategories(
+            [FromQuery] string? keyword,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 5)
+        {
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1 || pageSize > 50) pageSize = 5;
+
+            var query = _context.Categories
+                .AsNoTracking()
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                string kw = keyword.Trim().ToLower();
+                query = query.Where(c => c.CategoryName.ToLower().Contains(kw) ||
+                                        (c.Description != null && c.Description.ToLower().Contains(kw)));
+            }
+
+            int totalItems = await query.CountAsync();
+            int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            var items = await query
+                .OrderBy(c => c.CategoryId)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(c => new CategoryDto
+                {
+                    CategoryId = c.CategoryId,
+                    CategoryName = c.CategoryName,
+                    Description = c.Description
+                })
+                .ToListAsync();
+
+            var response = new PagedResult<CategoryDto>
+            {
+                CurrentPage = pageNumber,
+                PageSize = pageSize,
+                TotalItems = totalItems,
+                TotalPages = totalPages == 0 ? 1 : totalPages,
+                Items = items
+            };
+
+            return Ok(response);
+        }
+
         // 1. READ: Lấy toàn bộ danh mục từ SQL Server dưới dạng DTO
         [HttpGet]
         public async Task<IActionResult> GetAll()

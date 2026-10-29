@@ -27,6 +27,7 @@ namespace MiniSupermarket.WinForms
 
             panelHeader = new Panel();
             btnRunReport = new Button();
+            btnAllOrders = new Button();
             dtpToDate = new DateTimePicker();
             lblToDate = new Label();
             dtpReportDate = new DateTimePicker();
@@ -88,6 +89,7 @@ namespace MiniSupermarket.WinForms
             // 
             panelHeader.BackColor = Color.White;
             panelHeader.Controls.Add(btnRunReport);
+            panelHeader.Controls.Add(btnAllOrders);
             panelHeader.Controls.Add(dtpToDate);
             panelHeader.Controls.Add(lblToDate);
             panelHeader.Controls.Add(dtpReportDate);
@@ -117,6 +119,22 @@ namespace MiniSupermarket.WinForms
             btnRunReport.UseVisualStyleBackColor = false;
 
             // 
+            // 
+            // btnAllOrders
+            // 
+            btnAllOrders.BackColor = Color.FromArgb(71, 85, 105);
+            btnAllOrders.Cursor = Cursors.Hand;
+            btnAllOrders.FlatAppearance.BorderSize = 0;
+            btnAllOrders.FlatStyle = FlatStyle.Flat;
+            btnAllOrders.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnAllOrders.ForeColor = Color.White;
+            btnAllOrders.Location = new Point(950, 14);
+            btnAllOrders.Name = "btnAllOrders";
+            btnAllOrders.Size = new Size(110, 36);
+            btnAllOrders.TabIndex = 6;
+            btnAllOrders.Text = "🌐 Tất Cả";
+            btnAllOrders.UseVisualStyleBackColor = false;
+
             // dtpToDate
             // 
             dtpToDate.CustomFormat = "dd/MM/yyyy";
@@ -650,6 +668,7 @@ namespace MiniSupermarket.WinForms
         private Label lblToDate;
         private DateTimePicker dtpToDate;
         private Button btnRunReport;
+        private Button btnAllOrders;
 
         private TableLayoutPanel panelSummary;
         private Panel cardRevenue;

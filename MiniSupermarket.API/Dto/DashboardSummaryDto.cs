@@ -6,8 +6,14 @@ namespace MiniSupermarket.API.Dto
         // 1. Doanh thu hôm nay (VNĐ)
         public decimal TodayRevenue { get; set; }
 
-        // 2. Tổng số hóa đơn đã xuất
+        // Doanh thu theo kỳ lọc
+        public decimal PeriodRevenue { get; set; }
+
+        // 2. Tổng số hóa đơn đã xuất (toàn hệ thống)
         public int TotalOrders { get; set; }
+
+        // Số đơn theo kỳ lọc
+        public int PeriodOrdersCount { get; set; }
 
         // 3. Số lượng khách hàng thành viên
         public int TotalCustomers { get; set; }
@@ -30,6 +36,7 @@ namespace MiniSupermarket.API.Dto
     {
         public string Date { get; set; } = string.Empty; // yyyy-MM-dd
         public decimal Revenue { get; set; }             // Doanh thu trong ngày
+        public decimal TotalRevenue => Revenue;          // Hỗ trợ cả 2 tên thuộc tính
         public int OrderCount { get; set; }              // Số lượng hóa đơn
     }
 }

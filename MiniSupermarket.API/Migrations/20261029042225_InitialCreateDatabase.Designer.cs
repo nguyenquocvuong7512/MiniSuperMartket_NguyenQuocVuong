@@ -12,7 +12,7 @@ using MiniSupermarket.API.Data;
 namespace MiniSupermarket.API.Migrations
 {
     [DbContext(typeof(SupermarketDbContext))]
-    [Migration("20261022074042_InitialCreateDatabase")]
+    [Migration("20261029042225_InitialCreateDatabase")]
     partial class InitialCreateDatabase
     {
         /// <inheritdoc />
@@ -558,7 +558,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             OrderDetailId = 1,
                             OrderId = 1,
-                            ProductId = 101,
+                            ProductId = 1,
                             Quantity = 2,
                             SubTotal = 70000m,
                             UnitPrice = 35000m
@@ -567,7 +567,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             OrderDetailId = 2,
                             OrderId = 1,
-                            ProductId = 601,
+                            ProductId = 6,
                             Quantity = 1,
                             SubTotal = 195000m,
                             UnitPrice = 195000m
@@ -576,7 +576,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             OrderDetailId = 3,
                             OrderId = 2,
-                            ProductId = 201,
+                            ProductId = 2,
                             Quantity = 2,
                             SubTotal = 76000m,
                             UnitPrice = 38000m
@@ -585,7 +585,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             OrderDetailId = 4,
                             OrderId = 2,
-                            ProductId = 901,
+                            ProductId = 9,
                             Quantity = 2,
                             SubTotal = 250000m,
                             UnitPrice = 125000m
@@ -594,7 +594,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             OrderDetailId = 5,
                             OrderId = 3,
-                            ProductId = 301,
+                            ProductId = 3,
                             Quantity = 2,
                             SubTotal = 90000m,
                             UnitPrice = 45000m
@@ -603,7 +603,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             OrderDetailId = 6,
                             OrderId = 3,
-                            ProductId = 501,
+                            ProductId = 5,
                             Quantity = 2,
                             SubTotal = 330000m,
                             UnitPrice = 165000m
@@ -612,7 +612,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             OrderDetailId = 7,
                             OrderId = 4,
-                            ProductId = 401,
+                            ProductId = 4,
                             Quantity = 2,
                             SubTotal = 84000m,
                             UnitPrice = 42000m
@@ -621,7 +621,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             OrderDetailId = 8,
                             OrderId = 4,
-                            ProductId = 701,
+                            ProductId = 7,
                             Quantity = 1,
                             SubTotal = 48000m,
                             UnitPrice = 48000m
@@ -630,7 +630,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             OrderDetailId = 9,
                             OrderId = 5,
-                            ProductId = 701,
+                            ProductId = 7,
                             Quantity = 2,
                             SubTotal = 96000m,
                             UnitPrice = 48000m
@@ -639,7 +639,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             OrderDetailId = 10,
                             OrderId = 5,
-                            ProductId = 1301,
+                            ProductId = 13,
                             Quantity = 1,
                             SubTotal = 85000m,
                             UnitPrice = 85000m
@@ -648,7 +648,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             OrderDetailId = 11,
                             OrderId = 6,
-                            ProductId = 1201,
+                            ProductId = 12,
                             Quantity = 1,
                             SubTotal = 110000m,
                             UnitPrice = 110000m
@@ -657,7 +657,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             OrderDetailId = 12,
                             OrderId = 6,
-                            ProductId = 1401,
+                            ProductId = 14,
                             Quantity = 1,
                             SubTotal = 32000m,
                             UnitPrice = 32000m
@@ -666,7 +666,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             OrderDetailId = 13,
                             OrderId = 7,
-                            ProductId = 1001,
+                            ProductId = 10,
                             Quantity = 2,
                             SubTotal = 440000m,
                             UnitPrice = 220000m
@@ -675,7 +675,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             OrderDetailId = 14,
                             OrderId = 7,
-                            ProductId = 101,
+                            ProductId = 1,
                             Quantity = 1,
                             SubTotal = 35000m,
                             UnitPrice = 35000m
@@ -684,7 +684,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             OrderDetailId = 15,
                             OrderId = 8,
-                            ProductId = 801,
+                            ProductId = 8,
                             Quantity = 3,
                             SubTotal = 156000m,
                             UnitPrice = 52000m
@@ -693,7 +693,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             OrderDetailId = 16,
                             OrderId = 8,
-                            ProductId = 1101,
+                            ProductId = 11,
                             Quantity = 1,
                             SubTotal = 95000m,
                             UnitPrice = 95000m
@@ -702,7 +702,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             OrderDetailId = 17,
                             OrderId = 9,
-                            ProductId = 401,
+                            ProductId = 4,
                             Quantity = 2,
                             SubTotal = 84000m,
                             UnitPrice = 42000m
@@ -711,7 +711,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             OrderDetailId = 18,
                             OrderId = 9,
-                            ProductId = 1501,
+                            ProductId = 15,
                             Quantity = 1,
                             SubTotal = 250000m,
                             UnitPrice = 250000m
@@ -720,7 +720,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             OrderDetailId = 19,
                             OrderId = 10,
-                            ProductId = 1301,
+                            ProductId = 13,
                             Quantity = 1,
                             SubTotal = 85000m,
                             UnitPrice = 85000m
@@ -729,7 +729,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             OrderDetailId = 20,
                             OrderId = 10,
-                            ProductId = 1001,
+                            ProductId = 10,
                             Quantity = 1,
                             SubTotal = 220000m,
                             UnitPrice = 220000m
@@ -738,7 +738,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             OrderDetailId = 21,
                             OrderId = 11,
-                            ProductId = 501,
+                            ProductId = 5,
                             Quantity = 3,
                             SubTotal = 495000m,
                             UnitPrice = 165000m
@@ -747,7 +747,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             OrderDetailId = 22,
                             OrderId = 11,
-                            ProductId = 1101,
+                            ProductId = 11,
                             Quantity = 2,
                             SubTotal = 190000m,
                             UnitPrice = 95000m
@@ -756,7 +756,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             OrderDetailId = 23,
                             OrderId = 12,
-                            ProductId = 1401,
+                            ProductId = 14,
                             Quantity = 1,
                             SubTotal = 32000m,
                             UnitPrice = 32000m
@@ -765,7 +765,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             OrderDetailId = 24,
                             OrderId = 12,
-                            ProductId = 1501,
+                            ProductId = 15,
                             Quantity = 1,
                             SubTotal = 250000m,
                             UnitPrice = 250000m
@@ -774,7 +774,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             OrderDetailId = 25,
                             OrderId = 13,
-                            ProductId = 201,
+                            ProductId = 2,
                             Quantity = 2,
                             SubTotal = 76000m,
                             UnitPrice = 38000m
@@ -783,7 +783,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             OrderDetailId = 26,
                             OrderId = 13,
-                            ProductId = 1201,
+                            ProductId = 12,
                             Quantity = 2,
                             SubTotal = 220000m,
                             UnitPrice = 110000m
@@ -792,7 +792,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             OrderDetailId = 27,
                             OrderId = 14,
-                            ProductId = 101,
+                            ProductId = 1,
                             Quantity = 1,
                             SubTotal = 35000m,
                             UnitPrice = 35000m
@@ -801,7 +801,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             OrderDetailId = 28,
                             OrderId = 14,
-                            ProductId = 801,
+                            ProductId = 8,
                             Quantity = 1,
                             SubTotal = 52000m,
                             UnitPrice = 52000m
@@ -810,7 +810,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             OrderDetailId = 29,
                             OrderId = 15,
-                            ProductId = 301,
+                            ProductId = 3,
                             Quantity = 2,
                             SubTotal = 90000m,
                             UnitPrice = 45000m
@@ -819,7 +819,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             OrderDetailId = 30,
                             OrderId = 15,
-                            ProductId = 901,
+                            ProductId = 9,
                             Quantity = 2,
                             SubTotal = 250000m,
                             UnitPrice = 125000m
@@ -866,7 +866,7 @@ namespace MiniSupermarket.API.Migrations
                     b.HasData(
                         new
                         {
-                            ProductId = 101,
+                            ProductId = 1,
                             Barcode = "8930000001010",
                             CategoryId = 1,
                             Price = 35000m,
@@ -876,7 +876,7 @@ namespace MiniSupermarket.API.Migrations
                         },
                         new
                         {
-                            ProductId = 201,
+                            ProductId = 2,
                             Barcode = "8930000002017",
                             CategoryId = 2,
                             Price = 38000m,
@@ -886,7 +886,7 @@ namespace MiniSupermarket.API.Migrations
                         },
                         new
                         {
-                            ProductId = 301,
+                            ProductId = 3,
                             Barcode = "8930000003014",
                             CategoryId = 3,
                             Price = 45000m,
@@ -896,7 +896,7 @@ namespace MiniSupermarket.API.Migrations
                         },
                         new
                         {
-                            ProductId = 401,
+                            ProductId = 4,
                             Barcode = "8930000004011",
                             CategoryId = 4,
                             Price = 42000m,
@@ -906,7 +906,7 @@ namespace MiniSupermarket.API.Migrations
                         },
                         new
                         {
-                            ProductId = 501,
+                            ProductId = 5,
                             Barcode = "8930000005018",
                             CategoryId = 5,
                             Price = 165000m,
@@ -916,17 +916,17 @@ namespace MiniSupermarket.API.Migrations
                         },
                         new
                         {
-                            ProductId = 601,
+                            ProductId = 6,
                             Barcode = "8930000006015",
                             CategoryId = 6,
                             Price = 195000m,
                             ProductName = "Cá lăng sinh thái sông Đà",
-                            StockQuantity = 30,
+                            StockQuantity = 6,
                             Unit = "Kg"
                         },
                         new
                         {
-                            ProductId = 701,
+                            ProductId = 7,
                             Barcode = "8930000007012",
                             CategoryId = 7,
                             Price = 48000m,
@@ -936,7 +936,7 @@ namespace MiniSupermarket.API.Migrations
                         },
                         new
                         {
-                            ProductId = 801,
+                            ProductId = 8,
                             Barcode = "8930000008019",
                             CategoryId = 8,
                             Price = 52000m,
@@ -946,7 +946,7 @@ namespace MiniSupermarket.API.Migrations
                         },
                         new
                         {
-                            ProductId = 901,
+                            ProductId = 9,
                             Barcode = "8930000009016",
                             CategoryId = 9,
                             Price = 125000m,
@@ -956,7 +956,7 @@ namespace MiniSupermarket.API.Migrations
                         },
                         new
                         {
-                            ProductId = 1001,
+                            ProductId = 10,
                             Barcode = "8930000010013",
                             CategoryId = 10,
                             Price = 220000m,
@@ -966,7 +966,7 @@ namespace MiniSupermarket.API.Migrations
                         },
                         new
                         {
-                            ProductId = 1101,
+                            ProductId = 11,
                             Barcode = "8930000011010",
                             CategoryId = 11,
                             Price = 95000m,
@@ -976,7 +976,7 @@ namespace MiniSupermarket.API.Migrations
                         },
                         new
                         {
-                            ProductId = 1201,
+                            ProductId = 12,
                             Barcode = "8930000012017",
                             CategoryId = 12,
                             Price = 110000m,
@@ -986,7 +986,7 @@ namespace MiniSupermarket.API.Migrations
                         },
                         new
                         {
-                            ProductId = 1301,
+                            ProductId = 13,
                             Barcode = "8930000013014",
                             CategoryId = 13,
                             Price = 85000m,
@@ -996,7 +996,7 @@ namespace MiniSupermarket.API.Migrations
                         },
                         new
                         {
-                            ProductId = 1401,
+                            ProductId = 14,
                             Barcode = "8930000014011",
                             CategoryId = 14,
                             Price = 32000m,
@@ -1006,12 +1006,12 @@ namespace MiniSupermarket.API.Migrations
                         },
                         new
                         {
-                            ProductId = 1501,
+                            ProductId = 15,
                             Barcode = "8930000015018",
                             CategoryId = 15,
                             Price = 250000m,
                             ProductName = "Combo Rau Củ Xanh Dinh Dưỡng Tuần",
-                            StockQuantity = 20,
+                            StockQuantity = 8,
                             Unit = "Set 5kg"
                         });
                 });

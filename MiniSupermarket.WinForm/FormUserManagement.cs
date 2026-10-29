@@ -4,12 +4,16 @@ using System.Drawing;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using MiniSupermarket.WinForms.Services;
 
 namespace MiniSupermarket.WinForms
 {
     public partial class FormUserManagement : Form
     {
         private int _selectedUserId = 0;
+        private int _currentPage = 1;
+        private readonly int _pageSize = 5;
+        private int _totalPages = 1;
 
         public FormUserManagement()
         {
@@ -19,14 +23,39 @@ namespace MiniSupermarket.WinForms
             Theme.UITheme.StyleButton(btnResetPassword, Theme.UITheme.ButtonVariant.Warning);
             Theme.UITheme.StyleButton(btnDeleteUser, Theme.UITheme.ButtonVariant.Danger);
             Theme.UITheme.StyleButton(btnRefresh, Theme.UITheme.ButtonVariant.Neutral);
+            Theme.UITheme.StyleButton(btnSearch, Theme.UITheme.ButtonVariant.Secondary);
+            Theme.UITheme.StyleButton(btnPrev, Theme.UITheme.ButtonVariant.Neutral);
+            Theme.UITheme.StyleButton(btnNext, Theme.UITheme.ButtonVariant.Neutral);
 
             cboRole.Items.AddRange(new object[] { "Admin", "Cashier", "Warehouse" });
             cboRole.SelectedIndex = 1;
 
             SetupUserGrid();
 
-            this.Load += async (s, e) => await LoadUsersAsync();
-            btnRefresh.Click += async (s, e) => await LoadUsersAsync();
+            this.Load += async (s, e) => await LoadUsersPagedAsync();
+            btnRefresh.Click += async (s, e) =>
+            {
+                txtKeyword.Clear();
+                _currentPage = 1;
+                await LoadUsersPagedAsync();
+                ClearInputs();
+            };
+            btnSearch.Click += async (s, e) =>
+            {
+                _currentPage = 1;
+                await LoadUsersPagedAsync();
+            };
+            txtKeyword.KeyDown += (s, e) =>
+            {
+                if (e.KeyCode == Keys.Enter)
+                {
+                    e.SuppressKeyPress = true;
+                    btnSearch.PerformClick();
+                }
+            };
+            btnPrev.Click += btnPrev_Click;
+            btnNext.Click += btnNext_Click;
+
             btnAddUser.Click += async (s, e) => await AddUserAsync();
             btnResetPassword.Click += async (s, e) => await ResetPasswordAsync();
             btnDeleteUser.Click += async (s, e) => await DeleteUserAsync();
@@ -74,7 +103,7 @@ namespace MiniSupermarket.WinForms
             });
         }
 
-        private async Task LoadUsersAsync()
+        private async Task LoadUsersPagedAsync()
         {
             if (SessionManager.CurrentRole.Trim().ToUpper() != "ADMIN")
             {
@@ -89,11 +118,23 @@ namespace MiniSupermarket.WinForms
 
             try
             {
-                var users = await ApiClientService.Client.GetFromJsonAsync<List<UserDto>>("users");
-                dgvUsers.DataSource = users;
+                string keyword = txtKeyword.Text.Trim();
+                string url = $"users/paged?keyword={Uri.EscapeDataString(keyword)}&pageNumber={_currentPage}&pageSize={_pageSize}";
 
-                int count = users?.Count ?? 0;
-                lblUserCount.Text = $"Tổng: {count} người dùng";
+                var result = await ApiClientService.Client.GetFromJsonAsync<PagedViewResult<UserDto>>(url);
+                if (result != null)
+                {
+                    _currentPage = result.CurrentPage;
+                    _totalPages = result.TotalPages == 0 ? 1 : result.TotalPages;
+
+                    dgvUsers.DataSource = null;
+                    dgvUsers.DataSource = result.Items;
+
+                    lblUserCount.Text = $"Tổng: {result.TotalItems} người dùng";
+                    lblPaging.Text = $"Trang {_currentPage} / {_totalPages} (Tổng: {result.TotalItems} người dùng)";
+                    btnPrev.Enabled = _currentPage > 1;
+                    btnNext.Enabled = _currentPage < _totalPages;
+                }
             }
             catch (Exception ex)
             {
@@ -103,6 +144,24 @@ namespace MiniSupermarket.WinForms
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error
                 );
+            }
+        }
+
+        private async void btnPrev_Click(object? sender, EventArgs e)
+        {
+            if (_currentPage > 1)
+            {
+                _currentPage--;
+                await LoadUsersPagedAsync();
+            }
+        }
+
+        private async void btnNext_Click(object? sender, EventArgs e)
+        {
+            if (_currentPage < _totalPages)
+            {
+                _currentPage++;
+                await LoadUsersPagedAsync();
             }
         }
 
@@ -164,7 +223,7 @@ namespace MiniSupermarket.WinForms
                         MessageBoxIcon.Information
                     );
                     ClearInputs();
-                    await LoadUsersAsync();
+                    await LoadUsersPagedAsync();
                 }
                 else
                 {
@@ -248,7 +307,7 @@ namespace MiniSupermarket.WinForms
                 {
                     MessageBox.Show("Đã xóa tài khoản!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     ClearInputs();
-                    await LoadUsersAsync();
+                    await LoadUsersPagedAsync();
                 }
                 else
                 {

@@ -255,11 +255,11 @@ namespace MiniSupermarket.API.Controllers
         // GET: api/reports/dashboard-summary
         // =========================================================================
         [HttpGet("dashboard-summary")]
-        public async Task<IActionResult> GetDashboardSummary()
+        public async Task<IActionResult> GetDashboardSummary([FromQuery] DateTime? fromDate, [FromQuery] DateTime? toDate)
         {
             var today = DateTime.Today;
 
-            // 1. Doanh thu hôm nay (nếu ngày hiện tại chưa có đơn, tính từ đơn mới nhất hoặc hôm nay)
+            // 1. Doanh thu hôm nay
             decimal todayRevenue = await _context.Orders
                 .Where(o => o.OrderDate.Date == today && o.Status == "Completed")
                 .SumAsync(o => (decimal?)o.TotalAmount) ?? 0;
@@ -267,8 +267,24 @@ namespace MiniSupermarket.API.Controllers
             int todayOrdersCount = await _context.Orders
                 .CountAsync(o => o.OrderDate.Date == today);
 
-            // 2. Tổng số hóa đơn đã xuất
+            // 2. Tổng số hóa đơn toàn hệ thống
             int totalOrders = await _context.Orders.CountAsync();
+
+            decimal periodRevenue = todayRevenue;
+            int periodOrdersCount = totalOrders;
+
+            if (fromDate.HasValue && toDate.HasValue)
+            {
+                DateTime start = fromDate.Value.Date;
+                DateTime end = toDate.Value.Date.AddDays(1).AddTicks(-1);
+
+                periodRevenue = await _context.Orders
+                    .Where(o => o.OrderDate >= start && o.OrderDate <= end && o.Status == "Completed")
+                    .SumAsync(o => (decimal?)o.TotalAmount) ?? 0;
+
+                periodOrdersCount = await _context.Orders
+                    .CountAsync(o => o.OrderDate >= start && o.OrderDate <= end);
+            }
 
             // 3. Số lượng khách hàng thành viên
             int totalCustomers = await _context.Customers.CountAsync();
@@ -287,6 +303,8 @@ namespace MiniSupermarket.API.Controllers
                 TodayRevenue = todayRevenue,
                 TodayOrdersCount = todayOrdersCount,
                 TotalOrders = totalOrders,
+                PeriodOrdersCount = periodOrdersCount,
+                PeriodRevenue = periodRevenue,
                 TotalCustomers = totalCustomers,
                 LowStockProductsCount = lowStockCount,
                 GrandTotalRevenue = grandTotalRevenue,
@@ -300,7 +318,6 @@ namespace MiniSupermarket.API.Controllers
             });
         }
 
-        // =========================================================================
         // TIÊU CHÍ 45: BIỂU ĐỒ CỘT DOANH THU THEO NGÀY (BAR CHART)
         // GET: api/reports/daily-revenue?fromDate=2026-10-01&toDate=2026-10-31
         // =========================================================================

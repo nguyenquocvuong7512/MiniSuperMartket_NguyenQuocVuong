@@ -60,21 +60,21 @@ namespace MiniSupermarket.API.Data
 
             // === 15 SẢN PHẨM ĐẠI DIỆN TƯƠNG ỨNG TỪNG DANH MỤC ===
             modelBuilder.Entity<Product>().HasData(
-                new Product { ProductId = 101, Barcode = "8930000001010", ProductName = "Cải bó xôi hữu cơ Farm", CategoryId = 1, Price = 35000, StockQuantity = 80, Unit = "Bó 500g" },
-                new Product { ProductId = 201, Barcode = "8930000002017", ProductName = "Cà rốt giống củ bản địa", CategoryId = 2, Price = 38000, StockQuantity = 100, Unit = "Kg" },
-                new Product { ProductId = 301, Barcode = "8930000003014", ProductName = "Ổi lê hữu cơ chín cây", CategoryId = 3, Price = 45000, StockQuantity = 60, Unit = "Kg" },
-                new Product { ProductId = 401, Barcode = "8930000004011", ProductName = "Nấm đùi gà tươi Organic", CategoryId = 4, Price = 42000, StockQuantity = 50, Unit = "Gói 250g" },
-                new Product { ProductId = 501, Barcode = "8930000005018", ProductName = "Thịt ba chỉ heo thảo mộc", CategoryId = 5, Price = 165000, StockQuantity = 40, Unit = "Khay 500g" },
-                new Product { ProductId = 601, Barcode = "8930000006015", ProductName = "Cá lăng sinh thái sông Đà", CategoryId = 6, Price = 195000, StockQuantity = 6, Unit = "Kg" },
-                new Product { ProductId = 701, Barcode = "8930000007012", ProductName = "Trứng gà ta thảo mộc tự nhiên", CategoryId = 7, Price = 48000, StockQuantity = 120, Unit = "Hộp 10 quả" },
-                new Product { ProductId = 801, Barcode = "8930000008019", ProductName = "Sữa bò tươi thanh trùng Organic", CategoryId = 8, Price = 52000, StockQuantity = 45, Unit = "Chai 900ml" },
-                new Product { ProductId = 901, Barcode = "8930000009016", ProductName = "Gạo ST25 hữu cơ ruộng rươi", CategoryId = 9, Price = 125000, StockQuantity = 70, Unit = "Túi 2kg" },
-                new Product { ProductId = 1001, Barcode = "8930000010013", ProductName = "Mật ong hoa rừng nguyên chất", CategoryId = 10, Price = 220000, StockQuantity = 35, Unit = "Hũ 500ml" },
-                new Product { ProductId = 1101, Barcode = "8930000011010", ProductName = "Nước mắm truyền thống cá cơm 40N", CategoryId = 11, Price = 95000, StockQuantity = 50, Unit = "Chai 500ml" },
-                new Product { ProductId = 1201, Barcode = "8930000012017", ProductName = "Dầu mè vàng ép lạnh thủ công", CategoryId = 12, Price = 110000, StockQuantity = 40, Unit = "Chai 250ml" },
-                new Product { ProductId = 1301, Barcode = "8930000013014", ProductName = "Trà hoa cúc sấy lạnh tự nhiên", CategoryId = 13, Price = 85000, StockQuantity = 55, Unit = "Hũ 80g" },
-                new Product { ProductId = 1401, Barcode = "8930000014011", ProductName = "Dưa cải củ lên men tự nhiên", CategoryId = 14, Price = 32000, StockQuantity = 60, Unit = "Hũ 450g" },
-                new Product { ProductId = 1501, Barcode = "8930000015018", ProductName = "Combo Rau Củ Xanh Dinh Dưỡng Tuần", CategoryId = 15, Price = 250000, StockQuantity = 8, Unit = "Set 5kg" }
+                new Product { ProductId = 1, Barcode = "8930000001010", ProductName = "Cải bó xôi hữu cơ Farm", CategoryId = 1, Price = 35000, StockQuantity = 80, Unit = "Bó 500g" },
+                new Product { ProductId = 2, Barcode = "8930000002017", ProductName = "Cà rốt giống củ bản địa", CategoryId = 2, Price = 38000, StockQuantity = 100, Unit = "Kg" },
+                new Product { ProductId = 3, Barcode = "8930000003014", ProductName = "Ổi lê hữu cơ chín cây", CategoryId = 3, Price = 45000, StockQuantity = 60, Unit = "Kg" },
+                new Product { ProductId = 4, Barcode = "8930000004011", ProductName = "Nấm đùi gà tươi Organic", CategoryId = 4, Price = 42000, StockQuantity = 50, Unit = "Gói 250g" },
+                new Product { ProductId = 5, Barcode = "8930000005018", ProductName = "Thịt ba chỉ heo thảo mộc", CategoryId = 5, Price = 165000, StockQuantity = 40, Unit = "Khay 500g" },
+                new Product { ProductId = 6, Barcode = "8930000006015", ProductName = "Cá lăng sinh thái sông Đà", CategoryId = 6, Price = 195000, StockQuantity = 6, Unit = "Kg" },
+                new Product { ProductId = 7, Barcode = "8930000007012", ProductName = "Trứng gà ta thảo mộc tự nhiên", CategoryId = 7, Price = 48000, StockQuantity = 120, Unit = "Hộp 10 quả" },
+                new Product { ProductId = 8, Barcode = "8930000008019", ProductName = "Sữa bò tươi thanh trùng Organic", CategoryId = 8, Price = 52000, StockQuantity = 45, Unit = "Chai 900ml" },
+                new Product { ProductId = 9, Barcode = "8930000009016", ProductName = "Gạo ST25 hữu cơ ruộng rươi", CategoryId = 9, Price = 125000, StockQuantity = 70, Unit = "Túi 2kg" },
+                new Product { ProductId = 10, Barcode = "8930000010013", ProductName = "Mật ong hoa rừng nguyên chất", CategoryId = 10, Price = 220000, StockQuantity = 35, Unit = "Hũ 500ml" },
+                new Product { ProductId = 11, Barcode = "8930000011010", ProductName = "Nước mắm truyền thống cá cơm 40N", CategoryId = 11, Price = 95000, StockQuantity = 50, Unit = "Chai 500ml" },
+                new Product { ProductId = 12, Barcode = "8930000012017", ProductName = "Dầu mè vàng ép lạnh thủ công", CategoryId = 12, Price = 110000, StockQuantity = 40, Unit = "Chai 250ml" },
+                new Product { ProductId = 13, Barcode = "8930000013014", ProductName = "Trà hoa cúc sấy lạnh tự nhiên", CategoryId = 13, Price = 85000, StockQuantity = 55, Unit = "Hũ 80g" },
+                new Product { ProductId = 14, Barcode = "8930000014011", ProductName = "Dưa cải củ lên men tự nhiên", CategoryId = 14, Price = 32000, StockQuantity = 60, Unit = "Hũ 450g" },
+                new Product { ProductId = 15, Barcode = "8930000015018", ProductName = "Combo Rau Củ Xanh Dinh Dưỡng Tuần", CategoryId = 15, Price = 250000, StockQuantity = 8, Unit = "Set 5kg" }
             );
 
             // === 15 KHÁCH HÀNG ===
@@ -85,15 +85,15 @@ namespace MiniSupermarket.API.Data
                 new Customer { CustomerId = 4, CustomerName = "Phạm Thị Dung", PhoneNumber = "0935566778", Address = "12 Nguyễn Văn Cừ, Quận Ninh Kiều, Cần Thơ", MembershipRank = "Thân Thiết", RewardPoints = 85 },
                 new Customer { CustomerId = 5, CustomerName = "Hoàng Minh Đức", PhoneNumber = "0977889900", Address = "56 Trần Hưng Đạo, Thành phố Nha Trang, Khánh Hòa", MembershipRank = "Mới", RewardPoints = 20 },
                 new Customer { CustomerId = 6, CustomerName = "Võ Thị Hoa", PhoneNumber = "0901234567", Address = "89 Nguyễn Huệ, Phường Bến Nghé, Quận 1, Hồ Chí Minh", MembershipRank = "Vàng", RewardPoints = 720 },
-    new Customer { CustomerId = 7, CustomerName = "Đặng Văn Hùng", PhoneNumber = "0912345678", Address = "34 Trần Phú, Quận Hải Châu, Đà Nẵng", MembershipRank = "Bạc", RewardPoints = 315 },
-    new Customer { CustomerId = 8, CustomerName = "Bùi Thị Lan", PhoneNumber = "0987654321", Address = "67 Hai Bà Trưng, Quận Hoàn Kiếm, Hà Nội", MembershipRank = "Thân Thiết", RewardPoints = 150 },
-    new Customer { CustomerId = 9, CustomerName = "Đỗ Minh Quân", PhoneNumber = "0931234567", Address = "25 Lê Duẩn, Thành phố Huế, Thừa Thiên Huế", MembershipRank = "Mới", RewardPoints = 45 },
-    new Customer { CustomerId = 10, CustomerName = "Ngô Thị Mai", PhoneNumber = "0971234568", Address = "112 Phan Chu Trinh, Thành phố Hội An, Quảng Nam", MembershipRank = "Bạc", RewardPoints = 280 },
-    new Customer { CustomerId = 11, CustomerName = "Phan Văn Nam", PhoneNumber = "0908765432", Address = "43 Điện Biên Phủ, Quận Thanh Khê, Đà Nẵng", MembershipRank = "Vàng", RewardPoints = 590 },
-    new Customer { CustomerId = 12, CustomerName = "Lý Thị Ngọc", PhoneNumber = "0913456789", Address = "78 Lạc Long Quân, Quận Tây Hồ, Hà Nội", MembershipRank = "Thân Thiết", RewardPoints = 110 },
-    new Customer { CustomerId = 13, CustomerName = "Trương Minh Phúc", PhoneNumber = "0984567890", Address = "156 Võ Văn Tần, Quận 3, Hồ Chí Minh", MembershipRank = "Kim Cương", RewardPoints = 1480 },
-    new Customer { CustomerId = 14, CustomerName = "Mai Thị Thảo", PhoneNumber = "0936789012", Address = "29 Nguyễn Trãi, Quận 5, Hồ Chí Minh", MembershipRank = "Bạc", RewardPoints = 360 },
-    new Customer { CustomerId = 15, CustomerName = "Đinh Văn Tùng", PhoneNumber = "0978901234", Address = "91 Trần Hưng Đạo, Thành phố Vũng Tàu, Bà Rịa - Vũng Tàu", MembershipRank = "Vàng", RewardPoints = 830 }
+                new Customer { CustomerId = 7, CustomerName = "Đặng Văn Hùng", PhoneNumber = "0912345678", Address = "34 Trần Phú, Quận Hải Châu, Đà Nẵng", MembershipRank = "Bạc", RewardPoints = 315 },
+                new Customer { CustomerId = 8, CustomerName = "Bùi Thị Lan", PhoneNumber = "0987654321", Address = "67 Hai Bà Trưng, Quận Hoàn Kiếm, Hà Nội", MembershipRank = "Thân Thiết", RewardPoints = 150 },
+                new Customer { CustomerId = 9, CustomerName = "Đỗ Minh Quân", PhoneNumber = "0931234567", Address = "25 Lê Duẩn, Thành phố Huế, Thừa Thiên Huế", MembershipRank = "Mới", RewardPoints = 45 },
+                new Customer { CustomerId = 10, CustomerName = "Ngô Thị Mai", PhoneNumber = "0971234568", Address = "112 Phan Chu Trinh, Thành phố Hội An, Quảng Nam", MembershipRank = "Bạc", RewardPoints = 280 },
+                new Customer { CustomerId = 11, CustomerName = "Phan Văn Nam", PhoneNumber = "0908765432", Address = "43 Điện Biên Phủ, Quận Thanh Khê, Đà Nẵng", MembershipRank = "Vàng", RewardPoints = 590 },
+                new Customer { CustomerId = 12, CustomerName = "Lý Thị Ngọc", PhoneNumber = "0913456789", Address = "78 Lạc Long Quân, Quận Tây Hồ, Hà Nội", MembershipRank = "Thân Thiết", RewardPoints = 110 },
+                new Customer { CustomerId = 13, CustomerName = "Trương Minh Phúc", PhoneNumber = "0984567890", Address = "156 Võ Văn Tần, Quận 3, Hồ Chí Minh", MembershipRank = "Kim Cương", RewardPoints = 1480 },
+                new Customer { CustomerId = 14, CustomerName = "Mai Thị Thảo", PhoneNumber = "0936789012", Address = "29 Nguyễn Trãi, Quận 5, Hồ Chí Minh", MembershipRank = "Bạc", RewardPoints = 360 },
+                new Customer { CustomerId = 15, CustomerName = "Đinh Văn Tùng", PhoneNumber = "0978901234", Address = "91 Trần Hưng Đạo, Thành phố Vũng Tàu, Bà Rịa - Vũng Tàu", MembershipRank = "Vàng", RewardPoints = 830 }
             );
             // === 3 VAI TRÒ ===
             modelBuilder.Entity<Role>().HasData(
@@ -266,64 +266,64 @@ namespace MiniSupermarket.API.Data
             // === 30 CHI TIẾT ĐƠN HÀNG ===
             modelBuilder.Entity<OrderDetail>().HasData(
                 // Đơn 1: Cải bó xôi (35k x 2) + Cá lăng (195k x 1) = 265k
-                new OrderDetail { OrderDetailId = 1, OrderId = 1, ProductId = 101, Quantity = 2, UnitPrice = 35000, SubTotal = 70000 },
-                new OrderDetail { OrderDetailId = 2, OrderId = 1, ProductId = 601, Quantity = 1, UnitPrice = 195000, SubTotal = 195000 },
+                new OrderDetail { OrderDetailId = 1, OrderId = 1, ProductId = 1, Quantity = 2, UnitPrice = 35000, SubTotal = 70000 },
+                new OrderDetail { OrderDetailId = 2, OrderId = 1, ProductId = 6, Quantity = 1, UnitPrice = 195000, SubTotal = 195000 },
 
                 // Đơn 2: Cà rốt (38k x 2) + Gạo ST25 (125k x 2) = 326k
-                new OrderDetail { OrderDetailId = 3, OrderId = 2, ProductId = 201, Quantity = 2, UnitPrice = 38000, SubTotal = 76000 },
-                new OrderDetail { OrderDetailId = 4, OrderId = 2, ProductId = 901, Quantity = 2, UnitPrice = 125000, SubTotal = 250000 },
+                new OrderDetail { OrderDetailId = 3, OrderId = 2, ProductId = 2, Quantity = 2, UnitPrice = 38000, SubTotal = 76000 },
+                new OrderDetail { OrderDetailId = 4, OrderId = 2, ProductId = 9, Quantity = 2, UnitPrice = 125000, SubTotal = 250000 },
 
                 // Đơn 3: Ổi lê (45k x 2) + Thịt ba chỉ (165k x 2) = 420k
-                new OrderDetail { OrderDetailId = 5, OrderId = 3, ProductId = 301, Quantity = 2, UnitPrice = 45000, SubTotal = 90000 },
-                new OrderDetail { OrderDetailId = 6, OrderId = 3, ProductId = 501, Quantity = 2, UnitPrice = 165000, SubTotal = 330000 },
+                new OrderDetail { OrderDetailId = 5, OrderId = 3, ProductId = 3, Quantity = 2, UnitPrice = 45000, SubTotal = 90000 },
+                new OrderDetail { OrderDetailId = 6, OrderId = 3, ProductId = 5, Quantity = 2, UnitPrice = 165000, SubTotal = 330000 },
 
                 // Đơn 4: Nấm đùi gà (42k x 2) + Trứng gà (48k x 1) = 132k
-                new OrderDetail { OrderDetailId = 7, OrderId = 4, ProductId = 401, Quantity = 2, UnitPrice = 42000, SubTotal = 84000 },
-                new OrderDetail { OrderDetailId = 8, OrderId = 4, ProductId = 701, Quantity = 1, UnitPrice = 48000, SubTotal = 48000 },
+                new OrderDetail { OrderDetailId = 7, OrderId = 4, ProductId = 4, Quantity = 2, UnitPrice = 42000, SubTotal = 84000 },
+                new OrderDetail { OrderDetailId = 8, OrderId = 4, ProductId = 7, Quantity = 1, UnitPrice = 48000, SubTotal = 48000 },
 
                 // Đơn 5: Trứng gà (48k x 2) + Trà hoa cúc (85k x 1) = 181k
-                new OrderDetail { OrderDetailId = 9, OrderId = 5, ProductId = 701, Quantity = 2, UnitPrice = 48000, SubTotal = 96000 },
-                new OrderDetail { OrderDetailId = 10, OrderId = 5, ProductId = 1301, Quantity = 1, UnitPrice = 85000, SubTotal = 85000 },
+                new OrderDetail { OrderDetailId = 9, OrderId = 5, ProductId = 7, Quantity = 2, UnitPrice = 48000, SubTotal = 96000 },
+                new OrderDetail { OrderDetailId = 10, OrderId = 5, ProductId = 13, Quantity = 1, UnitPrice = 85000, SubTotal = 85000 },
 
                 // Đơn 6: Dầu mè (110k x 1) + Dưa cải củ (32k x 1) = 142k
-                new OrderDetail { OrderDetailId = 11, OrderId = 6, ProductId = 1201, Quantity = 1, UnitPrice = 110000, SubTotal = 110000 },
-                new OrderDetail { OrderDetailId = 12, OrderId = 6, ProductId = 1401, Quantity = 1, UnitPrice = 32000, SubTotal = 32000 },
+                new OrderDetail { OrderDetailId = 11, OrderId = 6, ProductId = 12, Quantity = 1, UnitPrice = 110000, SubTotal = 110000 },
+                new OrderDetail { OrderDetailId = 12, OrderId = 6, ProductId = 14, Quantity = 1, UnitPrice = 32000, SubTotal = 32000 },
 
                 // Đơn 7: Mật ong hoa rừng (220k x 2) + Cải bó xôi (35k x 1) = 475k
-                new OrderDetail { OrderDetailId = 13, OrderId = 7, ProductId = 1001, Quantity = 2, UnitPrice = 220000, SubTotal = 440000 },
-                new OrderDetail { OrderDetailId = 14, OrderId = 7, ProductId = 101, Quantity = 1, UnitPrice = 35000, SubTotal = 35000 },
+                new OrderDetail { OrderDetailId = 13, OrderId = 7, ProductId = 10, Quantity = 2, UnitPrice = 220000, SubTotal = 440000 },
+                new OrderDetail { OrderDetailId = 14, OrderId = 7, ProductId = 1, Quantity = 1, UnitPrice = 35000, SubTotal = 35000 },
 
                 // Đơn 8: Sữa tươi (52k x 3) + Nước mắm (95k x 1) = 251k
-                new OrderDetail { OrderDetailId = 15, OrderId = 8, ProductId = 801, Quantity = 3, UnitPrice = 52000, SubTotal = 156000 },
-                new OrderDetail { OrderDetailId = 16, OrderId = 8, ProductId = 1101, Quantity = 1, UnitPrice = 95000, SubTotal = 95000 },
+                new OrderDetail { OrderDetailId = 15, OrderId = 8, ProductId = 8, Quantity = 3, UnitPrice = 52000, SubTotal = 156000 },
+                new OrderDetail { OrderDetailId = 16, OrderId = 8, ProductId = 11, Quantity = 1, UnitPrice = 95000, SubTotal = 95000 },
 
                 // Đơn 9: Nấm đùi gà (42k x 2) + Combo rau củ (250k x 1) = 334k
-                new OrderDetail { OrderDetailId = 17, OrderId = 9, ProductId = 401, Quantity = 2, UnitPrice = 42000, SubTotal = 84000 },
-                new OrderDetail { OrderDetailId = 18, OrderId = 9, ProductId = 1501, Quantity = 1, UnitPrice = 250000, SubTotal = 250000 },
+                new OrderDetail { OrderDetailId = 17, OrderId = 9, ProductId = 4, Quantity = 2, UnitPrice = 42000, SubTotal = 84000 },
+                new OrderDetail { OrderDetailId = 18, OrderId = 9, ProductId = 15, Quantity = 1, UnitPrice = 250000, SubTotal = 250000 },
 
                 // Đơn 10: Trà hoa cúc (85k x 1) + Mật ong hoa rừng (220k x 1) = 305k
-                new OrderDetail { OrderDetailId = 19, OrderId = 10, ProductId = 1301, Quantity = 1, UnitPrice = 85000, SubTotal = 85000 },
-                new OrderDetail { OrderDetailId = 20, OrderId = 10, ProductId = 1001, Quantity = 1, UnitPrice = 220000, SubTotal = 220000 },
+                new OrderDetail { OrderDetailId = 19, OrderId = 10, ProductId = 13, Quantity = 1, UnitPrice = 85000, SubTotal = 85000 },
+                new OrderDetail { OrderDetailId = 20, OrderId = 10, ProductId = 10, Quantity = 1, UnitPrice = 220000, SubTotal = 220000 },
 
                 // Đơn 11: Thịt ba chỉ (165k x 3) + Nước mắm (95k x 2) = 685k
-                new OrderDetail { OrderDetailId = 21, OrderId = 11, ProductId = 501, Quantity = 3, UnitPrice = 165000, SubTotal = 495000 },
-                new OrderDetail { OrderDetailId = 22, OrderId = 11, ProductId = 1101, Quantity = 2, UnitPrice = 95000, SubTotal = 190000 },
+                new OrderDetail { OrderDetailId = 21, OrderId = 11, ProductId = 5, Quantity = 3, UnitPrice = 165000, SubTotal = 495000 },
+                new OrderDetail { OrderDetailId = 22, OrderId = 11, ProductId = 11, Quantity = 2, UnitPrice = 95000, SubTotal = 190000 },
 
                 // Đơn 12: Dưa cải củ (32k x 1) + Combo rau củ (250k x 1) = 282k
-                new OrderDetail { OrderDetailId = 23, OrderId = 12, ProductId = 1401, Quantity = 1, UnitPrice = 32000, SubTotal = 32000 },
-                new OrderDetail { OrderDetailId = 24, OrderId = 12, ProductId = 1501, Quantity = 1, UnitPrice = 250000, SubTotal = 250000 },
+                new OrderDetail { OrderDetailId = 23, OrderId = 12, ProductId = 14, Quantity = 1, UnitPrice = 32000, SubTotal = 32000 },
+                new OrderDetail { OrderDetailId = 24, OrderId = 12, ProductId = 15, Quantity = 1, UnitPrice = 250000, SubTotal = 250000 },
 
                 // Đơn 13: Cà rốt (38k x 2) + Dầu mè (110k x 2) = 296k
-                new OrderDetail { OrderDetailId = 25, OrderId = 13, ProductId = 201, Quantity = 2, UnitPrice = 38000, SubTotal = 76000 },
-                new OrderDetail { OrderDetailId = 26, OrderId = 13, ProductId = 1201, Quantity = 2, UnitPrice = 110000, SubTotal = 220000 },
+                new OrderDetail { OrderDetailId = 25, OrderId = 13, ProductId = 2, Quantity = 2, UnitPrice = 38000, SubTotal = 76000 },
+                new OrderDetail { OrderDetailId = 26, OrderId = 13, ProductId = 12, Quantity = 2, UnitPrice = 110000, SubTotal = 220000 },
 
                 // Đơn 14: Cải bó xôi (35k x 1) + Sữa tươi (52k x 1) = 87k
-                new OrderDetail { OrderDetailId = 27, OrderId = 14, ProductId = 101, Quantity = 1, UnitPrice = 35000, SubTotal = 35000 },
-                new OrderDetail { OrderDetailId = 28, OrderId = 14, ProductId = 801, Quantity = 1, UnitPrice = 52000, SubTotal = 52000 },
+                new OrderDetail { OrderDetailId = 27, OrderId = 14, ProductId = 1, Quantity = 1, UnitPrice = 35000, SubTotal = 35000 },
+                new OrderDetail { OrderDetailId = 28, OrderId = 14, ProductId = 8, Quantity = 1, UnitPrice = 52000, SubTotal = 52000 },
 
                 // Đơn 15 (Đơn hủy): Ổi lê (45k x 2) + Gạo ST25 (125k x 2) = 340k
-                new OrderDetail { OrderDetailId = 29, OrderId = 15, ProductId = 301, Quantity = 2, UnitPrice = 45000, SubTotal = 90000 },
-                new OrderDetail { OrderDetailId = 30, OrderId = 15, ProductId = 901, Quantity = 2, UnitPrice = 125000, SubTotal = 250000 }
+                new OrderDetail { OrderDetailId = 29, OrderId = 15, ProductId = 3, Quantity = 2, UnitPrice = 45000, SubTotal = 90000 },
+                new OrderDetail { OrderDetailId = 30, OrderId = 15, ProductId = 9, Quantity = 2, UnitPrice = 125000, SubTotal = 250000 }
             );
         }
     }

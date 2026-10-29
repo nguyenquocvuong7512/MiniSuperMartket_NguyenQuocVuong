@@ -1,5 +1,3 @@
-using System.Windows.Forms;
-
 namespace MiniSupermarket.WinForms
 {
     partial class FormCustomerManagement
@@ -32,6 +30,10 @@ namespace MiniSupermarket.WinForms
             colAddress = new DataGridViewTextBoxColumn();
             colPoints = new DataGridViewTextBoxColumn();
             colRank = new DataGridViewTextBoxColumn();
+            panelPaging = new Panel();
+            lblPaging = new Label();
+            btnNext = new Button();
+            btnPrev = new Button();
             panelInfo = new Panel();
             lblInfoTitle = new Label();
             cbMembershipRank = new ComboBox();
@@ -54,6 +56,7 @@ namespace MiniSupermarket.WinForms
             panelTop.SuspendLayout();
             panelBody.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvCustomers).BeginInit();
+            panelPaging.SuspendLayout();
             panelInfo.SuspendLayout();
             statusStrip1.SuspendLayout();
             SuspendLayout();
@@ -80,7 +83,7 @@ namespace MiniSupermarket.WinForms
             btnLoad.FlatStyle = FlatStyle.Flat;
             btnLoad.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnLoad.ForeColor = Color.FromArgb(71, 85, 105);
-            btnLoad.Location = new Point(485, 15);
+            btnLoad.Location = new Point(480, 15);
             btnLoad.Name = "btnLoad";
             btnLoad.Size = new Size(90, 30);
             btnLoad.TabIndex = 3;
@@ -96,7 +99,7 @@ namespace MiniSupermarket.WinForms
             btnSearch.FlatStyle = FlatStyle.Flat;
             btnSearch.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnSearch.ForeColor = Color.White;
-            btnSearch.Location = new Point(390, 15);
+            btnSearch.Location = new Point(385, 15);
             btnSearch.Name = "btnSearch";
             btnSearch.Size = new Size(88, 30);
             btnSearch.TabIndex = 2;
@@ -110,8 +113,8 @@ namespace MiniSupermarket.WinForms
             txtKeyword.Font = new Font("Segoe UI", 10F);
             txtKeyword.Location = new Point(95, 17);
             txtKeyword.Name = "txtKeyword";
-            txtKeyword.PlaceholderText = "Nhập tên hoặc số điện thoại khách hàng...";
-            txtKeyword.Size = new Size(280, 25);
+            txtKeyword.PlaceholderText = "Nhập tên hoặc số điện thoại...";
+            txtKeyword.Size = new Size(275, 25);
             txtKeyword.TabIndex = 1;
             // 
             // lblSearch
@@ -128,6 +131,7 @@ namespace MiniSupermarket.WinForms
             // panelBody
             // 
             panelBody.Controls.Add(dgvCustomers);
+            panelBody.Controls.Add(panelPaging);
             panelBody.Controls.Add(panelInfo);
             panelBody.Dock = DockStyle.Fill;
             panelBody.Location = new Point(12, 72);
@@ -152,7 +156,7 @@ namespace MiniSupermarket.WinForms
             dgvCustomers.ReadOnly = true;
             dgvCustomers.RowHeadersVisible = false;
             dgvCustomers.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvCustomers.Size = new Size(806, 572);
+            dgvCustomers.Size = new Size(806, 527);
             dgvCustomers.TabIndex = 0;
             dgvCustomers.CellClick += dgvCustomers_CellClick;
             dgvCustomers.CellContentClick += dgvCustomers_CellContentClick;
@@ -161,39 +165,39 @@ namespace MiniSupermarket.WinForms
             // 
             colId.DataPropertyName = "CustomerId";
             colId.FillWeight = 15F;
-            colId.HeaderText = "Mã ID";
+            colId.HeaderText = "Mã KH";
             colId.Name = "colId";
             colId.ReadOnly = true;
             // 
             // colName
             // 
             colName.DataPropertyName = "CustomerName";
-            colName.FillWeight = 35F;
-            colName.HeaderText = "Tên Khách hàng";
+            colName.FillWeight = 30F;
+            colName.HeaderText = "Họ và Tên";
             colName.Name = "colName";
             colName.ReadOnly = true;
             // 
             // colPhone
             // 
             colPhone.DataPropertyName = "PhoneNumber";
-            colPhone.FillWeight = 25F;
-            colPhone.HeaderText = "Số điện thoại";
+            colPhone.FillWeight = 20F;
+            colPhone.HeaderText = "Số Điện Thoại";
             colPhone.Name = "colPhone";
             colPhone.ReadOnly = true;
             // 
             // colAddress
             // 
             colAddress.DataPropertyName = "Address";
-            colAddress.FillWeight = 40F;
-            colAddress.HeaderText = "Địa chỉ";
+            colAddress.FillWeight = 30F;
+            colAddress.HeaderText = "Địa Chỉ";
             colAddress.Name = "colAddress";
             colAddress.ReadOnly = true;
             // 
             // colPoints
             // 
             colPoints.DataPropertyName = "RewardPoints";
-            colPoints.FillWeight = 20F;
-            colPoints.HeaderText = "Điểm tích lũy";
+            colPoints.FillWeight = 15F;
+            colPoints.HeaderText = "Điểm Tích Lũy";
             colPoints.Name = "colPoints";
             colPoints.ReadOnly = true;
             // 
@@ -201,9 +205,65 @@ namespace MiniSupermarket.WinForms
             // 
             colRank.DataPropertyName = "MembershipRank";
             colRank.FillWeight = 20F;
-            colRank.HeaderText = "Hạng thẻ";
+            colRank.HeaderText = "Hạng Thẻ";
             colRank.Name = "colRank";
             colRank.ReadOnly = true;
+            // 
+            // panelPaging
+            // 
+            panelPaging.BackColor = Color.White;
+            panelPaging.Controls.Add(lblPaging);
+            panelPaging.Controls.Add(btnNext);
+            panelPaging.Controls.Add(btnPrev);
+            panelPaging.Dock = DockStyle.Bottom;
+            panelPaging.Location = new Point(0, 537);
+            panelPaging.Name = "panelPaging";
+            panelPaging.Padding = new Padding(12, 8, 12, 8);
+            panelPaging.Size = new Size(806, 45);
+            panelPaging.TabIndex = 2;
+            // 
+            // lblPaging
+            // 
+            lblPaging.Anchor = AnchorStyles.Top;
+            lblPaging.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            lblPaging.ForeColor = Color.FromArgb(71, 85, 105);
+            lblPaging.Location = new Point(233, 12);
+            lblPaging.Name = "lblPaging";
+            lblPaging.Size = new Size(340, 23);
+            lblPaging.TabIndex = 1;
+            lblPaging.Text = "Trang 1 / 1 (Tổng số: 0 khách hàng)";
+            lblPaging.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // btnNext
+            // 
+            btnNext.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnNext.BackColor = Color.FromArgb(241, 245, 249);
+            btnNext.Cursor = Cursors.Hand;
+            btnNext.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
+            btnNext.FlatStyle = FlatStyle.Flat;
+            btnNext.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnNext.ForeColor = Color.FromArgb(71, 85, 105);
+            btnNext.Location = new Point(666, 8);
+            btnNext.Name = "btnNext";
+            btnNext.Size = new Size(125, 29);
+            btnNext.TabIndex = 2;
+            btnNext.Text = "Trang sau >>";
+            btnNext.UseVisualStyleBackColor = false;
+            // 
+            // btnPrev
+            // 
+            btnPrev.BackColor = Color.FromArgb(241, 245, 249);
+            btnPrev.Cursor = Cursors.Hand;
+            btnPrev.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
+            btnPrev.FlatStyle = FlatStyle.Flat;
+            btnPrev.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnPrev.ForeColor = Color.FromArgb(71, 85, 105);
+            btnPrev.Location = new Point(12, 8);
+            btnPrev.Name = "btnPrev";
+            btnPrev.Size = new Size(125, 29);
+            btnPrev.TabIndex = 0;
+            btnPrev.Text = "<< Trang trước";
+            btnPrev.UseVisualStyleBackColor = false;
             // 
             // panelInfo
             // 
@@ -238,41 +298,40 @@ namespace MiniSupermarket.WinForms
             lblInfoTitle.ForeColor = Color.FromArgb(15, 23, 42);
             lblInfoTitle.Location = new Point(18, 16);
             lblInfoTitle.Name = "lblInfoTitle";
-            lblInfoTitle.Size = new Size(204, 21);
-            lblInfoTitle.TabIndex = 15;
-            lblInfoTitle.Text = "💎 THÔNG TIN HỘI VIÊN";
+            lblInfoTitle.Size = new Size(236, 21);
+            lblInfoTitle.TabIndex = 0;
+            lblInfoTitle.Text = "👤 THÔNG TIN KHÁCH HÀNG";
             // 
             // cbMembershipRank
             // 
             cbMembershipRank.DropDownStyle = ComboBoxStyle.DropDownList;
             cbMembershipRank.Font = new Font("Segoe UI", 10F);
             cbMembershipRank.FormattingEnabled = true;
-            cbMembershipRank.Items.AddRange(new object[] { "Chuẩn", "Bạc", "Vàng", "Kim cương" });
-            cbMembershipRank.Location = new Point(20, 360);
+            cbMembershipRank.Items.AddRange(new object[] { "Chuẩn", "Bạc", "Vàng", "Bạch Kim" });
+            cbMembershipRank.Location = new Point(25, 340);
             cbMembershipRank.Name = "cbMembershipRank";
-            cbMembershipRank.Size = new Size(318, 25);
-            cbMembershipRank.TabIndex = 11;
+            cbMembershipRank.Size = new Size(320, 25);
+            cbMembershipRank.TabIndex = 12;
             // 
             // lblMembershipRank
             // 
             lblMembershipRank.AutoSize = true;
             lblMembershipRank.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblMembershipRank.ForeColor = Color.FromArgb(71, 85, 105);
-            lblMembershipRank.Location = new Point(18, 338);
+            lblMembershipRank.Location = new Point(25, 320);
             lblMembershipRank.Name = "lblMembershipRank";
-            lblMembershipRank.Size = new Size(60, 15);
-            lblMembershipRank.TabIndex = 10;
+            lblMembershipRank.Size = new Size(62, 15);
+            lblMembershipRank.TabIndex = 11;
             lblMembershipRank.Text = "Hạng thẻ:";
             // 
             // txtRewardPoints
             // 
             txtRewardPoints.BorderStyle = BorderStyle.FixedSingle;
-            txtRewardPoints.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            txtRewardPoints.Location = new Point(20, 298);
+            txtRewardPoints.Font = new Font("Segoe UI", 10F);
+            txtRewardPoints.Location = new Point(25, 280);
             txtRewardPoints.Name = "txtRewardPoints";
-            txtRewardPoints.PlaceholderText = "0";
-            txtRewardPoints.Size = new Size(318, 25);
-            txtRewardPoints.TabIndex = 9;
+            txtRewardPoints.Size = new Size(320, 25);
+            txtRewardPoints.TabIndex = 10;
             txtRewardPoints.Text = "0";
             // 
             // lblRewardPoints
@@ -280,112 +339,107 @@ namespace MiniSupermarket.WinForms
             lblRewardPoints.AutoSize = true;
             lblRewardPoints.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblRewardPoints.ForeColor = Color.FromArgb(71, 85, 105);
-            lblRewardPoints.Location = new Point(18, 276);
+            lblRewardPoints.Location = new Point(25, 260);
             lblRewardPoints.Name = "lblRewardPoints";
-            lblRewardPoints.Size = new Size(82, 15);
-            lblRewardPoints.TabIndex = 8;
+            lblRewardPoints.Size = new Size(84, 15);
+            lblRewardPoints.TabIndex = 9;
             lblRewardPoints.Text = "Điểm tích lũy:";
             // 
             // txtAddress
             // 
             txtAddress.BorderStyle = BorderStyle.FixedSingle;
             txtAddress.Font = new Font("Segoe UI", 10F);
-            txtAddress.Location = new Point(20, 218);
-            txtAddress.Multiline = true;
+            txtAddress.Location = new Point(25, 220);
             txtAddress.Name = "txtAddress";
-            txtAddress.PlaceholderText = "Địa chỉ cư trú...";
-            txtAddress.ScrollBars = ScrollBars.Vertical;
-            txtAddress.Size = new Size(318, 48);
-            txtAddress.TabIndex = 7;
+            txtAddress.Size = new Size(320, 25);
+            txtAddress.TabIndex = 8;
             // 
             // lblAddress
             // 
             lblAddress.AutoSize = true;
             lblAddress.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblAddress.ForeColor = Color.FromArgb(71, 85, 105);
-            lblAddress.Location = new Point(18, 196);
+            lblAddress.Location = new Point(25, 200);
             lblAddress.Name = "lblAddress";
             lblAddress.Size = new Size(47, 15);
-            lblAddress.TabIndex = 6;
+            lblAddress.TabIndex = 7;
             lblAddress.Text = "Địa chỉ:";
             // 
             // txtPhoneNumber
             // 
             txtPhoneNumber.BorderStyle = BorderStyle.FixedSingle;
             txtPhoneNumber.Font = new Font("Segoe UI", 10F);
-            txtPhoneNumber.Location = new Point(20, 158);
+            txtPhoneNumber.Location = new Point(25, 160);
             txtPhoneNumber.Name = "txtPhoneNumber";
-            txtPhoneNumber.PlaceholderText = "Ví dụ: 0901234567";
-            txtPhoneNumber.Size = new Size(318, 25);
-            txtPhoneNumber.TabIndex = 5;
+            txtPhoneNumber.Size = new Size(320, 25);
+            txtPhoneNumber.TabIndex = 6;
             // 
             // lblPhoneNumber
             // 
             lblPhoneNumber.AutoSize = true;
             lblPhoneNumber.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblPhoneNumber.ForeColor = Color.FromArgb(71, 85, 105);
-            lblPhoneNumber.Location = new Point(18, 136);
+            lblPhoneNumber.Location = new Point(25, 140);
             lblPhoneNumber.Name = "lblPhoneNumber";
             lblPhoneNumber.Size = new Size(83, 15);
-            lblPhoneNumber.TabIndex = 4;
+            lblPhoneNumber.TabIndex = 5;
             lblPhoneNumber.Text = "Số điện thoại:";
             // 
             // txtCustomerName
             // 
             txtCustomerName.BorderStyle = BorderStyle.FixedSingle;
             txtCustomerName.Font = new Font("Segoe UI", 10F);
-            txtCustomerName.Location = new Point(20, 98);
+            txtCustomerName.Location = new Point(25, 105);
             txtCustomerName.Name = "txtCustomerName";
-            txtCustomerName.PlaceholderText = "Họ và tên khách hàng...";
-            txtCustomerName.Size = new Size(318, 25);
-            txtCustomerName.TabIndex = 3;
+            txtCustomerName.Size = new Size(320, 25);
+            txtCustomerName.TabIndex = 4;
             // 
             // lblCustomerName
             // 
             lblCustomerName.AutoSize = true;
             lblCustomerName.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblCustomerName.ForeColor = Color.FromArgb(71, 85, 105);
-            lblCustomerName.Location = new Point(18, 76);
+            lblCustomerName.Location = new Point(25, 85);
             lblCustomerName.Name = "lblCustomerName";
-            lblCustomerName.Size = new Size(97, 15);
-            lblCustomerName.TabIndex = 2;
-            lblCustomerName.Text = "Tên Khách hàng:";
+            lblCustomerName.Size = new Size(64, 15);
+            lblCustomerName.TabIndex = 3;
+            lblCustomerName.Text = "Họ và tên:";
             // 
             // txtCustomerId
             // 
-            txtCustomerId.BackColor = Color.FromArgb(241, 245, 249);
+            txtCustomerId.BackColor = Color.FromArgb(248, 250, 252);
             txtCustomerId.BorderStyle = BorderStyle.FixedSingle;
             txtCustomerId.Font = new Font("Segoe UI", 10F);
-            txtCustomerId.Location = new Point(20, 44);
+            txtCustomerId.Location = new Point(25, 55);
             txtCustomerId.Name = "txtCustomerId";
             txtCustomerId.ReadOnly = true;
-            txtCustomerId.Size = new Size(318, 25);
-            txtCustomerId.TabIndex = 1;
+            txtCustomerId.Size = new Size(320, 25);
+            txtCustomerId.TabIndex = 2;
             // 
             // lblCustomerId
             // 
             lblCustomerId.AutoSize = true;
             lblCustomerId.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblCustomerId.ForeColor = Color.FromArgb(71, 85, 105);
-            lblCustomerId.Location = new Point(18, 24);
+            lblCustomerId.Location = new Point(25, 35);
             lblCustomerId.Name = "lblCustomerId";
-            lblCustomerId.Size = new Size(46, 15);
-            lblCustomerId.TabIndex = 0;
-            lblCustomerId.Text = "Mã ID:";
+            lblCustomerId.Size = new Size(49, 15);
+            lblCustomerId.TabIndex = 1;
+            lblCustomerId.Text = "Mã KH:";
             // 
             // btnDelete
             // 
-            btnDelete.BackColor = Color.FromArgb(220, 38, 38);
+            btnDelete.BackColor = Color.FromArgb(239, 68, 68);
             btnDelete.Cursor = Cursors.Hand;
             btnDelete.FlatAppearance.BorderSize = 0;
             btnDelete.FlatStyle = FlatStyle.Flat;
-            btnDelete.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnDelete.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnDelete.ForeColor = Color.White;
-            btnDelete.Location = new Point(235, 415);
+            btnDelete.Location = new Point(250, 390);
             btnDelete.Name = "btnDelete";
-            btnDelete.Size = new Size(103, 40);
-            btnDelete.TabIndex = 14;
-            btnDelete.Text = "🗑 Xóa";
+            btnDelete.Size = new Size(95, 34);
+            btnDelete.TabIndex = 15;
+            btnDelete.Text = "🗑️ Xóa";
             btnDelete.UseVisualStyleBackColor = false;
             btnDelete.Click += btnDelete_Click;
             // 
@@ -395,13 +449,13 @@ namespace MiniSupermarket.WinForms
             btnUpdate.Cursor = Cursors.Hand;
             btnUpdate.FlatAppearance.BorderSize = 0;
             btnUpdate.FlatStyle = FlatStyle.Flat;
-            btnUpdate.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnUpdate.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnUpdate.ForeColor = Color.White;
-            btnUpdate.Location = new Point(127, 415);
+            btnUpdate.Location = new Point(138, 390);
             btnUpdate.Name = "btnUpdate";
-            btnUpdate.Size = new Size(102, 40);
-            btnUpdate.TabIndex = 13;
-            btnUpdate.Text = "✏️ Sửa";
+            btnUpdate.Size = new Size(100, 34);
+            btnUpdate.TabIndex = 14;
+            btnUpdate.Text = "✏️ Cập nhật";
             btnUpdate.UseVisualStyleBackColor = false;
             btnUpdate.Click += btnUpdate_Click;
             // 
@@ -411,22 +465,24 @@ namespace MiniSupermarket.WinForms
             btnAdd.Cursor = Cursors.Hand;
             btnAdd.FlatAppearance.BorderSize = 0;
             btnAdd.FlatStyle = FlatStyle.Flat;
-            btnAdd.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnAdd.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnAdd.ForeColor = Color.White;
-            btnAdd.Location = new Point(20, 415);
+            btnAdd.Location = new Point(25, 390);
             btnAdd.Name = "btnAdd";
-            btnAdd.Size = new Size(101, 40);
-            btnAdd.TabIndex = 12;
-            btnAdd.Text = "➕ Thêm";
+            btnAdd.Size = new Size(100, 34);
+            btnAdd.TabIndex = 13;
+            btnAdd.Text = "➕ Thêm mới";
             btnAdd.UseVisualStyleBackColor = false;
             btnAdd.Click += btnAdd_Click;
             // 
             // statusStrip1
             // 
-            statusStrip1.BackColor = Color.FromArgb(241, 245, 249);
+            statusStrip1.BackColor = Color.White;
+            statusStrip1.Font = new Font("Segoe UI", 9F);
             statusStrip1.Items.AddRange(new ToolStripItem[] { lblReady });
             statusStrip1.Location = new Point(12, 654);
             statusStrip1.Name = "statusStrip1";
+            statusStrip1.RenderMode = ToolStripRenderMode.ManagerRenderMode;
             statusStrip1.Size = new Size(1176, 22);
             statusStrip1.TabIndex = 2;
             statusStrip1.Text = "statusStrip1";
@@ -458,6 +514,7 @@ namespace MiniSupermarket.WinForms
             panelTop.PerformLayout();
             panelBody.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dgvCustomers).EndInit();
+            panelPaging.ResumeLayout(false);
             panelInfo.ResumeLayout(false);
             panelInfo.PerformLayout();
             statusStrip1.ResumeLayout(false);
@@ -481,6 +538,10 @@ namespace MiniSupermarket.WinForms
         private DataGridViewTextBoxColumn colAddress;
         private DataGridViewTextBoxColumn colPoints;
         private DataGridViewTextBoxColumn colRank;
+        private Panel panelPaging;
+        private Button btnPrev;
+        private Label lblPaging;
+        private Button btnNext;
         private Panel panelInfo;
         private Label lblInfoTitle;
         private Label lblCustomerId;

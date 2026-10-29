@@ -22,18 +22,20 @@ namespace MiniSupermarket.WinForms
             InitializeComponent();
             Theme.UITheme.ApplyModernDataGridView(dgvOrders);
             Theme.UITheme.StyleButton(btnRunReport, Theme.UITheme.ButtonVariant.Primary);
+            Theme.UITheme.StyleButton(btnAllOrders, Theme.UITheme.ButtonVariant.Secondary);
             Theme.UITheme.StyleButton(btnCancelOrder, Theme.UITheme.ButtonVariant.Danger);
             Theme.UITheme.StyleButton(btnViewOrderDetail, Theme.UITheme.ButtonVariant.Secondary);
             Theme.UITheme.StyleButton(btnRefresh, Theme.UITheme.ButtonVariant.Neutral);
             Theme.UITheme.StyleButton(btnExportReport, Theme.UITheme.ButtonVariant.Success);
 
-            // Khởi tạo khoảng thời gian mặc định: 7 ngày gần nhất
-            dtpReportDate.Value = DateTime.Today.AddDays(-6);
+            // Khởi tạo khoảng thời gian mặc định: Từ đầu tháng hiện tại đến hôm nay
+            dtpReportDate.Value = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
             dtpToDate.Value = DateTime.Today;
 
             SetupGridColumns();
 
             btnRunReport.Click += async (s, e) => await LoadReportDataAsync();
+            btnAllOrders.Click += async (s, e) => await LoadReportDataAsync(loadAllTime: true);
             btnRefresh.Click += async (s, e) => await LoadReportDataAsync();
             btnCancelOrder.Click += async (s, e) => await OpenCancelOrderDialogAsync();
             btnViewOrderDetail.Click += (s, e) => ShowSelectedOrderDetail();
@@ -41,7 +43,42 @@ namespace MiniSupermarket.WinForms
             dgvOrders.CellDoubleClick += (s, e) => ShowSelectedOrderDetail();
             dgvOrders.RowPrePaint += DgvOrders_RowPrePaint;
 
+            // Xử lý sự kiện click trên biểu đồ doanh thu và chuyển tab
+            chartRevenue.MouseClick += ChartRevenue_MouseClick;
+            tabReports.SelectedIndexChanged += async (s, e) =>
+            {
+                if (tabReports.SelectedTab == tabChart)
+                {
+                    await LoadDailyRevenueChartAsync();
+                }
+            };
+
             this.Load += async (s, e) => await LoadReportDataAsync();
+        }
+
+        private void ChartRevenue_MouseClick(object? sender, MouseEventArgs e)
+        {
+            try
+            {
+                var hit = chartRevenue.HitTest(e.X, e.Y);
+                if (hit != null && hit.ChartElementType == ChartElementType.DataPoint && hit.PointIndex >= 0)
+                {
+                    if (chartRevenue.Series.IndexOf("DoanhThu") >= 0 &&
+                        hit.PointIndex < chartRevenue.Series["DoanhThu"].Points.Count)
+                    {
+                        var dp = chartRevenue.Series["DoanhThu"].Points[hit.PointIndex];
+                        string detailText = !string.IsNullOrEmpty(dp.ToolTip)
+                            ? dp.ToolTip
+                            : $"Ngày: {dp.AxisLabel} - Doanh thu: {dp.YValues[0]:N0} đ";
+
+                        MessageBox.Show(detailText, "Chi tiết doanh thu", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Chart Click error: " + ex.Message);
+            }
         }
 
         private void DgvOrders_RowPrePaint(object? sender, DataGridViewRowPrePaintEventArgs e)
@@ -193,7 +230,7 @@ namespace MiniSupermarket.WinForms
         // =========================================================
         // TẢI DỮ LIỆU BÁO CÁO & DASHBOARD
         // =========================================================
-        private async Task LoadReportDataAsync()
+        private async Task LoadReportDataAsync(bool loadAllTime = false)
         {
             if (SessionManager.CurrentRole.Trim().ToUpper() != "ADMIN")
             {
@@ -209,18 +246,25 @@ namespace MiniSupermarket.WinForms
             try
             {
                 btnRunReport.Enabled = false;
+                btnAllOrders.Enabled = false;
                 btnRunReport.Text = "Đang tải...";
 
-                // 1. Tiêu chí 44: Thẻ tổng kết Dashboard (Dashboard KPI Summary Cards)
-                await LoadDashboardSummaryAsync();
+                if (loadAllTime)
+                {
+                    dtpReportDate.Value = new DateTime(2020, 1, 1);
+                    dtpToDate.Value = DateTime.Today;
+                }
+
+                DateTime fromDate = dtpReportDate.Value.Date;
+                DateTime toDate = dtpToDate.Value.Date.AddDays(1).AddTicks(-1);
+
+                // 1. Tiêu chí 44: Thẻ tổng kết Dashboard
+                await LoadDashboardSummaryAsync(fromDate, toDate);
 
                 // 2. Tiêu chí 45: Biểu đồ cột Doanh thu theo thời gian (Column Chart - Group By Ngày)
                 await LoadDailyRevenueChartAsync();
 
                 // 3. Tải danh sách đơn hàng chi tiết theo khoảng ngày chọn
-                DateTime fromDate = dtpReportDate.Value.Date;
-                DateTime toDate = dtpToDate.Value.Date.AddDays(1).AddTicks(-1);
-
                 var response = await ApiClientService.Client.GetAsync("orders");
                 if (response.IsSuccessStatusCode)
                 {
@@ -255,6 +299,39 @@ namespace MiniSupermarket.WinForms
                         }).ToList();
 
                         dgvOrders.DataSource = displayList;
+
+                        // Đồng bộ thẻ số lượng và doanh thu đúng khớp 100% với danh sách đang hiển thị
+                        decimal periodRevenue = filtered
+                            .Where(o => string.Equals(o.Status, "Completed", StringComparison.OrdinalIgnoreCase))
+                            .Sum(o => o.TotalAmount);
+                        int completedOrders = filtered
+                            .Count(o => string.Equals(o.Status, "Completed", StringComparison.OrdinalIgnoreCase));
+                        int cancelledOrders = filtered
+                            .Count(o => string.Equals(o.Status, "Cancelled", StringComparison.OrdinalIgnoreCase));
+
+                        bool isAllTime = (allOrders.Count == filtered.Count);
+                        bool isOnlyToday = (!isAllTime && dtpReportDate.Value.Date == DateTime.Today && dtpToDate.Value.Date == DateTime.Today);
+
+                        if (isOnlyToday)
+                        {
+                            lblRevenueTitle.Text = "DOANH THU HÔM NAY";
+                            lblOrdersTitle.Text = "HÓA ĐƠN HÔM NAY";
+                        }
+                        else if (isAllTime)
+                        {
+                            lblRevenueTitle.Text = "TỔNG DOANH THU TOÀN BỘ";
+                            lblOrdersTitle.Text = "TỔNG SỐ HÓA ĐƠN";
+                        }
+                        else
+                        {
+                            lblRevenueTitle.Text = $"DOANH THU ({dtpReportDate.Value:dd/MM} - {dtpToDate.Value:dd/MM})";
+                            lblOrdersTitle.Text = $"HÓA ĐƠN ({dtpReportDate.Value:dd/MM} - {dtpToDate.Value:dd/MM})";
+                        }
+
+                        lblTotalRevenue.Text = $"{periodRevenue:N0} đ";
+                        lblTotalOrders.Text = $"{filtered.Count:N0} đơn";
+
+                        tabOrders.Text = $"📋 Danh Sách Đơn Hàng ({filtered.Count} đơn)";
                     }
                 }
             }
@@ -270,6 +347,7 @@ namespace MiniSupermarket.WinForms
             finally
             {
                 btnRunReport.Enabled = true;
+                btnAllOrders.Enabled = true;
                 btnRunReport.Text = "📊 Xem Báo Cáo";
             }
         }
@@ -277,11 +355,17 @@ namespace MiniSupermarket.WinForms
         // =========================================================
         // TIÊU CHÍ 44: TẢI 4 THẺ TỔNG KẾT DASHBOARD (SUMMARY CARDS)
         // =========================================================
-        private async Task LoadDashboardSummaryAsync()
+        private async Task LoadDashboardSummaryAsync(DateTime? fromDate = null, DateTime? toDate = null)
         {
             try
             {
-                var response = await ApiClientService.Client.GetAsync("reports/dashboard-summary");
+                string url = "reports/dashboard-summary";
+                if (fromDate.HasValue && toDate.HasValue)
+                {
+                    url += $"?fromDate={fromDate.Value:yyyy-MM-dd}&toDate={toDate.Value:yyyy-MM-dd}";
+                }
+
+                var response = await ApiClientService.Client.GetAsync(url);
                 if (response.IsSuccessStatusCode)
                 {
                     var jsonStr = await response.Content.ReadAsStringAsync();
@@ -289,8 +373,6 @@ namespace MiniSupermarket.WinForms
 
                     if (doc.RootElement.TryGetProperty("data", out var dataElem))
                     {
-                        decimal todayRevenue = dataElem.TryGetProperty("todayRevenue", out var pRev) ? pRev.GetDecimal() : 0;
-                        int totalOrders = dataElem.TryGetProperty("totalOrders", out var pOrd) ? pOrd.GetInt32() : 0;
                         int totalCustomers = dataElem.TryGetProperty("totalCustomers", out var pCust) ? pCust.GetInt32() : 0;
                         int lowStockCount = 0;
                         if (dataElem.TryGetProperty("lowStockProductsCount", out var pStockCount))
@@ -298,8 +380,6 @@ namespace MiniSupermarket.WinForms
                         else if (dataElem.TryGetProperty("lowStockCount", out var pStockAlt))
                             lowStockCount = pStockAlt.GetInt32();
 
-                        lblTotalRevenue.Text = $"{todayRevenue:N0} đ";
-                        lblTotalOrders.Text = $"{totalOrders:N0} đơn";
                         lblTotalCustomers.Text = $"{totalCustomers:N0} khách";
                         lblLowStock.Text = $"{lowStockCount:N0} sp yếu";
                     }
@@ -332,23 +412,52 @@ namespace MiniSupermarket.WinForms
 
                 if (doc.RootElement.TryGetProperty("data", out var dataElem))
                 {
-                    chartRevenue.Series["DoanhThu"].Points.Clear();
-
-                    foreach (var item in dataElem.EnumerateArray())
+                    if (chartRevenue.Series.IndexOf("DoanhThu") >= 0)
                     {
-                        DateTime date = item.GetProperty("date").GetDateTime();
-                        decimal revenue = item.GetProperty("totalRevenue").GetDecimal();
-                        int orderCount = item.GetProperty("orderCount").GetInt32();
+                        chartRevenue.Series["DoanhThu"].Points.Clear();
 
-                        string label = date.ToString("dd/MM");
-                        int pointIndex = chartRevenue.Series["DoanhThu"].Points.AddXY(label, (double)revenue);
-                        chartRevenue.Series["DoanhThu"].Points[pointIndex].ToolTip = $"{date:dd/MM/yyyy}: {revenue:N0} đ ({orderCount} đơn)";
+                        foreach (var item in dataElem.EnumerateArray())
+                        {
+                            DateTime date = DateTime.MinValue;
+                            if (item.TryGetProperty("date", out var dProp))
+                            {
+                                if (dProp.ValueKind == JsonValueKind.String)
+                                {
+                                    DateTime.TryParse(dProp.GetString(), out date);
+                                }
+                                else
+                                {
+                                    try { date = dProp.GetDateTime(); } catch { }
+                                }
+                            }
+
+                            decimal revenue = 0;
+                            if (item.TryGetProperty("revenue", out var rProp))
+                            {
+                                revenue = rProp.GetDecimal();
+                            }
+                            else if (item.TryGetProperty("totalRevenue", out var trProp))
+                            {
+                                revenue = trProp.GetDecimal();
+                            }
+
+                            int orderCount = 0;
+                            if (item.TryGetProperty("orderCount", out var ocProp))
+                            {
+                                orderCount = ocProp.GetInt32();
+                            }
+
+                            string label = date != DateTime.MinValue ? date.ToString("dd/MM") : "N/A";
+                            int pointIndex = chartRevenue.Series["DoanhThu"].Points.AddXY(label, (double)revenue);
+                            string dateFormatted = date != DateTime.MinValue ? date.ToString("dd/MM/yyyy") : label;
+                            chartRevenue.Series["DoanhThu"].Points[pointIndex].ToolTip = $"{dateFormatted}: {revenue:N0} đ ({orderCount} đơn)";
+                        }
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // Bỏ qua lỗi chart nếu chưa có dữ liệu
+                System.Diagnostics.Debug.WriteLine("Lỗi chart: " + ex.Message);
             }
         }
 

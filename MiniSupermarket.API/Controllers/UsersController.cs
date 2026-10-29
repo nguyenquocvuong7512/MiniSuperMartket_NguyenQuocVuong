@@ -18,6 +18,58 @@ namespace MiniSupermarket.API.Controllers
             _context = context;
         }
 
+        // GET: /api/users/paged?keyword=...&pageNumber=1&pageSize=5
+        [HttpGet("paged")]
+        public async Task<IActionResult> GetPagedUsers(
+            [FromQuery] string? keyword,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 5)
+        {
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1 || pageSize > 50) pageSize = 5;
+
+            var query = _context.Users
+                .Include(u => u.Role)
+                .AsNoTracking()
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                string kw = keyword.Trim().ToLower();
+                query = query.Where(u => u.Username.ToLower().Contains(kw) ||
+                                        (u.FullName != null && u.FullName.ToLower().Contains(kw)) ||
+                                        (u.Role != null && u.Role.RoleName.ToLower().Contains(kw)));
+            }
+
+            int totalItems = await query.CountAsync();
+            int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            var items = await query
+                .OrderBy(u => u.Id)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(u => new UserDto
+                {
+                    Id = u.Id,
+                    Username = u.Username,
+                    FullName = u.FullName,
+                    Role = u.Role != null ? u.Role.RoleName : "Cashier",
+                    IsActive = true
+                })
+                .ToListAsync();
+
+            var response = new PagedResult<UserDto>
+            {
+                CurrentPage = pageNumber,
+                PageSize = pageSize,
+                TotalItems = totalItems,
+                TotalPages = totalPages == 0 ? 1 : totalPages,
+                Items = items
+            };
+
+            return Ok(response);
+        }
+
         // GET: /api/users
         [HttpGet]
         public async Task<IActionResult> GetAll()
