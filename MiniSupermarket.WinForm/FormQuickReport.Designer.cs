@@ -61,6 +61,11 @@ namespace MiniSupermarket.WinForms
             dgvOrders = new DataGridView();
             tabChart = new TabPage();
             chartRevenue = new Chart();
+            tabTopSelling = new TabPage();
+            panelTopSellingHeader = new Panel();
+            lblTopSellingTitle = new Label();
+            lblTopSellingSub = new Label();
+            dgvTopSelling = new DataGridView();
 
             panelGridActions = new Panel();
             btnExportReport = new Button();
@@ -81,6 +86,9 @@ namespace MiniSupermarket.WinForms
             ((System.ComponentModel.ISupportInitialize)dgvOrders).BeginInit();
             tabChart.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)chartRevenue).BeginInit();
+            tabTopSelling.SuspendLayout();
+            panelTopSellingHeader.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvTopSelling).BeginInit();
             panelGridActions.SuspendLayout();
             SuspendLayout();
 
@@ -533,6 +541,7 @@ namespace MiniSupermarket.WinForms
             // 
             tabReports.Controls.Add(tabOrders);
             tabReports.Controls.Add(tabChart);
+            tabReports.Controls.Add(tabTopSelling);
             tabReports.Dock = DockStyle.Fill;
             tabReports.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             tabReports.Location = new Point(18, 54);
@@ -623,6 +632,75 @@ namespace MiniSupermarket.WinForms
             chartRevenue.TabIndex = 0;
 
             // 
+            // tabTopSelling (TIÊU CHÍ 46: THỐNG KÊ TOP 5 SẢN PHẨM BÁN CHẠY NHẤT - LINQ)
+            // 
+            tabTopSelling.Controls.Add(dgvTopSelling);
+            tabTopSelling.Controls.Add(panelTopSellingHeader);
+            tabTopSelling.Location = new Point(4, 30);
+            tabTopSelling.Name = "tabTopSelling";
+            tabTopSelling.Padding = new Padding(8);
+            tabTopSelling.Size = new Size(1212, 351);
+            tabTopSelling.TabIndex = 2;
+            tabTopSelling.Text = "🏆 Top 5 Bán Chạy (Tiêu chí 46)";
+            tabTopSelling.UseVisualStyleBackColor = true;
+
+            // 
+            // panelTopSellingHeader
+            // 
+            panelTopSellingHeader.BackColor = Color.FromArgb(248, 250, 252);
+            panelTopSellingHeader.Controls.Add(lblTopSellingSub);
+            panelTopSellingHeader.Controls.Add(lblTopSellingTitle);
+            panelTopSellingHeader.Dock = DockStyle.Top;
+            panelTopSellingHeader.Location = new Point(8, 8);
+            panelTopSellingHeader.Name = "panelTopSellingHeader";
+            panelTopSellingHeader.Size = new Size(1196, 54);
+            panelTopSellingHeader.TabIndex = 0;
+
+            // 
+            // lblTopSellingTitle
+            // 
+            lblTopSellingTitle.AutoSize = true;
+            lblTopSellingTitle.Font = new Font("Segoe UI", 11.5F, FontStyle.Bold);
+            lblTopSellingTitle.ForeColor = Color.FromArgb(15, 23, 42);
+            lblTopSellingTitle.Location = new Point(10, 6);
+            lblTopSellingTitle.Name = "lblTopSellingTitle";
+            lblTopSellingTitle.Size = new Size(420, 21);
+            lblTopSellingTitle.TabIndex = 0;
+            lblTopSellingTitle.Text = "🏆 TOP 5 MẶT HÀNG TIÊU THỤ NHANH NHẤT (BEST-SELLERS)";
+
+            // 
+            // lblTopSellingSub
+            // 
+            lblTopSellingSub.AutoSize = true;
+            lblTopSellingSub.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
+            lblTopSellingSub.ForeColor = Color.FromArgb(5, 150, 105);
+            lblTopSellingSub.Location = new Point(12, 30);
+            lblTopSellingSub.Name = "lblTopSellingSub";
+            lblTopSellingSub.Size = new Size(620, 15);
+            lblTopSellingSub.TabIndex = 1;
+            
+
+            // 
+            // dgvTopSelling
+            // 
+            dgvTopSelling.AllowUserToAddRows = false;
+            dgvTopSelling.AllowUserToDeleteRows = false;
+            dgvTopSelling.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvTopSelling.BackgroundColor = Color.White;
+            dgvTopSelling.BorderStyle = BorderStyle.None;
+            dgvTopSelling.ColumnHeadersHeight = 38;
+            dgvTopSelling.Dock = DockStyle.Fill;
+            dgvTopSelling.Location = new Point(8, 62);
+            dgvTopSelling.MultiSelect = false;
+            dgvTopSelling.Name = "dgvTopSelling";
+            dgvTopSelling.ReadOnly = true;
+            dgvTopSelling.RowHeadersVisible = false;
+            dgvTopSelling.RowTemplate.Height = 36;
+            dgvTopSelling.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvTopSelling.Size = new Size(1196, 281);
+            dgvTopSelling.TabIndex = 1;
+
+            // 
             // FormQuickReport
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
@@ -656,6 +734,10 @@ namespace MiniSupermarket.WinForms
             ((System.ComponentModel.ISupportInitialize)dgvOrders).EndInit();
             tabChart.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)chartRevenue).EndInit();
+            tabTopSelling.ResumeLayout(false);
+            panelTopSellingHeader.ResumeLayout(false);
+            panelTopSellingHeader.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvTopSelling).EndInit();
             ResumeLayout(false);
         }
 
@@ -704,5 +786,10 @@ namespace MiniSupermarket.WinForms
         private DataGridView dgvOrders;
         private TabPage tabChart;
         private Chart chartRevenue;
+        private TabPage tabTopSelling;
+        private Panel panelTopSellingHeader;
+        private Label lblTopSellingTitle;
+        private Label lblTopSellingSub;
+        private DataGridView dgvTopSelling;
     }
 }

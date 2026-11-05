@@ -33,6 +33,7 @@ namespace MiniSupermarket.WinForms
             dtpToDate.Value = DateTime.Today;
 
             SetupGridColumns();
+            SetupTopSellingGridColumns();
 
             btnRunReport.Click += async (s, e) => await LoadReportDataAsync();
             btnAllOrders.Click += async (s, e) => await LoadReportDataAsync(loadAllTime: true);
@@ -50,6 +51,10 @@ namespace MiniSupermarket.WinForms
                 if (tabReports.SelectedTab == tabChart)
                 {
                     await LoadDailyRevenueChartAsync();
+                }
+                else if (tabReports.SelectedTab == tabTopSelling)
+                {
+                    await LoadTopSellingProductsAsync();
                 }
             };
 
@@ -264,7 +269,10 @@ namespace MiniSupermarket.WinForms
                 // 2. Tiêu chí 45: Biểu đồ cột Doanh thu theo thời gian (Column Chart - Group By Ngày)
                 await LoadDailyRevenueChartAsync();
 
-                // 3. Tải danh sách đơn hàng chi tiết theo khoảng ngày chọn
+                // 3. Tiêu chí 46: Top 5 sản phẩm bán chạy nhất (LINQ GroupBy -> OrderByDescending -> Take 5)
+                await LoadTopSellingProductsAsync();
+
+                // 4. Tải danh sách đơn hàng chi tiết theo khoảng ngày chọn
                 var response = await ApiClientService.Client.GetAsync("orders");
                 if (response.IsSuccessStatusCode)
                 {
@@ -462,8 +470,163 @@ namespace MiniSupermarket.WinForms
         }
 
         // =========================================================
-        // TIÊU CHÍ 48: XUẤT BÁO CÁO HÓA ĐƠN RA CSV/EXCEL (UTF-8 WITH BOM)
+        // TIÊU CHÍ 46: CẤU HÌNH LƯỚI & TẢI TOP 5 SẢN PHẨM BÁN CHẠY NHẤT (LINQ)
         // =========================================================
+        private void SetupTopSellingGridColumns()
+        {
+            dgvTopSelling.AutoGenerateColumns = false;
+            dgvTopSelling.Columns.Clear();
+
+            dgvTopSelling.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "colRank",
+                DataPropertyName = "Rank",
+                HeaderText = "Thứ Hạng",
+                Width = 110,
+                DefaultCellStyle = new DataGridViewCellStyle
+                {
+                    Alignment = DataGridViewContentAlignment.MiddleCenter,
+                    Font = new Font("Segoe UI", 9.5F, FontStyle.Bold)
+                }
+            });
+
+            dgvTopSelling.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "colTopProductId",
+                DataPropertyName = "ProductId",
+                HeaderText = "Mã SP",
+                Width = 90,
+                DefaultCellStyle = new DataGridViewCellStyle { Alignment = DataGridViewContentAlignment.MiddleCenter }
+            });
+
+            dgvTopSelling.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "colTopBarcode",
+                DataPropertyName = "Barcode",
+                HeaderText = "Mã Vạch",
+                Width = 160,
+                DefaultCellStyle = new DataGridViewCellStyle { Alignment = DataGridViewContentAlignment.MiddleCenter }
+            });
+
+            dgvTopSelling.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "colTopProductName",
+                DataPropertyName = "ProductName",
+                HeaderText = "Tên Sản Phẩm",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
+                DefaultCellStyle = new DataGridViewCellStyle { Font = new Font("Segoe UI", 9.5F, FontStyle.Bold) }
+            });
+
+            dgvTopSelling.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "colTopQuantity",
+                DataPropertyName = "TotalQuantitySold",
+                HeaderText = "Số Lượng Đã Bán",
+                Width = 160,
+                DefaultCellStyle = new DataGridViewCellStyle
+                {
+                    Alignment = DataGridViewContentAlignment.MiddleRight,
+                    Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+                    ForeColor = Color.FromArgb(37, 99, 235)
+                }
+            });
+
+            dgvTopSelling.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "colTopSales",
+                DataPropertyName = "TotalSalesAmountStr",
+                HeaderText = "Tổng Tiền Hàng (VNĐ)",
+                Width = 190,
+                DefaultCellStyle = new DataGridViewCellStyle
+                {
+                    Alignment = DataGridViewContentAlignment.MiddleRight,
+                    Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+                    ForeColor = Color.FromArgb(5, 150, 105)
+                }
+            });
+
+            // Tô màu nổi bật Top 1, Top 2, Top 3
+            dgvTopSelling.RowPrePaint += (s, e) =>
+            {
+                if (e.RowIndex >= 0 && e.RowIndex < dgvTopSelling.Rows.Count)
+                {
+                    var row = dgvTopSelling.Rows[e.RowIndex];
+                    if (e.RowIndex == 0) // Top 1: Vàng kim
+                    {
+                        row.DefaultCellStyle.BackColor = Color.FromArgb(254, 243, 199);
+                    }
+                    else if (e.RowIndex == 1) // Top 2: Bạc
+                    {
+                        row.DefaultCellStyle.BackColor = Color.FromArgb(241, 245, 249);
+                    }
+                    else if (e.RowIndex == 2) // Top 3: Đồng
+                    {
+                        row.DefaultCellStyle.BackColor = Color.FromArgb(255, 237, 213);
+                    }
+                }
+            };
+        }
+
+        private async Task LoadTopSellingProductsAsync()
+        {
+            try
+            {
+                // Gọi API backend thực thi LINQ GroupBy(od => od.ProductId) -> OrderByDescending -> Take(5)
+                var response = await ApiClientService.Client.GetAsync("reports/top-selling-linq");
+                if (!response.IsSuccessStatusCode)
+                {
+                    // Dự phòng gọi endpoint Stored Procedure nếu endpoint LINQ trả lỗi
+                    response = await ApiClientService.Client.GetAsync("reports/top-selling");
+                }
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var jsonStr = await response.Content.ReadAsStringAsync();
+                    using var doc = JsonDocument.Parse(jsonStr);
+
+                    if (doc.RootElement.TryGetProperty("data", out var dataElem))
+                    {
+                        var list = new List<TopSellingItemViewModel>();
+                        int rank = 1;
+
+                        foreach (var item in dataElem.EnumerateArray())
+                        {
+                            int pid = item.GetProperty("productId").GetInt32();
+                            string barcode = item.GetProperty("barcode").GetString() ?? string.Empty;
+                            string name = item.GetProperty("productName").GetString() ?? string.Empty;
+                            int qty = item.GetProperty("totalQuantitySold").GetInt32();
+                            decimal sales = item.GetProperty("totalSalesAmount").GetDecimal();
+
+                            string rankBadge = rank switch
+                            {
+                                1 => "🥇 Top 1",
+                                2 => "🥈 Top 2",
+                                3 => "🥉 Top 3",
+                                _ => $"#{rank}"
+                            };
+
+                            list.Add(new TopSellingItemViewModel
+                            {
+                                Rank = rankBadge,
+                                ProductId = pid,
+                                Barcode = barcode,
+                                ProductName = name,
+                                TotalQuantitySold = qty,
+                                TotalSalesAmount = sales
+                            });
+
+                            rank++;
+                        }
+
+                        dgvTopSelling.DataSource = list;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Lỗi tải Top 5 bán chạy: " + ex.Message);
+            }
+        }
         private void ExportReportToCsv()
         {
             if (_cachedFilteredOrders == null || _cachedFilteredOrders.Count == 0)
@@ -547,5 +710,16 @@ namespace MiniSupermarket.WinForms
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
         public decimal SubTotal { get; set; }
+    }
+
+    public class TopSellingItemViewModel
+    {
+        public string Rank { get; set; } = string.Empty;
+        public int ProductId { get; set; }
+        public string Barcode { get; set; } = string.Empty;
+        public string ProductName { get; set; } = string.Empty;
+        public int TotalQuantitySold { get; set; }
+        public decimal TotalSalesAmount { get; set; }
+        public string TotalSalesAmountStr => $"{TotalSalesAmount:N0} đ";
     }
 }

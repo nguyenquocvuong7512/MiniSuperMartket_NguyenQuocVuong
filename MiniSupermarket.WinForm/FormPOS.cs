@@ -201,6 +201,67 @@ namespace MiniSupermarket.WinForms.Forms
             btnCustClear.Click += (s, e) => ResetCustomer();
             btnSelectGuest.Click += (s, e) => ResetCustomer();
             nudRedeemPoints.ValueChanged += (s, e) => OnRedeemPointsChanged();
+
+            // Cho phép nhập số điểm trực tiếp bằng bàn phím & tự động tính toán thời gian thực
+            nudRedeemPoints.Enter += (s, e) =>
+            {
+                nudRedeemPoints.Select(0, nudRedeemPoints.Text.Length);
+            };
+
+            nudRedeemPoints.KeyUp += (s, e) =>
+            {
+                string text = nudRedeemPoints.Text.Trim();
+                if (string.IsNullOrEmpty(text))
+                {
+                    nudRedeemPoints.Value = 0;
+                    OnRedeemPointsChanged();
+                    return;
+                }
+
+                if (decimal.TryParse(text, out decimal typedVal))
+                {
+                    if (typedVal > nudRedeemPoints.Maximum)
+                    {
+                        typedVal = nudRedeemPoints.Maximum;
+                        nudRedeemPoints.Value = typedVal;
+                        nudRedeemPoints.Text = typedVal.ToString();
+                        nudRedeemPoints.Select(nudRedeemPoints.Text.Length, 0);
+                    }
+                    else if (typedVal < 0)
+                    {
+                        nudRedeemPoints.Value = 0;
+                    }
+                    else
+                    {
+                        nudRedeemPoints.Value = typedVal;
+                    }
+                    OnRedeemPointsChanged();
+                }
+            };
+
+            nudRedeemPoints.KeyDown += (s, e) =>
+            {
+                if (e.KeyCode == Keys.Enter)
+                {
+                    e.SuppressKeyPress = true;
+                    OnRedeemPointsChanged();
+                    txtAmountReceived.Focus();
+                }
+            };
+
+            nudRedeemPoints.Leave += (s, e) =>
+            {
+                if (decimal.TryParse(nudRedeemPoints.Text, out decimal val))
+                {
+                    val = Math.Clamp(val, 0, nudRedeemPoints.Maximum);
+                    nudRedeemPoints.Value = val;
+                }
+                else
+                {
+                    nudRedeemPoints.Value = 0;
+                }
+                OnRedeemPointsChanged();
+            };
         }
 
         // =========================================================
